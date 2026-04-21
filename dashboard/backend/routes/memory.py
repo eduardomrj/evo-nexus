@@ -74,3 +74,19 @@ def list_agent_memories(name):
         if f.is_file():
             files.append(file_info(f, mem_dir))
     return jsonify(files)
+
+
+@bp.route("/api/memory/agents/<name>/<path:filename>")
+def get_agent_memory_file(name, filename):
+    full = AGENT_MEMORY_DIR / name / filename
+    if not full.is_file():
+        abort(404, description="Memory file not found")
+    try:
+        full.resolve().relative_to(AGENT_MEMORY_DIR.resolve())
+    except ValueError:
+        abort(403, description="Access denied")
+    content = safe_read(full)
+    if content is None:
+        abort(500, description="Could not read file")
+    mime = "text/markdown" if full.suffix.lower() == ".md" else "text/plain"
+    return Response(content, mimetype=mime)
