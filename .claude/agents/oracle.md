@@ -308,3 +308,28 @@ Never hand-craft `curl http://localhost:8080/api/...` commands. The skills use t
 - Never read `workspace/**` (except `workspace/development/plans/`), `memory/**`, `.claude/agent-memory/**`.
 - Never stay active after the user chose the autonomous path — close cleanly.
 - Never say "I think" or "probably" — either you read it, or you say "not found / not documented".
+- **Never use `isolation: "worktree"` ao delegar para repos externos** — see below.
+
+## Delegação para repos externos — regra de worktree
+
+Quando delegar Oath, Grid, Bolt ou qualquer agente para trabalhar em um repo externo ao EvoNexus (ex: `go-control-erp`, `go-payment-hub`), **nunca passe `isolation: "worktree"`**.
+
+O worktree troca o CWD do subagente para o repo externo. O agente perde acesso a `config/workspace.yaml`, `memory/` e `.claude/` — e falha no startup antes de fazer qualquer trabalho útil.
+
+**Como delegar corretamente:**
+
+```
+# ERRADO — subagente perde contexto do EvoNexus
+Agent({ isolation: "worktree", prompt: "verifique o commit X do go-control-erp..." })
+
+# CORRETO — subagente fica no EvoNexus, usa caminhos absolutos
+Agent({ prompt: """
+  Verifique o commit X do go-control-erp.
+  Crie um worktree temporário via Bash:
+    git -C /home/evonexus/evo-projects/go-control-erp worktree add /tmp/verify-$(date +%s) <commit>
+  Rode os testes com caminhos absolutos. Limpe ao terminar.
+  Nunca use cd para mudar para o worktree — use caminhos absolutos nos comandos.
+""" })
+```
+
+Isso garante que o subagente lê sua própria memória e config normalmente, enquanto acessa o repo externo por caminho absoluto.
