@@ -12,6 +12,8 @@ workspace/**
 !workspace/
 !workspace/**/
 !workspace/**/.gitkeep
+# Engineering artifacts (PRDs, plans, verifications, features) are tracked
+!workspace/development/**/*.md
 
 # ── Learning loop — user fact data (gitignored, may contain third-party content) ──
 workspace/learning/facts/
@@ -134,3 +136,17 @@ plugins/*/
 
 # ── Brain Repo raw transcripts (not backed up to brain repo) ──
 memory/raw-transcripts/
+
+# ── Vigil — configs e sessões (dados locais, podem conter tokens/nomes de grupos) ──
+config/vigil_settings.json
+config/community_categories.json
+config/discord_channels.json
+config/telegram_groups.json
+config/whatsapp_groups.json
+config/cache_*.json
+config/telegram_observer_session.session
+
+# ── Screenshots de debug (artefatos de sessão, não pertencem ao repo) ──
+current_state.png
+detail_*.png
+serket-*.png
