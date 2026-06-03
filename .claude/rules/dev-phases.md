@@ -147,3 +147,13 @@ Not every change deserves all 6 phases. Use judgment:
 | Post-incident fix | Discovery (trail-tracer) → Build → Verify → Retro |
 
 **Default:** when in doubt, ask `@helm-conductor` or `@compass-planner` which phases apply.
+
+---
+
+## Worktree isolation — repos externos
+
+**Regra crítica:** nunca use `isolation: "worktree"` ao delegar para subagentes que vão trabalhar em repos externos ao EvoNexus (ex: `go-control-erp`, `go-payment-hub`). O worktree troca o CWD do subagente para o repo externo e ele perde acesso a `config/workspace.yaml`, `memory/`, `.claude/` — causando falha no startup antes de fazer qualquer trabalho.
+
+**Padrão correto:** criar worktree manualmente via Bash com caminhos absolutos. O CWD do agente permanece no EvoNexus.
+
+Ver detalhes e exemplos em: `.claude/rules/worktree-isolation.md`
