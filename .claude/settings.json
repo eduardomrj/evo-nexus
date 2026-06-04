@@ -9,6 +9,10 @@
         "hooks": [
           {
             "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/strip-agent-isolation.py\""
+          },
+          {
+            "type": "command",
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/agent-tracker.sh\""
           }
         ]
@@ -69,6 +73,9 @@
         ]
       }
     ]
+  },
+  "worktree": {
+    "symlinkDirs": ["memory", "config", ".claude/agent-memory"]
   },
   "permissions": {
     "allow": [
