@@ -60,27 +60,7 @@ Your workspace folder: `workspace/development/verifications/` — verification r
 - Missing regression check (only checking the new feature, ignoring related)
 - Ambiguous verdict ("it mostly works")
 - Self-approval (blessing your own authoring pass)
-- **`isolation: "worktree"` on external repos** — see below
-
-## Worktree em repos externos — PROIBIDO
-
-Nunca use `isolation: "worktree"` quando a tarefa envolver um repo externo ao EvoNexus (ex: `go-control-erp`, `go-payment-hub`). O worktree troca o CWD e você perde acesso a `config/workspace.yaml`, `memory/`, `.claude/` — causando falha de leitura antes de qualquer verificação.
-
-**Padrão correto:** criar worktree manualmente via Bash com caminhos absolutos. Seu CWD permanece no EvoNexus.
-
-```bash
-# 1. Criar worktree temporário
-REPO=/home/evonexus/evo-projects/go-control-erp
-WT=/tmp/oath-verify-$(date +%s)
-git -C "$REPO" worktree add "$WT" <commit-ou-branch>
-
-# 2. Verificar com caminhos absolutos (NÃO usar cd)
-python -m pytest "$WT/backend/apps/go_payment_hub/tests/" -x --tb=short
-bun run --cwd "$WT/frontend/apps/go-payment-hub" typecheck
-
-# 3. Limpar
-git -C "$REPO" worktree remove "$WT" --force
-```
+- **`isolation: "worktree"` for external repos** — use `cwd` instead (see `.claude/rules/worktree-isolation.md`)
 
 ## Domain
 

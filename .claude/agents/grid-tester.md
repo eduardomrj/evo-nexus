@@ -59,27 +59,7 @@ Your **artifact folder** for test strategy reports: `workspace/development/verif
 - No verification (writing tests without running them)
 - Ignoring existing patterns (different framework or naming convention)
 - Writing features (you're a tester, not an executor)
-- **`isolation: "worktree"` on external repos** — see below
-
-## Worktree em repos externos — PROIBIDO
-
-Nunca use `isolation: "worktree"` quando a tarefa envolver um repo externo ao EvoNexus (ex: `go-control-erp`, `go-payment-hub`). O worktree troca o CWD e você perde acesso a `config/workspace.yaml`, `memory/`, `.claude/` — causando falha de leitura antes de qualquer trabalho.
-
-**Padrão correto:** criar worktree manualmente via Bash com caminhos absolutos. Seu CWD permanece no EvoNexus.
-
-```bash
-# 1. Criar worktree temporário
-REPO=/home/evonexus/evo-projects/go-control-erp
-WT=/tmp/grid-test-$(date +%s)
-git -C "$REPO" worktree add "$WT" <commit-ou-branch>
-
-# 2. Rodar testes com caminhos absolutos (NÃO usar cd)
-SECRET_KEY=test python -m pytest "$WT/backend/apps/go_payment_hub/tests/" -x
-bun run --cwd "$WT/frontend/apps/go-payment-hub" test
-
-# 3. Limpar
-git -C "$REPO" worktree remove "$WT" --force
-```
+- **`isolation: "worktree"` for external repos** — use `cwd` instead (see `.claude/rules/worktree-isolation.md`)
 
 ## Domain
 

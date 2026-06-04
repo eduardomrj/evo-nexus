@@ -308,28 +308,24 @@ Never hand-craft `curl http://localhost:8080/api/...` commands. The skills use t
 - Never read `workspace/**` (except `workspace/development/plans/`), `memory/**`, `.claude/agent-memory/**`.
 - Never stay active after the user chose the autonomous path — close cleanly.
 - Never say "I think" or "probably" — either you read it, or you say "not found / not documented".
-- **Never use `isolation: "worktree"` ao delegar para repos externos** — see below.
+- **Ao delegar para repos externos, use `cwd` — nunca `isolation: "worktree"`** — see below.
 
-## Delegação para repos externos — regra de worktree
+## Delegação para repos externos — padrão `cwd`
 
-Quando delegar Oath, Grid, Bolt ou qualquer agente para trabalhar em um repo externo ao EvoNexus (ex: `go-control-erp`, `go-payment-hub`), **nunca passe `isolation: "worktree"`**.
-
-O worktree troca o CWD do subagente para o repo externo. O agente perde acesso a `config/workspace.yaml`, `memory/` e `.claude/` — e falha no startup antes de fazer qualquer trabalho útil.
-
-**Como delegar corretamente:**
+Quando delegar Apex, Echo, Compass, Bolt, Oath ou qualquer agente para trabalhar em um repo externo (ex: `go-control-erp`, `go-payment-hub`), use o parâmetro `cwd` apontando para o repo. **Não passe `isolation`.**
 
 ```
-# ERRADO — subagente perde contexto do EvoNexus
-Agent({ isolation: "worktree", prompt: "verifique o commit X do go-control-erp..." })
+# ERRADO — isolation:worktree cria worktree do evo-nexus; sub-agente não alcança o projeto externo
+Agent({ isolation: "worktree", prompt: "analise o módulo account do go-control-erp..." })
 
-# CORRETO — subagente fica no EvoNexus, usa caminhos absolutos
-Agent({ prompt: """
-  Verifique o commit X do go-control-erp.
-  Crie um worktree temporário via Bash:
-    git -C /home/evonexus/evo-projects/go-control-erp worktree add /tmp/verify-$(date +%s) <commit>
-  Rode os testes com caminhos absolutos. Limpe ao terminar.
-  Nunca use cd para mudar para o worktree — use caminhos absolutos nos comandos.
-""" })
+# CORRETO — cwd coloca o sub-agente direto no projeto; herda --add-dir evo-nexus do processo pai
+Agent({
+  subagent_type: "apex-architect",
+  cwd: "/home/evonexus/evo-projects/go-control-erp",
+  prompt: "analise o módulo account..."
+})
 ```
 
-Isso garante que o subagente lê sua própria memória e config normalmente, enquanto acessa o repo externo por caminho absoluto.
+O sub-agente acorda com CWD no projeto externo e herda automaticamente o `--add-dir /home/evonexus/evo-nexus` do processo pai — portanto tem acesso aos agents, rules e skills do EvoNexus normalmente.
+
+**Pré-requisito:** funciona sempre que o Discord Plus tiver um Project Context ativo (o processo oracle já é iniciado com `--add-dir evo-nexus` nesse caso). Ver `.claude/rules/worktree-isolation.md` para detalhes.

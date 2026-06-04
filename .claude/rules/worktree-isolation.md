@@ -1,76 +1,67 @@
-# Worktree Isolation — Regra para Repos Externos
+# Agentes em Repos Externos — Padrão de Delegação
 
-Aplica-se a todos os agentes de engenharia (Oath, Grid, Bolt, Lens, Apex, etc.) que precisam verificar, testar ou trabalhar em repos fora do EvoNexus.
-
----
-
-## O problema
-
-`isolation: "worktree"` troca o CWD do subagente para o worktree do repo-alvo.  
-Quando o repo-alvo é **externo** ao EvoNexus (ex: `go-control-erp`), o agente perde acesso a:
-
-- `config/workspace.yaml`
-- `memory/` e `.claude/agent-memory/`
-- `.claude/agents/*.md`, `.claude/rules/`, `.claude/skills/`
-- qualquer arquivo relativo ao workspace EvoNexus
-
-Resultado: 3 falhas de leitura → agente para antes de fazer qualquer trabalho útil.
+Aplica-se a todos os agentes (Oracle, Oath, Grid, Bolt, Lens, Apex, etc.) que precisam trabalhar em repos fora do EvoNexus (ex: `go-control-erp`, `go-payment-hub`, `evonexus-discord-plus`).
 
 ---
 
-## Regra
+## Padrão correto — `cwd` sem isolation
 
-> **Nunca use `isolation: "worktree"` para repos externos ao EvoNexus.**
+Use o parâmetro `cwd` do Agent tool apontando para o repo externo. **Não passe `isolation`.**
 
 ```
-# ERRADO — quebra o contexto do EvoNexus
+# CORRETO — sub-agente tem CWD no projeto e herda contexto do EvoNexus
 Agent({
-  isolation: "worktree",
-  prompt: "verifique o commit c556a9d do go-control-erp..."
+  subagent_type: "apex-architect",
+  cwd: "/home/evonexus/evo-projects/go-control-erp",
+  prompt: "analise a arquitetura do módulo account..."
 })
 ```
 
+**Por que funciona:** o parâmetro `cwd` só troca o diretório de trabalho do sub-agente. O `--add-dir /home/evonexus/evo-nexus` fica armazenado no estado global do processo pai (não no AsyncLocalStorage do CWD) e é herdado automaticamente. O sub-agente acessa os arquivos do projeto pelo CWD E os agents/rules/skills do EvoNexus pelo --add-dir.
+
+**Pré-requisito:** o processo pai (oracle) deve ter sido iniciado com `--add-dir /home/evonexus/evo-nexus`. No Discord Plus com Project Context ativo isso acontece automaticamente.
+
 ---
 
-## Padrão correto para repos externos
+## O que NÃO fazer
 
-Crie o worktree manualmente via Bash com caminhos absolutos. O CWD do agente permanece no EvoNexus.
+```
+# ERRADO — isolation:worktree cria worktree do evo-nexus, não do repo externo
+Agent({
+  isolation: "worktree",
+  cwd: "/home/evonexus/evo-projects/go-control-erp",
+  prompt: "..."
+})
 
-### 1. Criar worktree temporário
-
-```bash
-REPO=/home/evonexus/evo-projects/go-control-erp
-WORKTREE=/tmp/verify-$(basename $REPO)-$(date +%s)
-git -C "$REPO" worktree add "$WORKTREE" <commit-ou-branch>
+# ERRADO — isolation e cwd são mutuamente exclusivos no Agent tool
+# e isolation:worktree faz o sub-agente acordar num worktree do evo-nexus
 ```
 
-### 2. Trabalhar com caminhos absolutos
+---
+
+## Acesso direto por caminho absoluto (sem Agent tool)
+
+Quando não precisar delegar — só ler ou rodar algo no repo externo — use caminhos absolutos diretamente:
 
 ```bash
+# Ler arquivo do projeto externo
+Read("/home/evonexus/evo-projects/go-control-erp/backend/apps/account/models.py")
+
 # Rodar testes
-cd "$WORKTREE/backend" && python manage.py test apps/go_payment_hub/
+Bash("python -m pytest /home/evonexus/evo-projects/go-control-erp/backend/apps/account/tests/ -x")
 
-# Ou sem trocar diretório
-python -m pytest "$WORKTREE/backend/apps/go_payment_hub/tests/" -x
-
-# Typecheck frontend
-cd "$WORKTREE/frontend/apps/go-payment-hub" && bun run typecheck
-```
-
-### 3. Limpar ao terminar
-
-```bash
-git -C "$REPO" worktree remove "$WORKTREE" --force
+# Build
+Bash("bun run --cwd /home/evonexus/evo-projects/go-control-erp/frontend typecheck")
 ```
 
 ---
 
-## Quando `isolation: "worktree"` É seguro
+## Quando `isolation: "worktree"` é apropriado
 
-Apenas quando o repo-alvo **é o próprio EvoNexus** — por exemplo, para testar uma feature em branch isolada sem afetar o working tree principal.
+Apenas para trabalho **interno ao EvoNexus** em branch isolada — ex: implementar uma feature sem afetar o working tree principal:
 
 ```
-# OK — worktree do EvoNexus, contexto preservado
+# OK — worktree do evo-nexus, contexto preservado, sem repo externo
 Agent({
   isolation: "worktree",
   prompt: "implemente X na branch feature/y do EvoNexus..."
@@ -79,32 +70,13 @@ Agent({
 
 ---
 
-## Agentes mais afetados
+## Se você já está rodando num worktree
 
-| Agente | Risco | Padrão recomendado |
-|---|---|---|
-| **Oath** | Alto — lê memória no startup | Bash com caminhos absolutos no worktree manual |
-| **Grid** | Alto — lê workspace.yaml | Bash com caminhos absolutos no worktree manual |
-| **Bolt** | Médio — só se CWD mudar | Manter CWD no EvoNexus, passar caminho absoluto do repo |
-| **Lens** | Baixo — read-only | Pode ler arquivos por caminho absoluto sem worktree |
-
----
-
-## Exemplo completo — Oath verificando go-control-erp
+Se o seu CWD atual for `.claude/worktrees/agent-*`, você está num worktree do evo-nexus. Isso é normal para tarefas internas. Para acessar repos externos, use caminhos absolutos:
 
 ```bash
-# 1. Criar worktree
-REPO=/home/evonexus/evo-projects/go-control-erp
-WT=/tmp/oath-verify-go-payment-hub-$(date +%s)
-git -C "$REPO" worktree add "$WT" backup/go-payment-hub-wip-2026-06-03
-
-# 2. Verificar
-cd "$WT/backend"
-SECRET_KEY=verify-only python manage.py check --deploy 2>&1 | head -20
-python -m pytest apps/go_payment_hub/tests/ -x --tb=short 2>&1 | tail -30
-
-# 3. Limpar
-git -C "$REPO" worktree remove "$WT" --force
+Read("/home/evonexus/evo-projects/go-control-erp/...")
+Bash("python -m pytest /home/evonexus/evo-projects/go-control-erp/backend/...")
 ```
 
-O agente Oath continua rodando no EvoNexus, lê sua memória normalmente, e acessa o repo externo via caminho absoluto.
+Não recuse o trabalho por estar num worktree. Use caminhos absolutos e siga normalmente.
