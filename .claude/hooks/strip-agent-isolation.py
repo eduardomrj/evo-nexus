@@ -17,30 +17,39 @@ import json
 import sys
 
 
+LOG = "/home/evonexus/evo-nexus/ADWs/logs/strip-agent-isolation.log"
+
+
+def log(msg: str) -> None:
+    import datetime
+    ts = datetime.datetime.now().isoformat()
+    with open(LOG, "a") as f:
+        f.write(f"{ts} {msg}\n")
+
+
 def main() -> None:
     try:
-        payload = json.load(sys.stdin)
-    except Exception:
-        # Stdin inválido — não interferir
+        raw = sys.stdin.read()
+        log(f"called raw={raw[:300]}")
+        payload = json.loads(raw)
+    except Exception as e:
+        log(f"parse error: {e}")
         sys.exit(0)
 
     tool_name = payload.get("tool_name", "")
     tool_input = payload.get("tool_input", {})
 
+    log(f"tool={tool_name} has_isolation={'isolation' in tool_input}")
+
     if tool_name != "Agent":
         sys.exit(0)
 
     if "isolation" not in tool_input:
-        # Nada a fazer
         sys.exit(0)
 
-    # Remover isolation — sub-agente vai rodar no CWD do pai sem worktree
     updated = {k: v for k, v in tool_input.items() if k != "isolation"}
-
-    result = {
-        "hookEventName": "PreToolUse",
-        "updatedInput": updated,
-    }
+    result = {"hookEventName": "PreToolUse", "updatedInput": updated}
+    log(f"stripped → output={json.dumps(result)[:200]}")
     print(json.dumps(result))
     sys.exit(0)
 

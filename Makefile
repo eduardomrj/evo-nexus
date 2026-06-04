@@ -170,7 +170,7 @@ discord-channel:    ## 💬 Start Discord channel in background (screen)
 	@if screen -list | grep -q '\.discord-channel'; then \
 		echo "⚠ Discord channel is already running. Use 'make discord-channel-stop' first or 'make discord-channel-attach' to connect."; \
 	else \
-		screen -dmS discord-channel claude --channels plugin:discord@claude-plugins-official --dangerously-skip-permissions; \
+		screen -dmS discord-channel claude --model sonnet --channels plugin:discord@claude-plugins-official --dangerously-skip-permissions; \
 		echo "✅ Discord channel running in background (screen: discord-channel)"; \
 		echo "📺 Ver: screen -r discord-channel"; \
 		echo "🛑 Parar: make discord-channel-stop"; \
@@ -276,8 +276,14 @@ print(f'OK — {len(cfg.heartbeats)} heartbeat(s) validated'); \
 heartbeat-run:      ## ▶️  Run a heartbeat manually: make heartbeat-run ID=atlas-4h
 	@cd dashboard/backend && $(PYTHON) heartbeat_runner.py --heartbeat-id $(ID)
 
+worktree-clean:     ## 🧹 Remove stale agent worktrees from .claude/worktrees/
+	@bash .claude/hooks/worktree-cleanup.sh
+
+worktree-clean-dry: ## 🔍 Preview worktrees that would be removed (dry-run)
+	@DRY_RUN=1 bash .claude/hooks/worktree-cleanup.sh
+
 help:               ## 📖 Show this help
 	@grep -E '^[a-zA-Z_-]+:.*##' Makefile | sort | awk 'BEGIN {FS = ":.*## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
 
-.PHONY: morning eod memory memory-lint weekly run list-routines daily scheduler dashboard-app terminal-logs terminal-stop telegram telegram-stop telegram-attach discord-channel discord-channel-stop discord-channel-attach imessage imessage-stop imessage-attach backup backup-s3 restore backup-list backup-daily logs logs-detail logs-tail metrics clean-logs docker-dashboard docker-telegram docker-down docker-logs docker-run docker-build help docs-build setup team-strategy team-dashboard team-weekly learn-weekly heartbeat-lint heartbeat-run
+.PHONY: morning eod memory memory-lint weekly run list-routines daily scheduler dashboard-app terminal-logs terminal-stop telegram telegram-stop telegram-attach discord-channel discord-channel-stop discord-channel-attach imessage imessage-stop imessage-attach backup backup-s3 restore backup-list backup-daily logs logs-detail logs-tail metrics clean-logs docker-dashboard docker-telegram docker-down docker-logs docker-run docker-build help docs-build setup team-strategy team-dashboard team-weekly learn-weekly heartbeat-lint heartbeat-run worktree-clean worktree-clean-dry
 .DEFAULT_GOAL := help
