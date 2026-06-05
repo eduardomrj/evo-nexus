@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/go-control-erp/features/payment-method-catalog/[C]plan-payment-method-catalog.md

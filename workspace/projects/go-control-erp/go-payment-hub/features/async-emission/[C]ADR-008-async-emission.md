@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/go-control-erp/features/go-payment-hub/[C]ADR-008-async-emission.md

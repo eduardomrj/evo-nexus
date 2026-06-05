@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/go-control-erp/features/go-payment-hub/[C]casos-de-uso-go-payment-hub.md
