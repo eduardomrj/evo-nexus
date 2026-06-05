@@ -7,6 +7,9 @@
 # ── Secrets & credentials ─────────────────
 .env
 
+# ── GitHub Actions workflows (upstream only — not used in personal fork) ──
+.github/workflows/
+
 # Workspace — personal data, ignore everything except .gitkeep placeholders
 workspace/**
 !workspace/
