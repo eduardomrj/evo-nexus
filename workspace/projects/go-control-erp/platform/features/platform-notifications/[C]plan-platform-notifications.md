@@ -1,0 +1,1 @@
+/home/evonexus/evo-projects/go-control-erp/features/platform-notifications/[C]plan-platform-notifications.md

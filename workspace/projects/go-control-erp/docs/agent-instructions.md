@@ -1,0 +1,1 @@
+/home/evonexus/evo-projects/go-control-erp/docs/agent-instructions.md

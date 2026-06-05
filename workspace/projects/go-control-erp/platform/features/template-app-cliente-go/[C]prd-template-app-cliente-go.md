@@ -1,0 +1,1 @@
+/home/evonexus/evo-projects/go-control-erp/workspace/development/features/template-app-cliente-go/[C]prd-template-app-cliente-go.md

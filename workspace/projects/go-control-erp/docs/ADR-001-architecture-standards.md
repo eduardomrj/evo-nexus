@@ -1,0 +1,1 @@
+/home/evonexus/evo-projects/go-control-erp/docs/ADR-001-architecture-standards.md

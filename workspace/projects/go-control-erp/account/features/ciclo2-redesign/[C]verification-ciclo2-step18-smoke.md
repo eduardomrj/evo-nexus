@@ -1,0 +1,1 @@
+/home/evonexus/evo-projects/go-control-erp/workspace/development/features/ciclo2-redesign/[C]verification-ciclo2-step18-smoke.md

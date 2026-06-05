@@ -1,0 +1,1 @@
+/home/evonexus/evo-projects/go-control-erp/workspace/development/features/module-tree/[C]plan-module-tree.md

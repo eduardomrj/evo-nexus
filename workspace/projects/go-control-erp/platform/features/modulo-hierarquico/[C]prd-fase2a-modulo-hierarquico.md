@@ -1,0 +1,1 @@
+/home/evonexus/evo-projects/go-control-erp/workspace/development/features/modulo-hierarquico/[C]prd-fase2a-modulo-hierarquico.md

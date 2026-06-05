@@ -1,0 +1,1 @@
+/home/evonexus/evo-projects/cpsmq/features/importacao-sigtap/PLAN_Importacao_SIGTAP_Extração_CPSMQ_2026-05-17.md

@@ -1,0 +1,1 @@
+/home/evonexus/evo-projects/cpsmq/docs/08-glossario.md

@@ -81,10 +81,10 @@ Call `@helm-conductor` when you have multiple active features or are unsure whic
 
 ## Feature folders — the unit of work
 
-Every non-trivial piece of work lives in its own feature folder:
+Every non-trivial piece of work lives in its own feature folder, always **inside the project it belongs to**:
 
 ```
-workspace/development/features/{feature-slug}/
+workspace/projects/{project}/features/{feature-slug}/
 ├── [C]discovery-{feature}.md       ← Phase 1 (Echo)
 ├── [C]prd-{feature}.md             ← Phase 2 (Compass)
 ├── [C]plan-{feature}.md            ← Phase 2 (Compass)
@@ -94,26 +94,33 @@ workspace/development/features/{feature-slug}/
 └── [C]retro-{feature}.md           ← Phase 6 (Mirror)
 ```
 
+**Project slug convention:** use the project's canonical name — e.g., `go-control-erp`, `evonexus-discord-plus`, `cpsmq`, `serket`, `evo-nexus` (for EvoNexus-internal work).
+
 **Slug convention:** `{kebab-case-name}` — e.g., `dark-mode`, `pg15-migration`, `auth-refactor`.
 
-**Why feature folders in addition to `workspace/development/{type}/`:**
-- Feature folders give **coherent context** — one place to find everything about a feature
-- Type folders (`plans/`, `reviews/`, etc.) are still useful for cross-feature views and remain the canonical location for standalone artifacts (one-off debug sessions, global audits, etc.)
+For **go-control-erp** sub-apps (go-payment-hub, account, go-message, etc.) the path is:
+```
+workspace/projects/go-control-erp/{app}/features/{feature-slug}/
+```
 
 **Rule of thumb:**
-- **Feature folder** when the work spans 2+ phases and has a clear name ("dark mode", "pg15 migration")
-- **Type folder** when the work is a one-off (a single plan, a standalone review, an ad-hoc debug) or spans no specific feature
+- **Feature folder** when the work spans 2+ phases and has a clear name
+- **`{project}/plans/{slug}/`** for multi-phase activation plans (index + phase folders)
+- **`{project}/reviews/`**, **`{project}/verifications/`**, **`{project}/debug/`** for standalone artifacts not tied to a feature
+
+`workspace/development/` no longer exists. There is no cross-project dump folder.
 
 ---
 
 ## Inherited Context — how agents read prior artifacts
 
-Before starting work, every engineering agent should check for prior artifacts in the active feature folder:
+Before starting work, every engineering agent must:
 
-1. **Is there a feature folder for this work?** Look for `workspace/development/features/{slug}/`
-2. **If yes**, read in order: discovery → PRD → plan → architecture → any prior reviews/verifications
-3. **Inherit** constraints, decisions, and open questions — don't re-litigate them
-4. **If unclear** which feature this is, ask the user or call `@helm-conductor`
+1. **Identify the project** — ask the user or infer from context (e.g., go-control-erp, evonexus-discord-plus)
+2. **Look for the feature folder** at `workspace/projects/{project}/features/{slug}/`
+3. **If found**, read in order: discovery → PRD → plan → architecture → any prior reviews/verifications
+4. **Inherit** constraints, decisions, and open questions — don't re-litigate them
+5. **If unclear** which project or feature this is, ask the user or call `@helm-conductor`
 
 This is how EvoNexus avoids each agent being an island: context flows forward through the feature folder.
 
@@ -129,7 +136,7 @@ When one agent hands off to another, the handoff includes:
 - **Expected output:** what the next agent should produce and where
 
 Example handoff:
-> "Compass → Bolt: plan saved to `workspace/development/features/dark-mode/[C]plan-dark-mode.md`. Architecture pending (Apex). Open question: token storage strategy (see plan §Open Questions). Expected: implementation against steps 1-5 + self-verification."
+> "Compass → Bolt: plan saved to `workspace/projects/go-control-erp/features/dark-mode/[C]plan-dark-mode.md`. Architecture pending (Apex). Open question: token storage strategy (see plan §Open Questions). Expected: implementation against steps 1-5 + self-verification."
 
 ---
 

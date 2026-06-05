@@ -1,0 +1,1 @@
+/home/evonexus/evo-projects/cpsmq/docs/ref-skill-extracao-siges.md

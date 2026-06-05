@@ -1,0 +1,1 @@
+/home/evonexus/evo-projects/go-control-erp/features/cnpj-api-module/[C]plan-cnpj-api-module.md

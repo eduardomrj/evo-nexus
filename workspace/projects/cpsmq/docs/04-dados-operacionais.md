@@ -1,0 +1,1 @@
+/home/evonexus/evo-projects/cpsmq/docs/04-dados-operacionais.md

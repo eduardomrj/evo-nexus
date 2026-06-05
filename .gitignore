@@ -13,13 +13,14 @@ workspace/**
 !workspace/**/
 !workspace/**/.gitkeep
 # Engineering artifacts (PRDs, plans, verifications, features) are tracked
-!workspace/development/**/*.md
+# workspace/development/ was removed — all content now lives under workspace/projects/
+!workspace/projects/**/*.md
+!workspace/projects/**/*.html
 
 # ── Learning loop — user fact data (gitignored, may contain third-party content) ──
 workspace/learning/facts/
 workspace/learning/decks/
 workspace/learning/.state/
-workspace/projects/*/
 # README is intentionally tracked (exception to workspace/** rule)
 !workspace/learning/README.md
 

@@ -1,0 +1,1 @@
+/home/evonexus/evo-projects/go-control-erp/workspace/development/features/aplicativo-detalhes-refactor/[C]plan-aplicativo-detalhes-refactor.md

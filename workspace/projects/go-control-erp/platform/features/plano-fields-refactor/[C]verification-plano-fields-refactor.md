@@ -1,0 +1,1 @@
+/home/evonexus/evo-projects/go-control-erp/workspace/development/features/plano-fields-refactor/[C]verification-plano-fields-refactor.md

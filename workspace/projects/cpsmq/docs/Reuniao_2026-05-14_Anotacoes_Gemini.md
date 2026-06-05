@@ -1,0 +1,1 @@
+/home/evonexus/evo-projects/cpsmq/docs/Reuniao_2026-05-14_Anotacoes_Gemini.md

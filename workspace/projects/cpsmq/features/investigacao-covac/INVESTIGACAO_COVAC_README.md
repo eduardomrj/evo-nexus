@@ -1,0 +1,1 @@
+/home/evonexus/evo-projects/cpsmq/features/investigacao-covac/INVESTIGACAO_COVAC_README.md

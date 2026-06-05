@@ -1,0 +1,1 @@
+/home/evonexus/evo-projects/go-control-erp/workspace/development/plans/adr001-platform-sweep/[C]plan-adr001-platform-sweep.md
