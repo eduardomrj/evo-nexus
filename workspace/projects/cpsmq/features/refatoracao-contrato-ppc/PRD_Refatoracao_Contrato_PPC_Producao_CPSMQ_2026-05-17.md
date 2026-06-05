@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/cpsmq/features/refatoracao-contrato-ppc/PRD_Refatoracao_Contrato_PPC_Producao_CPSMQ_2026-05-17.md

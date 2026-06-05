@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/cpsmq/docs/01-contexto-cliente.md

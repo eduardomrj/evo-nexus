@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/cpsmq/features/interface-sigtap/PLAN_Interface_SIGTAP_CPSMQ_2026-05-17.md

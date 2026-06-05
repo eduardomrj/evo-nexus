@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/cpsmq/docs/05-contexto-contratual.md

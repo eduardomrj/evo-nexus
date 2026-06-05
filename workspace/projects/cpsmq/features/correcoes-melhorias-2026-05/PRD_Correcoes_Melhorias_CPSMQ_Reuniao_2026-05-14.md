@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/cpsmq/features/correcoes-melhorias-2026-05/PRD_Correcoes_Melhorias_CPSMQ_Reuniao_2026-05-14.md

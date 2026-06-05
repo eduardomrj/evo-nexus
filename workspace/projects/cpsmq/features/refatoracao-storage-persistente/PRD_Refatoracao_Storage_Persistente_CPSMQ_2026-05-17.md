@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/cpsmq/features/refatoracao-storage-persistente/PRD_Refatoracao_Storage_Persistente_CPSMQ_2026-05-17.md

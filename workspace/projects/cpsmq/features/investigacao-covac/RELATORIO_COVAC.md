@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/cpsmq/features/investigacao-covac/RELATORIO_COVAC.md

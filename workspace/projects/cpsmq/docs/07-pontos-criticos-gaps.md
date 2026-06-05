@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/cpsmq/docs/07-pontos-criticos-gaps.md
