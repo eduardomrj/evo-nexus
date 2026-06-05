@@ -1,0 +1,110 @@
+diff --git a/.claude/skills/prod-activation-plan/SKILL.md b/.claude/skills/prod-activation-plan/SKILL.md
+index 71c9688..7f2ed19 100644
+--- a/.claude/skills/prod-activation-plan/SKILL.md
++++ b/.claude/skills/prod-activation-plan/SKILL.md
+@@ -1,11 +1,11 @@
+ ---
+ name: prod-activation-plan
+-description: "Create a phased activation plan using the EvoNexus standard structure — single index file + folder-per-phase + file-per-item, each item detailed with owner, dependencies, decisions pending, suggested agent team. Use when the user asks for an activation plan, implementation plan, rollout plan, or any phased plan for business/engineering initiatives. Also triggered by Oracle's Step 6 (implementation plan delivery) instead of writing an ad-hoc plan."
++description: "Create a phased activation plan using the EvoNexus standard structure — one folder per plan, index file + folder-per-phase + file-per-item, each item detailed with owner, dependencies, decisions pending, suggested agent team. Use when the user asks for an activation plan, implementation plan, rollout plan, or any phased plan for business/engineering initiatives. Also triggered by Oracle's Step 6 (implementation plan delivery) instead of writing an ad-hoc plan."
+ ---
+ 
+ # Activation Plan — Standard Structure
+ 
+-This skill creates a **phased activation plan** using the EvoNexus standard structure that has been battle-tested: a single index file at the top, folders per phase, one file per item with a rich template. Every file declares its owner agent, decisions pending, dependencies, and suggested implementation team. Oracle uses this skill instead of inventing a plan structure.
++This skill creates a **phased activation plan** using the EvoNexus standard structure that has been battle-tested: one folder per plan, a single index file at the top of that plan folder, folders per phase, one file per item with a rich template. Every file declares its owner agent, decisions pending, dependencies, and suggested implementation team. Oracle uses this skill instead of inventing a plan structure.
+ 
+ **Always respond in the user's language (default: pt-BR if the workspace is pt-BR).**
+ 
+@@ -52,24 +52,29 @@ If you don't have all of this, **ask the user or delegate to Compass first to pr
+ 
+ ```
+ workspace/development/plans/
+-├── [C]{plan-name}-{YYYY-MM-DD}.md       ← INDEX (single entry point)
+-├── {phase-1-slug}/                       ← e.g., fase-1-quick-wins/
+-│   ├── [C]1.1-{item-slug}.md
+-│   ├── [C]1.2-{item-slug}.md
+-│   └── ...
+-├── {phase-2-slug}/
+-│   └── ...
+-└── {phase-3-slug}/
+-    └── ...
++└── {plan-name}/
++    ├── [C]index-{YYYY-MM-DD}.md          ← INDEX (single entry point)
++    ├── {phase-1-slug}/                   ← e.g., fase-1-quick-wins/
++    │   ├── [C]1.1-{item-slug}.md
++    │   ├── [C]1.2-{item-slug}.md
++    │   └── ...
++    ├── {phase-2-slug}/
++    │   └── ...
++    └── {phase-3-slug}/
++        └── ...
+ ```
+ 
++**Why one folder per plan:** multiple initiatives can have `fase-1-*`, `fase-2-*`, etc. A dedicated `{plan-name}/` folder prevents unrelated phase folders from mixing directly under `workspace/development/plans/`.
++
+ ## Step 1 — Create the folder structure
+ 
+ ```bash
+ cd workspace/development/plans/
+-mkdir -p {phase-1-slug} {phase-2-slug} {phase-3-slug}
++mkdir -p {plan-name}/{phase-1-slug} {plan-name}/{phase-2-slug} {plan-name}/{phase-3-slug}
+ ```
+ 
++**Plan slug convention:** use the `plan-name` input as the folder slug. It must be lowercase kebab-case.
++
+ **Phase slug convention:** `fase-{N}-{purpose-slug}`. Examples:
+ - `fase-1-quick-wins`
+ - `fase-2-conexoes`
+@@ -79,7 +84,7 @@ Use the purpose of the phase, not just the number.
+ 
+ ## Step 2 — Write the INDEX file
+ 
+-Write `[C]{plan-name}-{YYYY-MM-DD}.md` at the root of `workspace/development/plans/`. The index is **a pure navigation file** — no duplication of item content. Template:
++Write `[C]index-{YYYY-MM-DD}.md` inside `workspace/development/plans/{plan-name}/`. The index is **a pure navigation file** — no duplication of item content. Template:
+ 
+ ```markdown
+ ---
+@@ -182,11 +187,11 @@ Pasta: [`{phase-3-slug}/`]({phase-3-slug}/)
+ - Never put item bodies in the index — just titles and links
+ - Always include the "Decisões críticas pendentes" section — it's the fastest path for the user to spot blockers
+ - Always include the "Histórico de mudanças" section — future-you will thank present-you
+-- Link every item to its own file using relative paths
++- Link every item to its own file using relative paths from inside the plan folder
+ 
+ ## Step 3 — Write one file per item
+ 
+-For each item across all phases, write `{phase-slug}/[C]{item-id}-{item-slug}.md` using this template:
++For each item across all phases, write `workspace/development/plans/{plan-name}/{phase-slug}/[C]{item-id}-{item-slug}.md` using this template:
+ 
+ ```markdown
+ ---
+@@ -295,8 +300,8 @@ After creating all files, report to the user with:
+ ```
+ Plano criado. Estrutura:
+ 
+-workspace/development/plans/
+-├── [C]{plan-name}-{date}.md       ← índice
++workspace/development/plans/{plan-name}/
++├── [C]index-{date}.md       ← índice
+ ├── {phase-1}/  ({N} itens)
+ ├── {phase-2}/  ({N} itens)
+ └── {phase-3}/  ({N} itens)
+@@ -312,12 +317,16 @@ Próximo passo sugerido: {item to start with, usually a [DECIDIR] that unblocks
+ 
+ ## Expanding an existing plan
+ 
+-If a plan with the same `plan-name` already exists at that location:
++If a plan folder with the same `plan-name` already exists at `workspace/development/plans/{plan-name}/`:
+ 
+ 1. **Never overwrite without asking.** Show the user what exists and what would change.
+ 2. If the user confirms expansion, **add** phases/items rather than replacing. Update the index's "Histórico de mudanças" with a new version entry (`v2`, `v3`…) describing what was added/changed.
+ 3. Preserve existing item files — only create new files for new items. If an existing item needs to be modified, edit it in place and note the change in the index history.
+ 
++### Legacy flat plans
++
++If a legacy plan exists in the old flat format at `workspace/development/plans/[C]{plan-name}-{YYYY-MM-DD}.md` or has `fase-*` folders directly under `workspace/development/plans/`, **do not overwrite or mix with it**. Ask the user whether to migrate it into `workspace/development/plans/{plan-name}/` first.
++
+ ## Materializing a Compass plan
+ 
+ When Oracle delegates the plan creation to @compass-planner and receives a structured output, **do not write the plan yourself** — pass Compass's output to this skill, which materializes it in the standard structure. This is the canonical flow:
