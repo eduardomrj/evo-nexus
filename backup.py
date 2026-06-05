@@ -487,7 +487,8 @@ def backup_s3_upload(zip_path: Path, s3_bucket: str = None):
         console.print(f"  Bucket: {bucket}")
         console.print(f"  Key:    {s3_key}")
 
-    s3 = boto3.client("s3")
+    endpoint_url = os.environ.get("AWS_ENDPOINT_URL")
+    s3 = boto3.client("s3", endpoint_url=endpoint_url) if endpoint_url else boto3.client("s3")
     s3.upload_file(str(zip_path), bucket, s3_key)
 
     if HAS_RICH:
@@ -500,7 +501,8 @@ def restore_s3(s3_key: str = None, s3_bucket: str = None, mode: str = "merge"):
     """Download a backup from S3 and restore it."""
     boto3 = _require_boto3()
     bucket, prefix = _get_s3_config(s3_bucket)
-    s3 = boto3.client("s3")
+    endpoint_url = os.environ.get("AWS_ENDPOINT_URL")
+    s3 = boto3.client("s3", endpoint_url=endpoint_url) if endpoint_url else boto3.client("s3")
 
     # If no key specified, list available and let user pick the latest
     if not s3_key:
@@ -569,7 +571,8 @@ def list_backups(target: str = "local", s3_bucket: str = None):
     elif target == "s3":
         boto3 = _require_boto3()
         bucket, prefix = _get_s3_config(s3_bucket)
-        s3 = boto3.client("s3")
+        endpoint_url = os.environ.get("AWS_ENDPOINT_URL")
+        s3 = boto3.client("s3", endpoint_url=endpoint_url) if endpoint_url else boto3.client("s3")
         resp = s3.list_objects_v2(Bucket=bucket, Prefix=prefix)
         contents = resp.get("Contents", [])
         zips = [c for c in contents if c["Key"].endswith(".zip")]

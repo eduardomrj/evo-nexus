@@ -31,6 +31,11 @@ dependencies = [
     "sqlparse>=0.4,<1.0",
     "jsonschema>=4.21",
     "flask-limiter>=3.5",
+    "telethon>=1.43.2",
+    "discord-py>=2.3",
+    "rapidfuzz>=3.14.5",
+    "pdfplumber>=0.11",
+    "playwright>=1.40",
 ]
 
 [project.scripts]

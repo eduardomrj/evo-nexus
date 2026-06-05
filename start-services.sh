@@ -34,7 +34,7 @@ mkdir -p "$SCRIPT_DIR/logs"
 # listener by its actual port; fall back to a strict pattern pinned to the
 # Python binary we spawn and the absolute script path so at worst we match
 # siblings inside this repo, never strangers.
-pkill -f 'terminal-server/bin/server.js' 2>/dev/null
+pkill -f 'terminal-server/bin/server.js' 2>/dev/null || true
 DASHBOARD_PORT="${EVONEXUS_PORT:-8080}"
 if command -v fuser >/dev/null 2>&1; then
   fuser -k -n tcp "$DASHBOARD_PORT" 2>/dev/null || true
@@ -46,13 +46,31 @@ fi
 VENV_PY="$SCRIPT_DIR/.venv/bin/python"
 pkill -f "$VENV_PY $SCRIPT_DIR/dashboard/backend/app.py" 2>/dev/null || true
 pkill -f "$VENV_PY $SCRIPT_DIR/scheduler.py" 2>/dev/null || true
-sleep 1
+pkill -f 'routines/custom/vigil.py' 2>/dev/null || true
+pkill -f 'evo-projects/vigil/vigil.py' 2>/dev/null || true
+if command -v fuser >/dev/null 2>&1; then
+  fuser -k -n tcp 8765 2>/dev/null || true
+elif command -v lsof >/dev/null 2>&1; then
+  pids=$(lsof -ti "tcp:8765" 2>/dev/null || true)
+  [ -n "$pids" ] && kill $pids 2>/dev/null || true
+fi
+pkill -f 'python.*community_observer.py' 2>/dev/null || true
+pkill -f 'python.*whatsapp_observer.py' 2>/dev/null || true
+sleep 2
+
+# Ensure Vigil data dir exists (outside repo — survives git pull)
+mkdir -p /home/evonexus/evo-projects/vigil/{logs,reports/daily}
 
 # Start terminal-server (must run FROM the project root for agent discovery)
 nohup node dashboard/terminal-server/bin/server.js > "$SCRIPT_DIR/logs/terminal-server.log" 2>&1 &
 
 # Start scheduler
 nohup "$SCRIPT_DIR/.venv/bin/python" scheduler.py > "$SCRIPT_DIR/logs/scheduler.log" 2>&1 &
+
+# EVO_NEXUS_ROOT / EVONEXUS_DIR — herdadas pelo Flask dashboard e ADWs
+# Vigil é gerenciado exclusivamente pelo vigil.service (systemd) — não lançar aqui
+export EVO_NEXUS_ROOT="$SCRIPT_DIR"
+export EVONEXUS_DIR="$SCRIPT_DIR"
 
 # Start Flask dashboard
 cd dashboard/backend || exit 1

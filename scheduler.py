@@ -83,6 +83,9 @@ def run_adw(name: str, script: str, args: str = ""):
         cmd = f"{PYTHON} {script_path}"
         if args:
             cmd += f" {args}"
+        env = os.environ.copy()
+        env.setdefault("EVO_NEXUS_ROOT", str(WORKSPACE))
+        env.setdefault("EVONEXUS_DIR", str(WORKSPACE))
         result = subprocess.run(
             cmd,
             shell=True,
@@ -90,6 +93,7 @@ def run_adw(name: str, script: str, args: str = ""):
             timeout=900,
             capture_output=True,
             text=True,
+            env=env,
         )
         status = "✓" if result.returncode == 0 else "✗"
         print(f"  {now} {status} {name}")
