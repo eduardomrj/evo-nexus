@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/go-control-erp/features/database-host/[C]plan-database-host.md

@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/go-control-erp/features/plano-edit-wizard/[C]plan-plano-edit-wizard.md

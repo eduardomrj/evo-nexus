@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/go-control-erp/features/aplicativo-fields-refactor/[C]plan-aplicativo-fields-refactor.md

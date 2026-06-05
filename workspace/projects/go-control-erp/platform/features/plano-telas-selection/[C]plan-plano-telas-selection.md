@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/go-control-erp/features/plano-telas-selection/[C]plan-plano-telas-selection.md

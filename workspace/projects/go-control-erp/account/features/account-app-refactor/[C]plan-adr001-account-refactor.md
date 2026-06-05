@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/go-control-erp/workspace/development/plans/adr001-account-refactor/[C]plan-adr001-account-refactor.md

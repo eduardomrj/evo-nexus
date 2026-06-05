@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/go-control-erp/features/recurso-params-schema/[C]plan-recurso-params-schema.md

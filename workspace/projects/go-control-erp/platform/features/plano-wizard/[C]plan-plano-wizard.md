@@ -1,1 +1,0 @@
-/home/evonexus/evo-nexus/workspace/development/features/plano-wizard/[C]plan-plano-wizard.md

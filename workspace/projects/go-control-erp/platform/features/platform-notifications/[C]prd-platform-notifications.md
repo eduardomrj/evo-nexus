@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/go-control-erp/features/platform-notifications/[C]prd-platform-notifications.md

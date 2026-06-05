@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/go-control-erp/features/licencas-nova-refactor/[C]plan-licencas-nova-refactor.md
