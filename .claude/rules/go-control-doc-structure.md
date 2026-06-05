@@ -1,94 +1,108 @@
-# GO Control ERP — Estrutura de Documentação no Workspace
+# GO Control ERP — Estrutura de Documentação
 
-Applies to every agent (Bolt, Canvas, Compass, Apex, etc.) that creates or organiza documentação para o GO Control ERP e todos os projetos sob seu guarda-chuva (go-payment-hub, go-message, account, platform, backoffice, qualquer app futuro).
+Applies to every agent (Bolt, Canvas, Compass, Apex, etc.) that creates or organizes documentation for GO Control ERP and all apps under its umbrella (go-payment-hub, go-message, account, platform, go-control-auth, go-cobranca, modulo-pessoas, any future app).
 
 ---
 
 ## Regra central
 
-**Arquivo físico** → git do projeto em `/home/evonexus/evo-projects/go-control-erp/`  
-**Symlink de acesso** → `workspace/projects/go-control-erp/{app}/{categoria}/`
+**Arquivo físico** → `evo-projects/go-control-erp/docs/{app}/`  
+**Acesso no workspace** → `workspace/projects/go-control-erp/{app}/` (symlink automático — não criar symlinks individuais)
 
-Nunca criar arquivo físico dentro de `workspace/projects/`. Nunca colocar symlinks em `workspace/development/features/` para projetos externos.
+Nunca criar arquivo físico dentro de `workspace/projects/`. O workspace é só acesso via symlinks.
 
 ---
 
-## Estrutura de pastas por app/módulo
+## Estrutura completa
 
 ```
-workspace/projects/go-control-erp/
-  {app}/                        ← ex: go-payment-hub, go-message, account
-    modulo/                     ← documentação do app como um todo
-    features/                   ← uma subpasta por feature/refatoração/bugfix
-      {slug}/
-    ciclos/                     ← verifications de steps, sprints, entregas
-      {ciclo}/
-    manuais/                    ← documentação viva de uso
-      tecnico/
-      operacional/
-    docs/                       ← backlog, brainstorm, glossário (transversal)
-    ux/                         ← mockups HTML, protótipos visuais
+evo-projects/go-control-erp/
+  backend/              ← código Django (nunca misturar docs aqui)
+  frontend/             ← código React (nunca misturar docs aqui)
+  infra/
+  scripts/
+  tests/
+  docs/
+    architecture/
+      decisions/        ← ADRs do projeto inteiro (ADR-001..N)
+      coding-standards.md
+      crud-and-design-patterns.md
+    design-system.md    ← Design System visual (leitura obrigatória antes de frontend)
+    agent-instructions.md
+    {app}/              ← account | platform | go-control-auth | go-message |
+      features/{slug}/  ← go-payment-hub | go-cobranca | modulo-pessoas
+      plans/{slug}/
+      docs/             ← docs principais do sub-app (PRD, arquitetura, planos do módulo)
+      ux/               ← mockups HTML, protótipos
+      manuais/
+        tecnico/
+        operacional/
+      ciclos/{ciclo}/
 ```
 
 ---
 
 ## Onde vai cada tipo de artefato
 
-| Artefato | Pasta |
+| Artefato | Caminho físico |
 |---|---|
-| PRD do app inteiro | `{app}/modulo/` |
-| Plano de implementação do app | `{app}/modulo/` |
-| ADR de arquitetura do app (ex: ADR-007) | `{app}/modulo/` |
-| Casos de uso, fluxos, modelagem do app | `{app}/modulo/` |
-| Brainstorm e decisões preparatórias do app | `{app}/modulo/` |
-| PRD de feature/refatoração/bugfix | `{app}/features/{slug}/` |
-| Plano de feature/refatoração/bugfix | `{app}/features/{slug}/` |
-| ADR específico de feature (ex: ADR-008) | `{app}/features/{slug}/` |
-| Verification de step/sprint | `{app}/ciclos/{ciclo}/` |
-| Manual técnico (API ref, arquitetura, connectors) | `{app}/manuais/tecnico/` |
-| Manual operacional (onboarding, runbooks, troubleshooting) | `{app}/manuais/operacional/` |
-| Backlog, glossário, brainstorm contínuo | `{app}/docs/` |
-| Mockups HTML, protótipos visuais | `{app}/ux/` |
+| ADR do projeto inteiro | `docs/architecture/decisions/ADR-NNN-*.md` |
+| Padrões de código/arquitetura | `docs/architecture/` |
+| Design System | `docs/design-system.md` |
+| PRD / arquitetura / plano do sub-app | `docs/{app}/docs/` |
+| ADR de feature específica | `docs/{app}/features/{slug}/[C]adr-*.md` |
+| PRD de feature | `docs/{app}/features/{slug}/[C]prd-*.md` |
+| Plano de feature | `docs/{app}/features/{slug}/[C]plan-*.md` |
+| Discovery / verification de feature | `docs/{app}/features/{slug}/[C]*.md` |
+| Plano multi-fase | `docs/{app}/plans/{slug}/[C]index-{data}.md` |
+| Verification de ciclo/sprint | `docs/{app}/ciclos/{ciclo}/[C]*.md` |
+| Manual técnico | `docs/{app}/manuais/tecnico/` |
+| Manual operacional | `docs/{app}/manuais/operacional/` |
+| Mockup HTML | `docs/{app}/ux/` |
 
 ---
 
 ## Regras rápidas para agentes
 
-1. **PRD/plano/ADR do app inteiro** → `modulo/`
-2. **Feature, refactor, bugfix com nome próprio** → `features/{slug}/`
-3. **Verification de step/sprint** → `ciclos/{ciclo}/`
-4. **Manual técnico/operacional** → `manuais/tecnico/` ou `manuais/operacional/`
-5. **Backlog, brainstorm, glossário** → `docs/`
-6. **Mockups e protótipos** → `ux/`
-7. **Nunca arquivo solto na raiz do app** — tudo vai em subpasta
-8. **Slug de feature em kebab-case** — ex: `async-emission`, `payment-method-catalog`
+1. **Qualquer doc** → sempre dentro de `docs/` — nunca na raiz do projeto nem em `backend/` ou `frontend/`
+2. **ADR do projeto** → `docs/architecture/decisions/`
+3. **Doc do sub-app inteiro** (PRD, arquitetura, plano de módulo) → `docs/{app}/docs/`
+4. **Feature com nome próprio** → `docs/{app}/features/{slug}/`
+5. **Plano multi-fase** → `docs/{app}/plans/{slug}/`
+6. **Verification de ciclo** → `docs/{app}/ciclos/{ciclo}/`
+7. **Manual** → `docs/{app}/manuais/tecnico/` ou `manuais/operacional/`
+8. **Mockup** → `docs/{app}/ux/`
+9. **Slug em kebab-case** — ex: `async-emission`, `payment-method-catalog`
+10. **Nada solto na raiz de `docs/{app}/`** — tudo vai em subpasta
 
 ---
 
-## Como criar symlink ao salvar um artefato novo
+## Symlinks no workspace
+
+O workspace espelha `docs/{app}/` via symlinks em:
+```
+workspace/projects/go-control-erp/{app}/ → evo-projects/docs/{app}/
+```
+
+**Não é necessário criar symlinks individuais por arquivo.** Salvar em `docs/{app}/` já torna o arquivo visível no workspace automaticamente.
+
+Exceção — arquivos diretos em `docs/` (não em `docs/{app}/`):
+```bash
+ln -sf "/home/evonexus/evo-projects/go-control-erp/docs/<arquivo>" \
+       "/home/evonexus/evo-nexus/workspace/projects/go-control-erp/docs/<arquivo>"
+```
+
+---
+
+## Exemplo: criar PRD de nova feature no go-payment-hub
 
 ```bash
-# Exemplo: PRD de nova feature "dark-mode" no go-payment-hub
-PHYSICAL=/home/evonexus/evo-projects/go-control-erp/features/go-payment-hub/[C]prd-dark-mode.md
-LINK=/home/evonexus/evo-nexus/workspace/projects/go-control-erp/go-payment-hub/features/dark-mode/[C]prd-dark-mode.md
+# 1. Salvar o arquivo físico
+PHYSICAL=/home/evonexus/evo-projects/go-control-erp/docs/go-payment-hub/features/dark-mode/[C]prd-dark-mode.md
+mkdir -p "$(dirname $PHYSICAL)"
+# ... escrever o arquivo ...
 
-mkdir -p "$(dirname $LINK)"
-ln -sf "$PHYSICAL" "$LINK"
-```
-
----
-
-## Referência: piloto go-payment-hub (estrutura aprovada 2026-06-02)
-
-```
-workspace/projects/go-control-erp/go-payment-hub/
-  modulo/      ← prd, plan, architecture(ADR-007), casos-de-uso, fluxos, modelagem, brainstorm, decisoes
-  features/
-    async-emission/    ← ADR-008, prd-async-emission, plan-async-emission
-    fase-2/            ← prd-fase2, plan-ciclo2
-    platform-registration/ ← plan, runbook
-  ciclos/
-    fase-1/    ← step1..step6-verification
-  docs/        ← backlog
-  ux/          ← mockups HTML
+# 2. Symlink não é necessário — workspace/go-payment-hub já aponta para docs/go-payment-hub/
+# O arquivo aparece automaticamente em:
+# workspace/projects/go-control-erp/go-payment-hub/features/dark-mode/[C]prd-dark-mode.md
 ```
