@@ -100,6 +100,25 @@ GET /api/v1/analytics/subscriptions?status=active&per_page=100
 - Paginate until `meta.has_more = false`
 - Sum `plan.price` of each active subscription — Evo Academy MRR
 
+## Step 2.5b — Collect Asaas data
+
+Use the `int-asaas` skill reference to call the Asaas API directly.
+Base URL: https://api.asaas.com/v3 (ASAAS_SANDBOX=false)
+Auth header: `access_token: ${ASAAS_API_KEY}`
+
+Collect:
+1. **Balance**: GET /finance/balance → field `balance` (BRL float)
+2. **Today's received payments**: GET /payments?status=RECEIVED&paymentDate={today}&limit=100 → sum `value` fields, count records
+3. **Overdue payments**: GET /payments?status=OVERDUE&limit=100 → list with `id`, `customer` name (GET /customers/{customerId} → field `name`), `value`, `dueDate`, `billingType`
+
+Format output:
+- Saldo Asaas: R$ {balance}
+- Recebido hoje: R$ {sum} ({count} cobranças)
+- Vencidas: {count} cobranças totalizando R$ {sum}
+  - List each: "{customerName} — R$ {value} — venceu {dueDate} ({billingType})"
+
+If ASAAS_API_KEY is empty or request fails, skip and log warning.
+
 ## Step 3 — Day's transactions
 
 Consolidate all financial transactions for the day:
