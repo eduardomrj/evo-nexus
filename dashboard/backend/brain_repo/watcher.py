@@ -10,7 +10,7 @@ from watchdog.observers import Observer
 
 log = logging.getLogger(__name__)
 
-DEBOUNCE_SECONDS_DEFAULT = 30
+DEBOUNCE_SECONDS_DEFAULT = 300  # 5 min — prevents cascade from routine log writes
 
 WATCH_PATHS = [
     "memory",
@@ -21,6 +21,7 @@ WATCH_PATHS = [
 
 EXCLUDE_PATHS = [
     "memory/raw-transcripts",
+    "workspace/ADWs/logs",      # chat/routine JSONL — large, volatile, not brain content
 ]
 
 

@@ -618,11 +618,13 @@ function brainCount(data: BrainSnapshotsResponse): number {
  * 30+ items and weekly to 12+ so both default to collapsed.
  */
 function BrainRepoSnapshots({
-  data, repoUrl, onRestore,
+  data, repoUrl, onRestore, onMilestone, brainBusy,
 }: {
   data: BrainSnapshotsResponse | null
   repoUrl?: string
   onRestore: (s: BrainSnapshot) => void
+  onMilestone: () => void
+  brainBusy: boolean
 }) {
   const { t } = useTranslation()
   const [openWeekly, setOpenWeekly] = useState(false)
@@ -676,7 +678,15 @@ function BrainRepoSnapshots({
       <div className="rounded-xl border border-[#152030] bg-[#0b1018] flex flex-col items-center justify-center py-16 text-[#667085]">
         <GitBranch size={48} className="mb-4 opacity-40" />
         <p className="text-sm text-[#8a9aae]">{t('backups.brainTab.noSnapshotsTitle')}</p>
-        <p className="text-xs mt-1">{t('backups.brainTab.noSnapshotsHint')}</p>
+        <p className="text-xs mt-1 mb-4">{t('backups.brainTab.noSnapshotsHint')}</p>
+        <button
+          onClick={onMilestone}
+          disabled={brainBusy}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#00FFA7]/10 border border-[#00FFA7]/20 text-[#00FFA7] hover:bg-[#00FFA7]/20 transition-colors text-sm font-medium disabled:opacity-50"
+        >
+          {brainBusy ? <Loader2 size={14} className="animate-spin" /> : <Tag size={14} />}
+          {brainBusy ? t('backups.destinations.syncInProgress') : t('backups.destinations.createMilestone')}
+        </button>
       </div>
     )
   }
@@ -822,6 +832,7 @@ export default function Backups() {
     }
   }, [activeTab, config?.brain_repo_configured, brainSnapshots, brainLoading, fetchBrainSnapshots])
 
+
   // Poll the backup config every 30s while the user is on this page and
   // brain repo is connected. Surfaces last_error changes from the watcher
   // (auto-sync failures) without requiring a manual refresh. Pauses when
@@ -894,6 +905,17 @@ export default function Backups() {
       setTimeout(() => setOptimisticSync(false), 1500)
     }
   }
+
+  // Auto-refresh brain snapshots when sync finishes (sync_in_progress: True→False).
+  // Detects the transition via a ref so we don't re-run on every render.
+  const prevSyncInProgress = useRef(false)
+  useEffect(() => {
+    const wasRunning = prevSyncInProgress.current
+    prevSyncInProgress.current = syncInProgress
+    if (wasRunning && !syncInProgress && activeTab === 'brain' && config?.brain_repo_configured) {
+      fetchBrainSnapshots()
+    }
+  }, [syncInProgress, activeTab, config?.brain_repo_configured, fetchBrainSnapshots])
 
   const handleBrainRepoCancel = async () => {
     try {
@@ -1346,6 +1368,8 @@ export default function Backups() {
             <BrainRepoSnapshots
               data={brainSnapshots}
               repoUrl={config.brain_repo?.repo_url}
+              onMilestone={handleBrainRepoMilestone}
+              brainBusy={brainBusy}
               onRestore={(snapshot) => {
                 setBrainRestoreModal(snapshot)
                 setBrainRestoreIncludeKb(false)

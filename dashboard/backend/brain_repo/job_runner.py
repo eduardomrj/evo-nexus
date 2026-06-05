@@ -169,6 +169,7 @@ _WATCH_PATHS = ["memory", "workspace", "customizations", "config-safe"]
 _EXCLUDE_RELATIVE_PATHS = [
     "memory/raw-transcripts",
     "workspace/projects",
+    "workspace/ADWs/logs",      # chat/routine JSONL — large, volatile, not brain content
 ]
 
 # Directory names skipped anywhere in the tree. Nested .git catches submodules

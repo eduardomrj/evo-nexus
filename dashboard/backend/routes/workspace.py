@@ -21,6 +21,12 @@ bp = Blueprint("workspace", __name__)
 REPO_ROOT = Path(__file__).resolve().parents[3]
 WORKSPACE_DIR = REPO_ROOT / "workspace"
 ADMIN_ROOTS = [REPO_ROOT / ".claude", REPO_ROOT / "config", REPO_ROOT / "docs"]
+
+# External project roots — paths outside REPO_ROOT reachable via workspace symlinks.
+# Populated from WORKSPACE_EXTERNAL_ROOTS env var (colon-separated absolute paths).
+# Falls back to the hardcoded evo-projects default for this machine.
+_ext_raw = os.environ.get("WORKSPACE_EXTERNAL_ROOTS", "/home/evonexus/evo-projects")
+EXTERNAL_ROOTS: list[Path] = [Path(p).resolve() for p in _ext_raw.split(":") if p.strip()]
 BLOCKLIST_PREFIXES = (
     ".git", "node_modules", "dist", ".venv", "__pycache__",
     "backups", ".mypy_cache", ".pytest_cache", "target", "build",
@@ -52,45 +58,78 @@ def _resolve_safe(path: str, *, require_admin: bool = False) -> Path:
     """
     path_str = str(path) if path else ""
 
-    # 1. Reject empty, absolute, or NUL-containing paths
+    # 1. Reject empty or NUL-containing paths
     if not path or "\x00" in path:
         _audit("denied", path_str, result="denied", reason="invalid_path")
         abort(403, description="Invalid path")
-    if Path(path).is_absolute():
-        _audit("denied", path_str, result="denied", reason="invalid_path")
-        abort(403, description="Absolute paths not allowed")
 
-    # 2. Resolve to absolute path
+    # Absolute paths are only allowed when they fall within EXTERNAL_ROOTS.
+    # The workspace tree emits absolute paths for symlink-resolved external files,
+    # so the file/download endpoints must accept them back.
+    if Path(path).is_absolute():
+        full = Path(path).resolve()
+        in_external = any(
+            full == er or _is_relative_to(full, er)
+            for er in EXTERNAL_ROOTS
+        )
+        if not in_external:
+            _audit("denied", path_str, result="denied", reason="invalid_path")
+            abort(403, description="Absolute paths not allowed outside external roots")
+        # Blocklist check against path segments relative to the matching external root
+        for er in EXTERNAL_ROOTS:
+            if _is_relative_to(full, er):
+                rel_parts = full.relative_to(er).parts
+                for part in rel_parts:
+                    for prefix in BLOCKLIST_PREFIXES:
+                        if part == prefix or part.startswith(prefix):
+                            _audit("denied", path_str, result="denied", reason="blocklist")
+                            abort(403, description=f"Access to '{part}' is blocked")
+                break
+        return full
+
+    # 2. Resolve to absolute path (follows symlinks)
     full = (REPO_ROOT / path).resolve()
 
-    # 3. Must be inside REPO_ROOT
+    # 3. Must be inside REPO_ROOT or an explicitly whitelisted external root
+    in_repo = False
     try:
         rel = full.relative_to(REPO_ROOT.resolve())
+        in_repo = True
     except ValueError:
+        pass
+
+    in_external = any(
+        full == er or _is_relative_to(full, er)
+        for er in EXTERNAL_ROOTS
+    )
+
+    if not in_repo and not in_external:
         _audit("denied", path_str, result="denied", reason="path_traversal")
         abort(403, description="Path traversal detected")
 
     # 4. Blocklist check: no segment may start with a blocklisted prefix
-    for part in rel.parts:
+    check_parts = rel.parts if in_repo else full.parts
+    for part in check_parts:
         for prefix in BLOCKLIST_PREFIXES:
             if part == prefix or part.startswith(prefix + "/"):
                 _audit("denied", path_str, result="denied", reason="blocklist")
                 abort(403, description=f"Access to '{part}' is blocked")
 
-    # 5. Check allowed roots
-    allowed_roots = _allowed_roots_for(current_user, require_admin)
-    if not any(
-        full == r.resolve() or _is_relative_to(full, r.resolve())
-        for r in allowed_roots
-    ):
-        if not require_admin and any(
+    # 5. Check allowed roots (external paths always allowed — already whitelisted above)
+    if in_repo:
+        allowed_roots = _allowed_roots_for(current_user, require_admin)
+        if not any(
             full == r.resolve() or _is_relative_to(full, r.resolve())
-            for r in ADMIN_ROOTS
+            for r in allowed_roots
         ):
-            _audit("denied", path_str, result="denied", reason="no_permission")
-            abort(403, description="Admin path requires elevated permission")
-        _audit("denied", path_str, result="denied", reason="out_of_scope")
-        abort(403, description="Path outside allowed roots")
+            if not require_admin and any(
+                full == r.resolve() or _is_relative_to(full, r.resolve())
+                for r in ADMIN_ROOTS
+            ):
+                _audit("denied", path_str, result="denied", reason="no_permission")
+                abort(403, description="Admin path requires elevated permission")
+            _audit("denied", path_str, result="denied", reason="out_of_scope")
+            abort(403, description="Path outside allowed roots")
 
     return full
 

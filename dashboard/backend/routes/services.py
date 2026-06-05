@@ -50,7 +50,7 @@ def list_services():
             "description": "Telegram Channel — receives and responds to messages via Claude",
             "command": "make telegram",
             "category": "channel",
-            **_check_process(["screen", "-list"], pipe_grep="telegram"),
+            **_check_process(["ps", "aux"], pipe_grep="-dmS telegram"),
         },
         {
             "id": "discord-channel",
@@ -58,7 +58,7 @@ def list_services():
             "description": "Discord Channel — bidirectional chat bridge with Claude Code",
             "command": "make discord-channel",
             "category": "channel",
-            **_check_process(["screen", "-list"], pipe_grep="discord-channel"),
+            **_check_process(["ps", "aux"], pipe_grep="-dmS discord-channel"),
         },
         {
             "id": "imessage",
@@ -66,7 +66,7 @@ def list_services():
             "description": "iMessage Channel — chat with Claude via Messages (macOS)",
             "command": "make imessage",
             "category": "channel",
-            **_check_process(["screen", "-list"], pipe_grep="imessage"),
+            **_check_process(["ps", "aux"], pipe_grep="-dmS imessage"),
         },
         {
             "id": "dashboard",
@@ -103,13 +103,18 @@ def run_routine(routine_id):
     if not script:
         return jsonify({"error": f"Unknown routine: {routine_id}"}), 400
 
-    # Validate script path is within ADWs/routines/
-    script_path = (WORKSPACE / "ADWs" / "routines" / script).resolve()
-    allowed_dir = (WORKSPACE / "ADWs" / "routines").resolve()
-    if not str(script_path).startswith(str(allowed_dir)):
+    # Validate path without resolving symlinks (custom/*.py may symlink to evo-projects/vigil/).
+    import os
+    routines_root = os.path.normpath(str((WORKSPACE / "ADWs" / "routines").resolve()))
+    rel = str(script).replace("\\", "/")
+    if rel.startswith("/") or ".." in rel.split("/"):
         return jsonify({"error": "Invalid script path"}), 400
-    if not script_path.exists():
+    candidate = os.path.normpath(os.path.join(routines_root, rel))
+    if candidate != routines_root and not candidate.startswith(routines_root + os.sep):
+        return jsonify({"error": "Invalid script path"}), 400
+    if not os.path.lexists(candidate):
         return jsonify({"error": f"Script not found: {script}"}), 404
+    script_path = Path(candidate)
 
     python_bin = shutil.which("uv")
     cmd_args = ["uv", "run", "python", str(script_path)] if python_bin else ["python3", str(script_path)]
@@ -211,7 +216,7 @@ def service_logs(service_id):
 
         # Check if running but no log yet
         try:
-            result = _check_process(["screen", "-list"], pipe_grep="telegram")
+            result = _check_process(["ps", "aux"], pipe_grep="-dmS telegram")
             if result["running"]:
                 return jsonify({"lines": [
                     "Telegram bot is running.",
@@ -263,7 +268,7 @@ def service_logs(service_id):
         screen_name = service_id
         label = "Discord channel" if service_id == "discord-channel" else "iMessage channel"
         try:
-            result = _check_process(["screen", "-list"], pipe_grep=screen_name)
+            result = _check_process(["ps", "aux"], pipe_grep=f"-dmS {screen_name}")
             if result["running"]:
                 return jsonify({"lines": [
                     f"{label} is running.",

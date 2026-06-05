@@ -186,6 +186,13 @@ class ClaudeBridge {
       for (const key of SYSTEM_VARS) {
         if (process.env[key]) cleanEnv[key] = process.env[key];
       }
+      const safeNodeOptions = (process.env.NODE_OPTIONS || '')
+        .split(/\s+/)
+        .filter((token) => /^--max-old-space-size=\d+$/.test(token))
+        .join(' ');
+      if (safeNodeOptions) {
+        cleanEnv.NODE_OPTIONS = safeNodeOptions;
+      }
 
       // Ensure OPENAI_MODEL is set when using an OpenAI-based provider.
       // OpenClaude's Codex mode requires 'codexplan' or 'codexspark' aliases
@@ -263,7 +270,7 @@ class ClaudeBridge {
         onOutput(data);
       });
 
-      claudeProcess.onExit((exitCode, signal) => {
+      claudeProcess.onExit(({ exitCode, signal }) => {
         console.log(`Claude session ${sessionId} exited with code ${exitCode}, signal ${signal}`);
         // Clear kill timeout if process exited naturally
         if (session.killTimeout) {

@@ -99,11 +99,36 @@ def _upsert_heartbeat_from_yaml(heartbeat_id: str) -> dict | None:
 # ── Step 1: Load identity ─────────────────────────────────────────────────────
 
 def step1_load_identity(agent: str) -> str:
-    """Read .claude/agents/{agent}.md and return persona text."""
+    """Read .claude/agents/{agent}.md and return persona text (frontmatter stripped)."""
     agent_file = AGENTS_DIR / f"{agent}.md"
     if not agent_file.exists():
         raise FileNotFoundError(f"Agent file not found: {agent_file}")
-    return agent_file.read_text(encoding="utf-8")
+    content = agent_file.read_text(encoding="utf-8")
+    # Strip YAML frontmatter so the prompt never starts with '---' (Claude CLI parses it as a flag)
+    if content.startswith("---"):
+        end = content.find("\n---", 3)
+        if end != -1:
+            content = content[end + 4:].lstrip("\n")
+    return content
+
+
+def _parse_agent_tools(agent: str) -> list[str]:
+    """Parse the 'tools:' line from agent frontmatter. Returns list of tool names."""
+    agent_file = AGENTS_DIR / f"{agent}.md"
+    if not agent_file.exists():
+        return []
+    content = agent_file.read_text(encoding="utf-8")
+    if not content.startswith("---"):
+        return []
+    end = content.find("\n---", 3)
+    if end == -1:
+        return []
+    frontmatter = content[3:end]
+    for line in frontmatter.splitlines():
+        if line.strip().startswith("tools:"):
+            raw = line.split(":", 1)[1].strip()
+            return [t.strip() for t in raw.split(",") if t.strip()]
+    return []
 
 
 # ── Step 2: Check approvals (stub) ───────────────────────────────────────────
@@ -234,11 +259,17 @@ def step7_invoke_claude(
             "cost_usd": None,
         }
 
+    # Use --allowedTools from agent frontmatter. When no tools are defined,
+    # fall back to a safe default set covering typical agent needs.
+    tools = _parse_agent_tools(agent)
+    _DEFAULT_TOOLS = "Bash,Read,Write,Edit,Glob,Grep,WebFetch"
+    allowed_tools_args = ["--allowedTools", ",".join(tools) if tools else _DEFAULT_TOOLS]
+
     cmd = [
         claude_bin,
         "--print",
         "--max-turns", str(max_turns),
-        "--dangerously-skip-permissions",
+        *allowed_tools_args,
         "--output-format", "json",
         prompt,  # positional argument — Claude CLI does not have a -p flag
     ]

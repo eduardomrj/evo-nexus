@@ -34,14 +34,30 @@ def get_routines():
     except Exception:
         discovered = {}
 
+    # Build reverse index: normalized script_key → existing metrics key
+    # e.g. "end-of-day" in metrics → "end_of_day" → matched by script_key of "eod" entry
+    normalized_data_keys: dict[str, str] = {k.replace("-", "_"): k for k in data}
+
     for make_id, spec in discovered.items():
+        script_key = spec.get("script_key", "")
+
         if make_id in data:
-            # already has execution metrics; enrich with agent/name if missing
+            # Exact match — enrich with agent/name if missing
             entry = data[make_id]
             if isinstance(entry, dict):
                 entry.setdefault("agent", spec.get("agent", ""))
                 entry.setdefault("source_plugin", spec.get("source_plugin"))
             continue
+
+        if script_key and script_key in normalized_data_keys:
+            # Same script already tracked under a different log_name — enrich and skip
+            original_key = normalized_data_keys[script_key]
+            entry = data[original_key]
+            if isinstance(entry, dict):
+                entry.setdefault("agent", spec.get("agent", ""))
+                entry.setdefault("source_plugin", spec.get("source_plugin"))
+            continue
+
         data[make_id] = {
             "agent": spec.get("agent", ""),
             "runs": 0,

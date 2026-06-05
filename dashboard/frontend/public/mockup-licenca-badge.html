@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mockup — Badge Status + Ícone Licença</title>
+<link rel="stylesheet" href="https://unpkg.com/primeicons/primeicons.css"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0f1117;
+    color: #e2e8f0;
+    font-family: 'Inter', system-ui, sans-serif;
+    padding: 32px;
+    min-height: 100vh;
+  }
+
+  /* ── DS tokens ── */
+  :root {
+    --primary-color: #4f6af5;
+    --surface-a: #161b27;
+    --surface-d: #1e2433;
+    --border: #1e2433;
+    --text-color: #e2e8f0;
+    --text-color-secondary: #94a3b8;
+    --radius: 8px;
+  }
+
+  h2 { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #94a3b8; margin-bottom: 16px; margin-top: 32px; }
+  h2:first-child { margin-top: 0; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+
+  /* ── Card ── */
+  .card {
+    background: var(--surface-a);
+    border: 1px solid var(--surface-d);
+    border-radius: var(--radius);
+    display: flex; flex-direction: column;
+  }
+  .card-body { padding: 16px; flex: 1; }
+  .card-footer {
+    padding: 10px 16px;
+    border-top: 1px solid var(--border);
+    display: flex; gap: 8px;
+  }
+
+  /* ── Badge — antes (PrimeReact severity) ── */
+  .tag { display: inline-flex; align-items: center; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 3px; }
+  .tag-success  { background: rgba(34,197,94,.15);  color: #22c55e; }
+  .tag-warning  { background: rgba(245,158,11,.15); color: #f59e0b; }
+  .tag-danger   { background: rgba(239,68,68,.15);  color: #ef4444; }
+  .tag-secondary { background: rgba(148,163,184,.12); color: #94a3b8; }
+
+  /* ── Badge — depois (cores padronizadas) ── */
+  .badge { display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 3px; white-space: nowrap; }
+  .badge-ativa     { background: rgba(34,197,94,.12);  color: #22c55e; }
+  .badge-pendente  { background: rgba(245,158,11,.12); color: #f59e0b; }
+  .badge-suspensa  { background: rgba(148,163,184,.12); color: #94a3b8; } /* cinza */
+  .badge-cancelada { background: rgba(239,68,68,.12);  color: #ef4444; } /* vermelho */
+
+  /* ── Icon container ── */
+  .icon-box {
+    width: 36px; height: 36px; border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .icon-indigo { background: rgba(79,106,245,.1); color: var(--primary-color); }
+  /* status-aware */
+  .icon-ativa     { background: rgba(34,197,94,.12);  color: #22c55e; }
+  .icon-pendente  { background: rgba(245,158,11,.12); color: #f59e0b; }
+  .icon-suspensa  { background: rgba(148,163,184,.12); color: #94a3b8; }
+  .icon-cancelada { background: rgba(239,68,68,.12);  color: #ef4444; }
+
+  /* ── Row ── */
+  .row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+  .meta { display: flex; flex-direction: column; gap: 6px; }
+  .meta-row { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-color-secondary); }
+  .meta-val { color: var(--text-color); font-family: 'IBM Plex Mono', monospace; }
+  .title { font-weight: 600; font-size: 14px; color: var(--text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sub { font-size: 12px; color: var(--text-color-secondary); margin-top: 2px; }
+
+  .btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; height: 30px; padding: 0 12px; border-radius: 6px; border: 1px solid var(--surface-d); background: transparent; color: var(--text-color-secondary); cursor: pointer; flex: 1; justify-content: center; }
+
+  .section-divider {
+    display: flex; align-items: center; gap: 12px; margin: 32px 0 24px;
+    font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #64748b;
+  }
+  .section-divider::before, .section-divider::after { content: ''; flex: 1; height: 1px; background: #1e2433; }
+
+  .pill {
+    display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 99px;
+    letter-spacing: .05em; text-transform: uppercase;
+  }
+  .pill-before { background: rgba(239,68,68,.15); color: #ef4444; }
+  .pill-after  { background: rgba(34,197,94,.15);  color: #22c55e; }
+
+  .note { font-size: 12px; color: #94a3b8; margin-bottom: 20px; padding: 10px 14px; background: rgba(79,106,245,.07); border-left: 3px solid #4f6af5; border-radius: 4px; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<h2>Mockup — Badge de Status + Ícone do Card de Licença</h2>
+
+<div class="note">
+  <strong>Mudanças propostas:</strong><br>
+  1. <strong>Badges</strong>: paleta consistente — ativa verde · pendente âmbar · suspensa cinza · cancelada vermelho<br>
+  2. <strong>Ícone</strong>: <code>pi-id-card</code> (mesmo estilo do card de empresa com <code>pi-building</code>)<br>
+  &nbsp;&nbsp;&nbsp;→ Opção A: ícone sempre indigo (cor neutra, como empresa)<br>
+  &nbsp;&nbsp;&nbsp;→ Opção B: ícone muda de cor conforme o status da licença
+</div>
+
+<!-- ANTES -->
+<div class="section-divider"><span class="pill pill-before">ANTES</span></div>
+
+<div class="grid">
+
+  <!-- Ativa -->
+  <div class="card">
+    <div class="card-body">
+      <div class="row">
+        <div class="icon-box icon-indigo"><i class="pi pi-file-check" style="font-size:16px"></i></div>
+        <div style="flex:1;min-width:0">
+          <div class="title">Emporion Desktop</div>
+          <div class="sub">Automação Software Ltda</div>
+        </div>
+        <span class="tag tag-success">Ativa</span>
+      </div>
+      <div class="meta">
+        <div class="meta-row"><i class="pi pi-calendar" style="font-size:11px;width:12px"></i><span style="min-width:60px">Início</span><span class="meta-val">01/01/2025</span></div>
+        <div class="meta-row"><i class="pi pi-calendar-times" style="font-size:11px;width:12px"></i><span style="min-width:60px">Vencimento</span><span class="meta-val">31/12/2025</span></div>
+      </div>
+    </div>
+    <div class="card-footer">
+      <button class="btn"><i class="pi pi-info-circle" style="font-size:11px"></i> Ver detalhes</button>
+      <button class="btn"><i class="pi pi-cog" style="font-size:11px"></i> Gerenciar</button>
+    </div>
+  </div>
+
+  <!-- Pendente -->
+  <div class="card">
+    <div class="card-body">
+      <div class="row">
+        <div class="icon-box icon-indigo"><i class="pi pi-file-check" style="font-size:16px"></i></div>
+        <div style="flex:1;min-width:0">
+          <div class="title">GO Platform</div>
+          <div class="sub">Cliente XYZ</div>
+        </div>
+        <span class="tag tag-warning">Pendente</span>
+      </div>
+      <div class="meta">
+        <div class="meta-row"><i class="pi pi-calendar" style="font-size:11px;width:12px"></i><span style="min-width:60px">Início</span><span class="meta-val">01/03/2025</span></div>
+        <div class="meta-row"><i class="pi pi-calendar-times" style="font-size:11px;width:12px"></i><span style="min-width:60px">Vencimento</span><span class="meta-val">Sem vencimento</span></div>
+      </div>
+    </div>
+    <div class="card-footer">
+      <button class="btn"><i class="pi pi-info-circle" style="font-size:11px"></i> Ver detalhes</button>
+      <button class="btn"><i class="pi pi-cog" style="font-size:11px"></i> Gerenciar</button>
+    </div>
+  </div>
+
+  <!-- Suspensa -->
+  <div class="card">
+    <div class="card-body">
+      <div class="row">
+        <div class="icon-box icon-indigo"><i class="pi pi-file-check" style="font-size:16px"></i></div>
+        <div style="flex:1;min-width:0">
+          <div class="title">SERKET</div>
+          <div class="sub">Empresa ABC</div>
+        </div>
+        <span class="tag tag-danger">Suspensa</span>
+      </div>
+      <div class="meta">
+        <div class="meta-row"><i class="pi pi-calendar" style="font-size:11px;width:12px"></i><span style="min-width:60px">Início</span><span class="meta-val">01/06/2024</span></div>
+        <div class="meta-row"><i class="pi pi-calendar-times" style="font-size:11px;width:12px"></i><span style="min-width:60px">Vencimento</span><span class="meta-val">30/06/2025</span></div>
+      </div>
+    </div>
+    <div class="card-footer">
+      <button class="btn"><i class="pi pi-info-circle" style="font-size:11px"></i> Ver detalhes</button>
+    </div>
+  </div>
+
+  <!-- Cancelada -->
+  <div class="card">
+    <div class="card-body">
+      <div class="row">
+        <div class="icon-box icon-indigo"><i class="pi pi-file-check" style="font-size:16px"></i></div>
+        <div style="flex:1;min-width:0">
+          <div class="title">Emporion Desktop</div>
+          <div class="sub">Loja Sul</div>
+        </div>
+        <span class="tag tag-secondary">Cancelada</span>
+      </div>
+      <div class="meta">
+        <div class="meta-row"><i class="pi pi-calendar" style="font-size:11px;width:12px"></i><span style="min-width:60px">Início</span><span class="meta-val">01/01/2024</span></div>
+        <div class="meta-row"><i class="pi pi-calendar-times" style="font-size:11px;width:12px"></i><span style="min-width:60px">Vencimento</span><span class="meta-val">31/12/2024</span></div>
+      </div>
+    </div>
+    <div class="card-footer">
+      <button class="btn"><i class="pi pi-info-circle" style="font-size:11px"></i> Ver detalhes</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- DEPOIS Opção A -->
+<div class="section-divider"><span class="pill pill-after">DEPOIS — Opção A (ícone neutro)</span></div>
+
+<div class="grid">
+
+  <div class="card">
+    <div class="card-body">
+      <div class="row">
+        <div class="icon-box icon-indigo"><i class="pi pi-id-card" style="font-size:16px"></i></div>
+        <div style="flex:1;min-width:0">
+          <div class="title">Emporion Desktop</div>
+          <div class="sub">Automação Software Ltda</div>
+        </div>
+        <span class="badge badge-ativa">Ativa</span>
+      </div>
+      <div class="meta">
+        <div class="meta-row"><i class="pi pi-calendar" style="font-size:11px;width:12px"></i><span style="min-width:60px">Início</span><span class="meta-val">01/01/2025</span></div>
+        <div class="meta-row"><i class="pi pi-calendar-times" style="font-size:11px;width:12px"></i><span style="min-width:60px">Vencimento</span><span class="meta-val">31/12/2025</span></div>
+      </div>
+    </div>
+    <div class="card-footer">
+      <button class="btn"><i class="pi pi-info-circle" style="font-size:11px"></i> Ver detalhes</button>
+      <button class="btn"><i class="pi pi-cog" style="font-size:11px"></i> Gerenciar</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="row">
+        <div class="icon-box icon-indigo"><i class="pi pi-id-card" style="font-size:16px"></i></div>
+        <div style="flex:1;min-width:0">
+          <div class="title">GO Platform</div>
+          <div class="sub">Cliente XYZ</div>
+        </div>
+        <span class="badge badge-pendente">Pendente</span>
+      </div>
+      <div class="meta">
+        <div class="meta-row"><i class="pi pi-calendar" style="font-size:11px;width:12px"></i><span style="min-width:60px">Início</span><span class="meta-val">01/03/2025</span></div>
+        <div class="meta-row"><i class="pi pi-calendar-times" style="font-size:11px;width:12px"></i><span style="min-width:60px">Vencimento</span><span class="meta-val">Sem vencimento</span></div>
+      </div>
+    </div>
+    <div class="card-footer">
+      <button class="btn"><i class="pi pi-info-circle" style="font-size:11px"></i> Ver detalhes</button>
+      <button class="btn"><i class="pi pi-cog" style="font-size:11px"></i> Gerenciar</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="row">
+        <div class="icon-box icon-indigo"><i class="pi pi-id-card" style="font-size:16px"></i></div>
+        <div style="flex:1;min-width:0">
+          <div class="title">SERKET</div>
+          <div class="sub">Empresa ABC</div>
+        </div>
+        <span class="badge badge-suspensa">Suspensa</span>
+      </div>
+      <div class="meta">
+        <div class="meta-row"><i class="pi pi-calendar" style="font-size:11px;width:12px"></i><span style="min-width:60px">Início</span><span class="meta-val">01/06/2024</span></div>
+        <div class="meta-row"><i class="pi pi-calendar-times" style="font-size:11px;width:12px"></i><span style="min-width:60px">Vencimento</span><span class="meta-val">30/06/2025</span></div>
+      </div>
+    </div>
+    <div class="card-footer">
+      <button class="btn"><i class="pi pi-info-circle" style="font-size:11px"></i> Ver detalhes</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="row">
+        <div class="icon-box icon-indigo"><i class="pi pi-id-card" style="font-size:16px"></i></div>
+        <div style="flex:1;min-width:0">
+          <div class="title">Emporion Desktop</div>
+          <div class="sub">Loja Sul</div>
+        </div>
+        <span class="badge badge-cancelada">Cancelada</span>
+      </div>
+      <div class="meta">
+        <div class="meta-row"><i class="pi pi-calendar" style="font-size:11px;width:12px"></i><span style="min-width:60px">Início</span><span class="meta-val">01/01/2024</span></div>
+        <div class="meta-row"><i class="pi pi-calendar-times" style="font-size:11px;width:12px"></i><span style="min-width:60px">Vencimento</span><span class="meta-val">31/12/2024</span></div>
+      </div>
+    </div>
+    <div class="card-footer">
+      <button class="btn"><i class="pi pi-info-circle" style="font-size:11px"></i> Ver detalhes</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- DEPOIS Opção B -->
+<div class="section-divider"><span class="pill pill-after">DEPOIS — Opção B (ícone reflete status)</span></div>
+
+<div class="grid">
+
+  <div class="card">
+    <div class="card-body">
+      <div class="row">
+        <div class="icon-box icon-ativa"><i class="pi pi-id-card" style="font-size:16px"></i></div>
+        <div style="flex:1;min-width:0">
+          <div class="title">Emporion Desktop</div>
+          <div class="sub">Automação Software Ltda</div>
+        </div>
+        <span class="badge badge-ativa">Ativa</span>
+      </div>
+      <div class="meta">
+        <div class="meta-row"><i class="pi pi-calendar" style="font-size:11px;width:12px"></i><span style="min-width:60px">Início</span><span class="meta-val">01/01/2025</span></div>
+        <div class="meta-row"><i class="pi pi-calendar-times" style="font-size:11px;width:12px"></i><span style="min-width:60px">Vencimento</span><span class="meta-val">31/12/2025</span></div>
+      </div>
+    </div>
+    <div class="card-footer">
+      <button class="btn"><i class="pi pi-info-circle" style="font-size:11px"></i> Ver detalhes</button>
+      <button class="btn"><i class="pi pi-cog" style="font-size:11px"></i> Gerenciar</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="row">
+        <div class="icon-box icon-pendente"><i class="pi pi-id-card" style="font-size:16px"></i></div>
+        <div style="flex:1;min-width:0">
+          <div class="title">GO Platform</div>
+          <div class="sub">Cliente XYZ</div>
+        </div>
+        <span class="badge badge-pendente">Pendente</span>
+      </div>
+      <div class="meta">
+        <div class="meta-row"><i class="pi pi-calendar" style="font-size:11px;width:12px"></i><span style="min-width:60px">Início</span><span class="meta-val">01/03/2025</span></div>
+        <div class="meta-row"><i class="pi pi-calendar-times" style="font-size:11px;width:12px"></i><span style="min-width:60px">Vencimento</span><span class="meta-val">Sem vencimento</span></div>
+      </div>
+    </div>
+    <div class="card-footer">
+      <button class="btn"><i class="pi pi-info-circle" style="font-size:11px"></i> Ver detalhes</button>
+      <button class="btn"><i class="pi pi-cog" style="font-size:11px"></i> Gerenciar</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="row">
+        <div class="icon-box icon-suspensa"><i class="pi pi-id-card" style="font-size:16px"></i></div>
+        <div style="flex:1;min-width:0">
+          <div class="title">SERKET</div>
+          <div class="sub">Empresa ABC</div>
+        </div>
+        <span class="badge badge-suspensa">Suspensa</span>
+      </div>
+      <div class="meta">
+        <div class="meta-row"><i class="pi pi-calendar" style="font-size:11px;width:12px"></i><span style="min-width:60px">Início</span><span class="meta-val">01/06/2024</span></div>
+        <div class="meta-row"><i class="pi pi-calendar-times" style="font-size:11px;width:12px"></i><span style="min-width:60px">Vencimento</span><span class="meta-val">30/06/2025</span></div>
+      </div>
+    </div>
+    <div class="card-footer">
+      <button class="btn"><i class="pi pi-info-circle" style="font-size:11px"></i> Ver detalhes</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="row">
+        <div class="icon-box icon-cancelada"><i class="pi pi-id-card" style="font-size:16px"></i></div>
+        <div style="flex:1;min-width:0">
+          <div class="title">Emporion Desktop</div>
+          <div class="sub">Loja Sul</div>
+        </div>
+        <span class="badge badge-cancelada">Cancelada</span>
+      </div>
+      <div class="meta">
+        <div class="meta-row"><i class="pi pi-calendar" style="font-size:11px;width:12px"></i><span style="min-width:60px">Início</span><span class="meta-val">01/01/2024</span></div>
+        <div class="meta-row"><i class="pi pi-calendar-times" style="font-size:11px;width:12px"></i><span style="min-width:60px">Vencimento</span><span class="meta-val">31/12/2024</span></div>
+      </div>
+    </div>
+    <div class="card-footer">
+      <button class="btn"><i class="pi pi-info-circle" style="font-size:11px"></i> Ver detalhes</button>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -456,7 +456,10 @@ with app.app_context():
                 PRIMARY KEY (plugin_slug, handler_path)
             );
             CREATE INDEX IF NOT EXISTS idx_plugins_status ON plugins_installed(status);
-            CREATE INDEX IF NOT EXISTS idx_plugin_audit_plugin ON plugin_audit_log(plugin_id, created_at);
+            -- idx_plugin_audit_plugin removed: Wave 2.5 migration below changes
+            -- plugin_audit_log to slug/event schema and creates idx_plugin_audit_slug
+            -- instead. Creating this index here fails when the table was already
+            -- migrated to Wave 2.5 (no plugin_id column).
             CREATE INDEX IF NOT EXISTS idx_hook_cb_disabled ON plugin_hook_circuit_state(disabled_until);
         """)
         _conn.commit()
@@ -466,6 +469,12 @@ with app.app_context():
     _user_cols = {row[1] for row in _cur.execute("PRAGMA table_info(users)").fetchall()}
     if "onboarding_state" not in _user_cols:
         _cur.execute("ALTER TABLE users ADD COLUMN onboarding_state TEXT")
+        # Backfill: users who existed before this column was introduced already
+        # had their environment configured pre-v0.31.0. Leaving the value NULL
+        # sends them through the onboarding wizard on next login (frontend
+        # treats anything != 'completed' | 'skipped' as "needs onboarding"),
+        # so mark pre-existing users as 'completed' instead.
+        _cur.execute("UPDATE users SET onboarding_state='completed' WHERE onboarding_state IS NULL")
         _conn.commit()
     if "onboarding_completed_agents_visit" not in _user_cols:
         _cur.execute("ALTER TABLE users ADD COLUMN onboarding_completed_agents_visit INTEGER NOT NULL DEFAULT 0")
@@ -759,7 +768,7 @@ login_manager.init_app(app)
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))
 
 @login_manager.unauthorized_handler
 def unauthorized():
@@ -952,6 +961,10 @@ app.register_blueprint(plugins_bp)
 app.register_blueprint(mcp_servers_bp)
 # B2.0: plugin public pages (unauthenticated, token-bound portals)
 app.register_blueprint(plugin_public_pages_bp)
+
+# Log Viewer proxy — mounts /log-viewer/* → localhost:8082
+from routes.log_viewer_proxy import bp as log_viewer_proxy_bp
+app.register_blueprint(log_viewer_proxy_bp)
 
 # --------------- Social Auth blueprints ---------------
 from auth.youtube import bp as youtube_auth_bp

@@ -573,7 +573,7 @@ const translations = {
         notConnectedTitle: 'Brain Repo no conectado',
         notConnectedHint: 'Conecta un repo de GitHub para versionar memoria y personalizaciones del workspace.',
         noSnapshotsTitle: 'Aún no hay snapshots',
-        noSnapshotsHint: 'Haz clic en "Crear hito" o "Sincronizar ahora" en la tarjeta del Brain Repo de arriba para generar el primer snapshot.',
+        noSnapshotsHint: 'Haz clic en "Crear hito" en la tarjeta del Brain Repo de arriba, o usa el botón de abajo para generar el primer snapshot.',
       },
       brainSnapshots: {
         head: 'Más reciente (HEAD)',
