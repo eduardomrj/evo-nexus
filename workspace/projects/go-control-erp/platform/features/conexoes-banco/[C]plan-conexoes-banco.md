@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/go-control-erp/workspace/development/features/conexoes-banco/[C]plan-conexoes-banco.md

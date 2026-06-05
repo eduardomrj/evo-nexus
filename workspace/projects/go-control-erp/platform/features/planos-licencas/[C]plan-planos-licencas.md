@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/go-control-erp/workspace/development/features/planos-licencas/[C]plan-planos-licencas.md

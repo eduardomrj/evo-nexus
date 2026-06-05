@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/go-control-erp/workspace/development/features/aplicativo-entity/[C]prd-aplicativo-entity.md

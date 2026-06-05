@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/go-control-erp/workspace/development/features/user-invite-acceptance/[C]prd-user-invite-acceptance.md

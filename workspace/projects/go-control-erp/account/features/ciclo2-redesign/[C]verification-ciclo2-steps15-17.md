@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/go-control-erp/workspace/development/features/ciclo2-redesign/[C]verification-ciclo2-steps15-17.md

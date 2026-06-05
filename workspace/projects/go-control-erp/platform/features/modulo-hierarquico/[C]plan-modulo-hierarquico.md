@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/go-control-erp/workspace/development/features/modulo-hierarquico/[C]plan-modulo-hierarquico.md

@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/go-control-erp/workspace/development/features/admin-password-reset-notification/[C]plan-admin-password-reset-notification.md

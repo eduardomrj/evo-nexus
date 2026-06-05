@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/go-control-erp/workspace/development/features/owner-phone-nova-conta/[C]plan-owner-phone-nova-conta.md

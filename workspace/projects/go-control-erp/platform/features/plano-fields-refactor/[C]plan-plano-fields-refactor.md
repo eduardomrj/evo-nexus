@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/go-control-erp/features/plano-fields-refactor/[C]plan-plano-fields-refactor.md
