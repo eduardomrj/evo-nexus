@@ -224,6 +224,26 @@ def _sync_heartbeats_to_db():
         conn.close()
 
 
+def _get_last_run_time(heartbeat_id: str) -> datetime | None:
+    """Return the UTC datetime of the most recent run for this heartbeat, or None."""
+    conn = _get_db()
+    try:
+        row = conn.execute(
+            "SELECT started_at FROM heartbeat_runs WHERE heartbeat_id = ? ORDER BY started_at DESC LIMIT 1",
+            (heartbeat_id,),
+        ).fetchone()
+        if not row:
+            return None
+        raw = row["started_at"]
+        # Parse ISO string produced by _now_iso() — ends with Z
+        raw = raw.rstrip("Z").split(".")[0]
+        return datetime.strptime(raw, "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
+    except Exception:
+        return None
+    finally:
+        conn.close()
+
+
 def register_interval_jobs():
     """Register schedule jobs for all heartbeats with 'interval' wake trigger."""
     _sync_heartbeats_to_db()
@@ -263,15 +283,32 @@ def register_interval_jobs():
 
             if interval_secs % 3600 == 0:
                 hours = interval_secs // 3600
-                schedule.every(hours).hours.do(_make_job(hb_id)).tag(tag)
+                job = schedule.every(hours).hours.do(_make_job(hb_id)).tag(tag)
                 print(f"[dispatcher] registered interval job for {hb_id} every {hours}h", flush=True)
             elif interval_secs % 60 == 0:
                 minutes = interval_secs // 60
-                schedule.every(minutes).minutes.do(_make_job(hb_id)).tag(tag)
+                job = schedule.every(minutes).minutes.do(_make_job(hb_id)).tag(tag)
                 print(f"[dispatcher] registered interval job for {hb_id} every {minutes}m", flush=True)
             else:
-                schedule.every(interval_secs).seconds.do(_make_job(hb_id)).tag(tag)
+                job = schedule.every(interval_secs).seconds.do(_make_job(hb_id)).tag(tag)
                 print(f"[dispatcher] registered interval job for {hb_id} every {interval_secs}s", flush=True)
+
+            # Preserve next_run across restarts: if the heartbeat ran before and
+            # last_run + interval is still in the future, use that as next_run so
+            # that a service restart does not reset the 24h (or any long-interval)
+            # clock back to "now + interval_secs".
+            last_run = _get_last_run_time(hb_id)
+            if last_run is not None:
+                expected_next = last_run + timedelta(seconds=interval_secs)
+                now_utc = datetime.now(timezone.utc)
+                if expected_next > now_utc:
+                    # Convert to naive local time as schedule library uses naive datetimes
+                    job.next_run = expected_next.astimezone().replace(tzinfo=None)
+                    print(f"[dispatcher] {hb_id} next_run adjusted to {job.next_run} (last_run={last_run})", flush=True)
+                else:
+                    # Interval already elapsed — fire immediately on next loop tick
+                    job.next_run = datetime.now().replace(tzinfo=None)
+                    print(f"[dispatcher] {hb_id} interval already elapsed, scheduling immediate run", flush=True)
 
             registered += 1
 
