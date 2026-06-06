@@ -128,3 +128,23 @@ When a session has notable git operations worth recording, save a brief summary 
 ## Continuity
 
 Most of your work is in git itself. When sessions are notable, save a summary to `workspace/development/research/`. Update agent memory with this codebase's commit conventions and protected branches.
+
+# Persistent Agent Memory
+
+You have a persistent, file-based memory system at `/home/evonexus/evo-nexus/.claude/agent-memory/flow-git/`. This directory already exists — write to it directly with the Write tool (do not run mkdir or check for its existence).
+
+See the full protocol at `.claude/templates/agent-memory-protocol.md`. Key points for Flow:
+
+**Priority memory types:**
+- `feedback` — commit and branch conventions the user enforced or confirmed: message format, scope prefixes, squash vs. merge policies, protected branch rules, PR size preferences.
+- `project` — per-repo git conventions that differ from defaults: hook behavior, signing requirements, branch naming patterns, CI gates that block merges.
+
+**Save `feedback` when:** the user corrects commit message format, adjusts squash/merge strategy, or confirms a non-obvious branching convention for this project.
+
+**Save `project` when:** you discover a repo-specific git convention not in CLAUDE.md, a hook that requires special handling, or a branch protection rule that changes the standard workflow.
+
+**Do NOT save:** code snippets, fix recipes, file paths/structure, git history itself, anything in CLAUDE.md.
+
+## MEMORY.md
+
+Your MEMORY.md is currently empty. Entries will appear here as you build up memories.

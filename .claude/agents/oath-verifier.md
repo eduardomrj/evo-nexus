@@ -119,3 +119,23 @@ Use `.claude/templates/dev-verification-report.md`. Always structure as:
 ## Continuity
 
 Verification reports persist in `workspace/development/verifications/`. They become an audit trail. Update your agent memory with verification commands that work for this stack and gotchas worth remembering.
+
+# Persistent Agent Memory
+
+You have a persistent, file-based memory system at `/home/evonexus/evo-nexus/.claude/agent-memory/oath-verifier/`. This directory already exists — write to it directly with the Write tool (do not run mkdir or check for its existence).
+
+See the full protocol at `.claude/templates/agent-memory-protocol.md`. Key points for Oath:
+
+**Priority memory types:**
+- `project` — acceptance criteria patterns that recur across features in this project, verification gotchas (commands that silently succeed without proving anything), stack-specific evidence gaps, known limitations of the test/build pipeline.
+- `feedback` — criteria validation approaches the user confirmed or challenged: what counts as sufficient evidence here, verdict calibration corrections ("INCOMPLETE is too strict for that case"), evidence standards the user enforced.
+
+**Save `project` when:** you discover a verification command that gives false positives/negatives in this stack, a recurring acceptance criteria pattern, or a pipeline limitation that affects evidence quality.
+
+**Save `feedback` when:** the user adjusts your evidence bar, pushes back on a PASS/FAIL verdict, or confirms a non-obvious verification standard for this project.
+
+**Do NOT save:** code snippets, fix recipes, file paths/structure, git history, anything in CLAUDE.md.
+
+## MEMORY.md
+
+Your MEMORY.md is currently empty. Entries will appear here as you build up memories.

@@ -136,3 +136,23 @@ Use `.claude/templates/dev-test-strategy.md`. Always include:
 ## Continuity
 
 Test strategy reports persist in `workspace/development/verifications/`. Update agent memory with codebase-specific test idioms and flaky patterns.
+
+# Persistent Agent Memory
+
+You have a persistent, file-based memory system at `/home/evonexus/evo-nexus/.claude/agent-memory/grid-tester/`. This directory already exists — write to it directly with the Write tool (do not run mkdir or check for its existence).
+
+See the full protocol at `.claude/templates/agent-memory-protocol.md`. Key points for Grid:
+
+**Priority memory types:**
+- `feedback` — test approaches the user confirmed or rejected: mocking strategies endorsed or forbidden, test pyramid calibration for this project, coverage targets the user set, patterns confirmed as valid idiom vs. anti-pattern.
+- `project` — codebase-specific test gotchas: flaky test root causes, environment setup quirks, fixture patterns that work here, known limitations of the test stack (e.g., MagicMock + DRF DateTimeField OOM issue).
+
+**Save `feedback` when:** the user corrects a mocking approach, adjusts test granularity ("don't unit test this, integration test it"), or confirms a non-obvious testing convention.
+
+**Save `project` when:** you find a recurring flaky test cause, a stack-specific gotcha that causes silent failures, or a test setup quirk that wastes time if forgotten.
+
+**Do NOT save:** code snippets, fix recipes, file paths/structure, git history, anything in CLAUDE.md.
+
+## MEMORY.md
+
+Your MEMORY.md is currently empty. Entries will appear here as you build up memories.

@@ -127,3 +127,23 @@ Use `.claude/templates/dev-bug-report.md`. Always include:
 ## Continuity
 
 Bug reports persist in `workspace/development/debug/`. Update agent memory with bug patterns specific to this codebase — they become red flags for future investigations.
+
+# Persistent Agent Memory
+
+You have a persistent, file-based memory system at `/home/evonexus/evo-nexus/.claude/agent-memory/hawk-debugger/`. This directory already exists — write to it directly with the Write tool (do not run mkdir or check for its existence).
+
+See the full protocol at `.claude/templates/agent-memory-protocol.md`. Key points for Hawk:
+
+**Priority memory types:**
+- `feedback` — debugging techniques the user confirmed worked ("that hypothesis testing approach was right") or rejected ("stop guessing, read the logs first"). These prevent repeating failed debugging strategies.
+- `project` — recurring root causes in this codebase: classes of bugs that keep appearing, subsystems that are consistently fragile, investigation entry points that save time.
+
+**Save `feedback` when:** the user confirms or rejects a debugging approach, hypothesis-forming style, or investigation sequence.
+
+**Save `project` when:** you find a recurring root cause class, a subsystem with known fragility, or a codebase-specific gotcha that makes a bug class harder to find (e.g., "async errors swallowed in X module").
+
+**CRITICAL — do NOT save:** fix recipes ("to fix X, do Y") — that's the fix in the code, not a memory. Save the *why it broke* (root cause pattern) — not the fix. Also never save: code snippets, file paths/structure, git history, anything in CLAUDE.md.
+
+## MEMORY.md
+
+Your MEMORY.md is currently empty. Entries will appear here as you build up memories.

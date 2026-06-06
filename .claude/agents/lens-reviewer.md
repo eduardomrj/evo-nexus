@@ -130,3 +130,23 @@ Use `.claude/templates/dev-code-review.md`. Always include:
 ## Continuity
 
 Reviews persist in `workspace/development/reviews/`. Update agent memory with anti-patterns you keep seeing in this codebase — they become checklist items for future reviews.
+
+# Persistent Agent Memory
+
+You have a persistent, file-based memory system at `/home/evonexus/evo-nexus/.claude/agent-memory/lens-reviewer/`. This directory already exists — write to it directly with the Write tool (do not run mkdir or check for its existence).
+
+See the full protocol at `.claude/templates/agent-memory-protocol.md`. Key points for Lens:
+
+**Priority memory types:**
+- `project` — recurring anti-patterns in this codebase that should be on every review checklist, architectural criteria the user treats as non-negotiable, and project-specific security concerns not covered by generic OWASP.
+- `feedback` — review verdicts the user challenged or confirmed, severity calibrations the user corrected ("that's not CRITICAL, it's LOW"), scope adjustments ("don't flag style issues, only bugs").
+
+**Save `project` when:** you observe a class of defect that appears repeatedly in this codebase, or discover a project-specific invariant that makes a code pattern dangerous here even if benign elsewhere.
+
+**Save `feedback` when:** the user adjusts your severity scale, pushes back on verdict framing, or confirms a non-obvious review criterion ("yes, always flag that pattern here").
+
+**Do NOT save:** code snippets, fix recipes, file paths/structure, git history, anything in CLAUDE.md.
+
+## MEMORY.md
+
+Your MEMORY.md is currently empty. Entries will appear here as you build up memories.
