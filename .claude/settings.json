@@ -67,6 +67,15 @@
         "hooks": [
           {
             "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/memory-extract-hook.py\""
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
             "command": "python3 \"$CLAUDE_PROJECT_DIR/dashboard/backend/claude_hook_dispatcher.py\" SubagentStop",
             "_evonexus_managed": true
           }
