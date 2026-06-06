@@ -32,13 +32,15 @@ evo-projects/go-control-erp/
     {app}/              ← account | platform | go-control-auth | go-message |
       features/{slug}/  ← go-payment-hub | go-cobranca | modulo-pessoas
       plans/{slug}/
-      docs/             ← docs principais do sub-app (PRD, arquitetura, planos do módulo)
-      ux/               ← mockups HTML, protótipos
+      ciclos/{ciclo}/
+      reviews/
       manuais/
         tecnico/
         operacional/
-      ciclos/{ciclo}/
+      ux/               ← mockups HTML, protótipos
 ```
+
+**Não existe pasta `docs/` dentro de `{app}/`.** Não há subpasta `docs/docs/`.
 
 ---
 
@@ -49,31 +51,35 @@ evo-projects/go-control-erp/
 | ADR do projeto inteiro | `docs/architecture/decisions/ADR-NNN-*.md` |
 | Padrões de código/arquitetura | `docs/architecture/` |
 | Design System | `docs/design-system.md` |
-| PRD / arquitetura / plano do sub-app | `docs/{app}/docs/` |
-| ADR de feature específica | `docs/{app}/features/{slug}/[C]adr-*.md` |
 | PRD de feature | `docs/{app}/features/{slug}/[C]prd-*.md` |
 | Plano de feature | `docs/{app}/features/{slug}/[C]plan-*.md` |
-| Discovery / verification de feature | `docs/{app}/features/{slug}/[C]*.md` |
-| Plano multi-fase | `docs/{app}/plans/{slug}/[C]index-{data}.md` |
+| ADR de feature específica | `docs/{app}/features/{slug}/[C]adr-*.md` |
+| Discovery / modelagem / CUs / fluxos de feature | `docs/{app}/features/{slug}/[C]*.md` |
+| PRD e plano do sub-app (MVP ou ciclo) | `docs/{app}/plans/{slug}/` |
+| Brainstorm, backlog, decisões transversais | `docs/{app}/plans/{slug}/` |
 | Verification de ciclo/sprint | `docs/{app}/ciclos/{ciclo}/[C]*.md` |
-| Manual técnico | `docs/{app}/manuais/tecnico/` |
-| Manual operacional | `docs/{app}/manuais/operacional/` |
+| Code review | `docs/{app}/reviews/` |
+| Referência técnica (API docs, integrações) | `docs/{app}/manuais/tecnico/` |
+| Runbooks, guias de onboarding, release notes | `docs/{app}/manuais/operacional/` |
 | Mockup HTML | `docs/{app}/ux/` |
 
 ---
 
 ## Regras rápidas para agentes
 
-1. **Qualquer doc** → sempre dentro de `docs/` — nunca na raiz do projeto nem em `backend/` ou `frontend/`
-2. **ADR do projeto** → `docs/architecture/decisions/`
-3. **Doc do sub-app inteiro** (PRD, arquitetura, plano de módulo) → `docs/{app}/docs/`
-4. **Feature com nome próprio** → `docs/{app}/features/{slug}/`
+1. **Qualquer doc** → sempre dentro de `docs/{app}/` — nunca na raiz do projeto nem em `backend/` ou `frontend/`
+2. **ADR do projeto inteiro** → `docs/architecture/decisions/`
+3. **Feature com nome próprio** → `docs/{app}/features/{slug}/` (PRD, plan, ADR, modelagem, CUs, fluxos, verification, retro)
+4. **PRD/plan do sub-app, brainstorm, backlog, decisões** → `docs/{app}/plans/{slug}/` (ex: `plans/mvp/`)
 5. **Plano multi-fase** → `docs/{app}/plans/{slug}/`
-6. **Verification de ciclo** → `docs/{app}/ciclos/{ciclo}/`
-7. **Manual** → `docs/{app}/manuais/tecnico/` ou `manuais/operacional/`
-8. **Mockup** → `docs/{app}/ux/`
-9. **Slug em kebab-case** — ex: `async-emission`, `payment-method-catalog`
-10. **Nada solto na raiz de `docs/{app}/`** — tudo vai em subpasta
+6. **Verification de ciclo/sprint** → `docs/{app}/ciclos/{ciclo}/`
+7. **Code review** → `docs/{app}/reviews/`
+8. **Referência técnica** (API docs, integração) → `docs/{app}/manuais/tecnico/`
+9. **Runbook / guia operacional / release notes** → `docs/{app}/manuais/operacional/`
+10. **Mockup HTML** → `docs/{app}/ux/`
+11. **Slug em kebab-case** — ex: `async-emission`, `payment-method-catalog`
+12. **Nada solto na raiz de `docs/{app}/`** — tudo vai em subpasta tipada
+13. **Não criar pasta `docs/` dentro de `{app}/`** — não existe `docs/{app}/docs/`
 
 ---
 
