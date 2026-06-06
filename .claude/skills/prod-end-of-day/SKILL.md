@@ -40,6 +40,22 @@ This gives the real overview of what changed in the workspace — more accurate 
 ### 1f. Current session
 Review the current session conversation — what was discussed, decided, and done.
 
+### 1g. Session scan — agents active today
+Run: `python3 ADWs/routines/evo-projects/eod_scan_sessions.py`
+
+This produces a JSON map of agents active today and whether they already have memory saved.
+Store the result mentally — it feeds Step 1h.
+
+### 1h. Recovery extraction — close the memory gap
+For each agent in the session scan where `has_memory_today = false` AND the agent is in scope:
+
+Run: `python3 ADWs/routines/agent_memory_extract.py --slug {slug} --transcript {transcript_path}`
+
+This is the third safety net (Layer C) — it catches agents that didn't save proactively (A) and weren't captured by the SubagentStop hook (B).
+
+If multiple transcript paths exist for the same agent today, pass the largest one (most content).
+Log each run result (entries extracted, cost).
+
 ## Step 2 — Consolidate learnings
 
 Analyze everything that was collected and identify:
@@ -89,6 +105,15 @@ Present a short summary:
 **Tasks:** {completed}/{total} completed
 **Memories:** {N} created/updated
 **Learnings:** {N} recorded
+
+**Memory Coverage:**
+| Agent | Active | Layer A | Layer B | Layer C | New entries |
+|-------|--------|---------|---------|---------|-------------|
+(fill from session scan + extraction results)
+
+A = saved proactively during session
+B = captured by SubagentStop hook
+C = recovered by EOD extraction
 
 **Tomorrow:** {sentence about where to resume}
 ```
