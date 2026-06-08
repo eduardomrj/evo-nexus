@@ -51,6 +51,27 @@ Referência de layout implementado:
 - [ ] App registra `AplicativoServiceToken` no Platform Admin (scope `app:register` + `app:read`)
 - [ ] Token armazenado como `PLATFORM_SERVICE_TOKEN` no `.env` do app
 
+### 5. Auth central (obrigatório — sem login próprio)
+- [ ] **Nenhum app tem página de login própria.** Toda autenticação passa pelo app AUTH.
+- [ ] `router.tsx` usa `AuthGuard` + `/auth/callback` (sem `legacyRouter`, sem `/login`)
+- [ ] `providers.tsx` usa `ShellProvider` + `AuthProvider` + `AccessDeniedProvider`
+- [ ] `AuthCallbackPage` chama `sessionManager.handleAuthCallback()` e navega para `/` em sucesso e falha
+- [ ] `vite.config.ts` — proxy `/api/v1/auth/` → admin backend (**porta 8000**) **antes** da entrada genérica `/api/`
+  ```ts
+  proxy: {
+    '/api/v1/auth': { target: 'http://localhost:8000', changeOrigin: true },
+    '/api/':        { target: 'http://localhost:<PORTA_DO_APP>', changeOrigin: true },
+  }
+  ```
+  > **Motivo:** `redeem-code`, `token/refresh` e `logout` existem no admin backend (auth_central).
+  > Se o proxy do app aponta para outro backend, o callback falha e o usuário fica em loop.
+- [ ] `.env.development` — sem `VITE_USE_CENTRAL_AUTH` (flag removida); variáveis mínimas:
+  ```
+  VITE_APP_KEY=<app-key>
+  VITE_API_BASE_URL=/api/v1
+  VITE_AUTH_URL=https://auth.myworkhome.com.br
+  ```
+
 ---
 
 ## Checklist obrigatório — Backend (todo novo app)
@@ -61,6 +82,23 @@ Referência de layout implementado:
 - [ ] `AplicativoContextMiddleware` wired com o URL prefix do app
 - [ ] `HasLicensedPermission` nos views que requerem módulo licenciado
 - [ ] Exceções de domínio em `exceptions.py` — nunca `ValueError`/`Exception` genérico
+
+### JWT — chave de assinatura compartilhada (CRÍTICO)
+
+> **Todo backend GO Control valida tokens emitidos pelo auth central.**
+> A chave de assinatura (`JWT_SIGNING_KEY`) deve ser **idêntica** em todos os backends.
+> Sem ela, o backend cai no fallback `SECRET_KEY` → tokens do auth são rejeitados → 401 em tudo.
+
+- [ ] `.env` contém `JWT_SIGNING_KEY=<valor compartilhado>` — **mesma chave** do auth e admin backends
+- [ ] `SIMPLE_JWT["SIGNING_KEY"]` no `settings/base.py` lê `config("JWT_SIGNING_KEY", default=SECRET_KEY)`
+- [ ] Verificar: `grep JWT_SIGNING_KEY /home/evonexus/evo-projects/go-control/go-control-admin/backend/.env` e usar o mesmo valor
+
+Backends de referência que já têm a chave correta:
+```
+go-control-admin/backend/.env   → JWT_SIGNING_KEY=...
+go-control-auth/backend/.env    → JWT_SIGNING_KEY=...  (mesmo valor)
+go-control-account/backend/.env → JWT_SIGNING_KEY=...  (mesmo valor)
+```
 
 ---
 
@@ -73,6 +111,17 @@ Qualquer entrega de frontend GO Control que apresente:
 - `axios`/`fetch` diretamente em componente React (deve estar em `features/*/api.ts`)
 - Ausência de skeleton/empty state
 - CRUD em modal centralizado em vez de side panel
+- Página `/login` própria (qualquer `LoginPage`, `RequireAuth`, `legacyRouter`)
+- `VITE_USE_CENTRAL_AUTH` no código ou nos arquivos `.env`
+- Proxy Vite sem entrada `/api/v1/auth/` → porta 8000 antes da entrada genérica
+
+…é **rejeitada** independentemente de funcionalidade.
+
+## Critérios de rejeição — Backend
+
+Qualquer entrega de backend GO Control que apresente:
+- `.env` sem `JWT_SIGNING_KEY` (ou com valor diferente dos outros backends)
+- `SIMPLE_JWT["SIGNING_KEY"]` hardcoded em vez de `config("JWT_SIGNING_KEY", default=SECRET_KEY)`
 
 …é **rejeitada** independentemente de funcionalidade.
 
