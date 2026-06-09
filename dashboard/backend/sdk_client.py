@@ -15,9 +15,17 @@ Usage from a skill:
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import Any
 
 import requests
+
+try:
+    from dotenv import load_dotenv as _load_dotenv
+
+    _load_dotenv(Path(__file__).resolve().parent.parent.parent / ".env")
+except ImportError:
+    pass
 
 
 class EvoClient:
