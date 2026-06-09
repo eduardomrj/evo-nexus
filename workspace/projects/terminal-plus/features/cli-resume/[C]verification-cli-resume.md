@@ -1,0 +1,1 @@
+/home/evonexus/evo-projects/terminal-plus/docs/verifications/cli-resume/[C]verification-cli-resume.md

@@ -1,0 +1,1 @@
+/home/evonexus/evo-projects/terminal-plus/docs/plans/cli-resume/[C]plan-cli-resume.md
