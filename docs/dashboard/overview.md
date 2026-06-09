@@ -46,7 +46,7 @@ Unified metrics dashboard. Shows aggregated data from all agents -- financial sn
 
 ### Systems
 
-Register external apps and services your team uses. Each system has a name, URL, type (Docker container, external URL, or iframe), and icon. Useful for quick-access links to tools like Grafana, Portainer, or internal apps.
+Register external apps and services your team uses. Each system has a name, URL, type (Docker container or external URL), and icon. Useful for quick-access links that open in a new browser tab, like Grafana, Portainer, or internal apps.
 
 ![Systems list](../imgs/doc-systems-list.webp)
 

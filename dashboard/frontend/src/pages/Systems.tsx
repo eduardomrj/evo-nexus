@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useConfirm } from '../components/ConfirmDialog'
-import { ExternalLink, Play, Square, RefreshCw, Plus, Pencil, Trash2, X, Monitor, Container, Globe, AppWindow } from 'lucide-react'
+import { ExternalLink, Play, Square, RefreshCw, Plus, Pencil, Trash2, X, Monitor, Container, Globe } from 'lucide-react'
 import { api } from '../lib/api'
 import { useTranslation } from 'react-i18next'
 
@@ -32,11 +32,10 @@ const ICONS = ['📦', '🌐', '🚀', '🏥', '🎤', '📊', '🔧', '💬', '
 const TYPE_CONFIG: Record<string, { icon: typeof Container; label: string; bg: string; text: string; border: string }> = {
   docker: { icon: Container, label: 'Docker', bg: 'rgba(96,165,250,0.10)', text: '#60A5FA', border: 'rgba(96,165,250,0.25)' },
   external: { icon: Globe, label: 'External', bg: 'rgba(168,85,247,0.10)', text: '#A855F7', border: 'rgba(168,85,247,0.25)' },
-  iframe: { icon: AppWindow, label: 'Embedded', bg: 'rgba(251,191,36,0.10)', text: '#FBBF24', border: 'rgba(251,191,36,0.25)' },
 }
 
 function getTypeConfig(type: string) {
-  return TYPE_CONFIG[type] || TYPE_CONFIG.docker
+  return type === 'iframe' ? TYPE_CONFIG.external : TYPE_CONFIG[type] || TYPE_CONFIG.docker
 }
 
 export default function Systems() {
@@ -45,7 +44,6 @@ export default function Systems() {
   const [apps, setApps] = useState<SystemApp[]>([])
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState<number | null>(null)
-  const [viewApp, setViewApp] = useState<SystemApp | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [form, setForm] = useState<SystemForm>(emptyForm)
@@ -76,7 +74,7 @@ export default function Systems() {
       url: app.url || '',
       container: app.container || '',
       icon: app.icon || '📦',
-      type: app.type || 'docker',
+      type: app.type === 'iframe' ? 'external' : app.type || 'docker',
     })
     setError('')
     setModalOpen(true)
@@ -123,32 +121,6 @@ export default function Systems() {
     } catch {
       setActionLoading(null)
     }
-  }
-
-  if (viewApp) {
-    return (
-      <div className="flex flex-col" style={{ height: 'calc(100vh - 64px)' }}>
-        <div className="flex items-center justify-between mb-4 flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <button onClick={() => setViewApp(null)} className="text-[#00FFA7] text-sm hover:underline">
-              &larr; Back
-            </button>
-            <h1 className="text-xl font-bold text-[#e6edf3]">{viewApp.name}</h1>
-            {viewApp.running !== null && (
-              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${viewApp.running ? 'bg-[#00FFA7]/10 text-[#00FFA7]' : 'bg-red-500/10 text-red-400'}`}>
-                {viewApp.running ? 'Running' : 'Stopped'}
-              </span>
-            )}
-          </div>
-          <a href={viewApp.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-[#667085] hover:text-[#00FFA7] transition-colors">
-            Open in new tab <ExternalLink size={12} />
-          </a>
-        </div>
-        <div className="flex-1 bg-[#161b22] border border-[#21262d] rounded-xl overflow-hidden">
-          <iframe src={viewApp.url} className="w-full h-full border-0" title={viewApp.name} />
-        </div>
-      </div>
-    )
   }
 
   return (
@@ -228,12 +200,14 @@ export default function Systems() {
 
                     {/* Open */}
                     {app.url && (
-                      <button
-                        onClick={() => setViewApp(app)}
+                      <a
+                        href={app.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg bg-[#00FFA7]/10 text-[#00FFA7] hover:bg-[#00FFA7]/20 border border-[#00FFA7]/20 transition-colors font-medium"
                       >
                         <ExternalLink size={13} /> Open
-                      </button>
+                      </a>
                     )}
 
                     {/* Docker actions */}
@@ -345,7 +319,6 @@ export default function Systems() {
                     className="w-full px-3 py-2 rounded-lg bg-[#0d1117] border border-[#21262d] text-[#e6edf3] text-sm focus:outline-none focus:border-[#00FFA7] transition-colors">
                     <option value="docker">Docker</option>
                     <option value="external">External URL</option>
-                    <option value="iframe">Embedded (iframe)</option>
                   </select>
                 </div>
               </div>
