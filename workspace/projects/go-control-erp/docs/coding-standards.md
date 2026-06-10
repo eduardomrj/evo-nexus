@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/go-control-erp/docs/coding-standards.md
