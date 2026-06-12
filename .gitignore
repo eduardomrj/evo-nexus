@@ -19,6 +19,16 @@ workspace/**
 # workspace/development/ was removed — all content now lives under workspace/projects/
 !workspace/projects/**/*.md
 !workspace/projects/**/*.html
+# Legal — only models and templates are tracked
+# Client contracts, analyses and internal docs are NOT (contain personal data)
+!workspace/legal/
+!workspace/legal/contratos/
+!workspace/legal/contratos/modelos/
+!workspace/legal/contratos/modelos/*.md
+!workspace/legal/contratos/modelos/*.j2
+!workspace/legal/contratos/fornecedores/
+!workspace/legal/contratos/fornecedores/*.md
+workspace/legal/contratos/clientes/
 
 # ── Learning loop — user fact data (gitignored, may contain third-party content) ──
 workspace/learning/facts/
