@@ -1,7 +1,7 @@
-# CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE SOFTWARE — MODELO 2026
-### Automação Comercial LTDA × [CLIENTE]
+# CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE SOFTWARE
+### Nº {{ numero_contrato }} | Automação Comercial LTDA × {{ empresa_nome }}
 
-> **Documento modelo.** Variáveis entre colchetes `[VARIAVEL]` devem ser preenchidas no momento da contratação.
+> **Documento gerado automaticamente.** Todos os dados foram preenchidos a partir do JSON de entrada e da consulta à Receita Federal.
 
 ---
 
@@ -18,8 +18,8 @@
 > Doravante denominada **AUTOMAÇÃO SOFTWARE**
 
 **CONTRATANTE:**
-> `[EMPRESA-NOME]`, CNPJ `[EMPRESA-CNPJ]`
-> `[EMPRESA-ENDERECO]`, `[EMPRESA-NUMERO]`, Bairro `[EMPRESA-BAIRRO]`, CEP `[EMPRESA-CEP]`, `[EMPRESA-CIDADE]`
+> {{ empresa_nome }}, CNPJ {{ cnpj_formatado }}
+> {{ endereco }}
 > Doravante denominada **CLIENTE**
 
 Este instrumento é composto pelo **Contrato** e pelos **Anexos I, II e III**, todos parte integrante e inseparável.
@@ -123,9 +123,7 @@ A suspensão cessa e a contagem é retomada no momento em que o CLIENTE providen
 - Assinatura formal do contrato.
 > O agendamento da implantação deve ocorrer em, no máximo, **7 dias** da assinatura.
 
-**4.6. Vencimento do boleto de licença:** o CLIENTE elege, no ato da assinatura deste instrumento, a data de vencimento mensal da licença:
-
-> [ ] Dia **5** [ ] Dia **10** [ ] Dia **15** [ ] Dia **20** do mês de referência.
+**4.6. Vencimento do boleto de licença:** o CLIENTE elege o dia **{{ vencimento }}** do mês de referência como data de vencimento mensal da licença, conforme indicado no ato da assinatura deste instrumento.
 
 A data eleita neste instrumento prevalece sobre qualquer comunicação posterior não formalizada por aditivo contratual escrito. O vencimento passa a ser aplicado a partir do mês subsequente à implantação.
 
@@ -336,7 +334,7 @@ Ambas as partes mantêm sigilo absoluto sobre informações comerciais, técnica
 
 ## Assinaturas
 
-Canindé/CE, `[DATA-ASSINATURA]`.
+Canindé/CE, {{ data_assinatura }}.
 
 O(a) signatário(a) do CONTRATANTE declara, sob as penas da lei, que possui poderes suficientes para obrigar a empresa perante este instrumento, na qualidade indicada abaixo, sendo pessoalmente responsabilizável em caso de falsidade dessa declaração.
 
@@ -353,14 +351,14 @@ O CONTRATANTE declara, ainda, que assina este instrumento dentro do prazo de val
       <p class="assinatura-cpf">CPF: _______________________________</p>
     </div>
     <div class="assinatura-bloco">
-      <p class="assinatura-empresa">`[EMPRESA-NOME]`</p>
-      <p class="assinatura-cnpj">CNPJ: `[EMPRESA-CNPJ]`</p>
+      <p class="assinatura-empresa">{{ empresa_nome }}</p>
+      <p class="assinatura-cnpj">CNPJ: {{ cnpj_formatado }}</p>
       <div class="assinatura-linha"></div>
-      <p class="assinatura-cargo">Nome: _______________________________</p>
-      <p class="assinatura-cpf">CPF: _______________________________</p>
-      <p class="assinatura-cpf">Cargo/Qualidade: _______________________________</p>
-      <p class="assinatura-cpf">E-mail: _______________________________</p>
-      <p class="assinatura-cpf">Telefone: _______________________________</p>
+      <p class="assinatura-cargo">{{ signatario.cargo }}</p>
+      <p class="assinatura-cpf">Nome: {{ signatario.nome }}</p>
+      <p class="assinatura-cpf">CPF: {{ signatario.cpf }}</p>
+      <p class="assinatura-cpf">E-mail: {{ signatario.email }}</p>
+      <p class="assinatura-cpf">Telefone: {{ signatario.telefone }}</p>
     </div>
   </div>
 
@@ -388,15 +386,13 @@ O CONTRATANTE declara, ainda, que assina este instrumento dentro do prazo de val
 
 ---
 
----
+## Anexo I — Acordo Comercial
 
-## ANEXO I — Acordo Comercial
-
-**Data de Emissão:** `[DATA-EMISSAO]`
-**Validade da Proposta:** 15 dias — `[DATA-VALIDADE]`
-**Cliente:** `[EMPRESA-NOME]`
-**CNPJ:** `[EMPRESA-CNPJ]`
-**Contato:** `[EMPRESA-NOME-CONTATO]`
+**Data de Emissão:** {{ data_assinatura }}
+**Validade da Proposta:** 15 dias — {{ data_validade }}
+**Cliente:** {{ empresa_nome }}
+**CNPJ:** {{ cnpj_formatado }}
+**Contato:** {{ signatario.nome }}
 
 ---
 
@@ -406,19 +402,17 @@ O CONTRATANTE declara, ainda, que assina este instrumento dentro do prazo de val
 
 | SOFTWARE / Módulo | Quantidade | Valor mensal (R$) |
 |---|---|---|
-| `[SOFTWARE-01]` | `[QTDE-LIC-01]` | `[SUB-LIC-01]` |
-| `[SOFTWARE-02]` | `[QTDE-LIC-02]` | `[SUB-LIC-02]` |
-| `[SOFTWARE-03]` | `[QTDE-LIC-03]` | `[SUB-LIC-03]` |
-| | **Subtotal:** | `[SUB-TOTAL-LIC]` |
-| | Desconto Promocional: | `[DESCONTO-LICENCA]` |
-| | **Total mensal:** | `[TOTAL-LICENCA]` |
-| | **Total da licença anual:** | `[TOTAL-ANUAL-LICENCA]` |
+{% for s in softwares %}| {{ s.nome }} | {{ s.qtd }} | R$ {{ s.valor_mensal_fmt }} |
+{% endfor %}| | **Subtotal:** | R$ {{ subtotal_licenca_fmt }} |
+{% if tem_desconto_licenca %}| | Desconto Promocional: | R$ {{ desconto_licenca_fmt }} |
+{% endif %}| | **Total mensal:** | R$ {{ total_mensal_fmt }} |
+| | **Total da licença anual:** | R$ {{ total_anual_fmt }} |
 
 **Resumo:**
-- Total da Assinatura Anual do Software: `[TOTAL-ANUAL-LICENCA]`
-- Forma de Pagamento: em **12 parcelas mensais** de `[VALOR-LICENCA-MES]`
+- Total da Assinatura Anual do Software: R$ {{ total_anual_fmt }}
+- Forma de Pagamento: em **12 parcelas mensais** de R$ {{ total_mensal_fmt }}
 - Meio de Pagamento: exclusivamente **boleto bancário / PIX**
-- Vencimento: ver cláusula 4.6
+- Vencimento: dia **{{ vencimento }}** de cada mês (conforme cláusula 4.6)
 
 ---
 
@@ -428,12 +422,10 @@ O CONTRATANTE declara, ainda, que assina este instrumento dentro do prazo de val
 
 | Serviço | Descrição | Valor (R$) |
 |---|---|---|
-| `[SERVICO-01]` | `[DESCRI-SRV-01]` | `[VAL-SRV-01]` |
-| `[SERVICO-02]` | `[DESCRI-SRV-02]` | `[VAL-SRV-02]` |
-| `[SERVICO-03]` | `[DESCRI-SRV-03]` | `[VAL-SRV-03]` |
-| | **Subtotal:** | `[SUB-TOTAL-SERVICOS]` |
-| | Desconto: | `[DESCONTO-SERVICOS]` |
-| | **Total dos Serviços:** | `[TOTAL-SERVICOS]` |
+{% for s in servicos %}| {{ s.nome }} | {{ s.descricao }} | R$ {{ s.valor_fmt }} |
+{% endfor %}| | **Subtotal:** | R$ {{ subtotal_servicos_fmt }} |
+{% if tem_desconto_servicos %}| | Desconto: | R$ {{ desconto_servicos_fmt }} |
+{% endif %}| | **Total dos Serviços:** | R$ {{ total_servicos_fmt }} |
 
 - Forma de Pagamento: **à vista via boleto bancário**
 - Vencimento: na data da implantação
@@ -442,13 +434,13 @@ O CONTRATANTE declara, ainda, que assina este instrumento dentro do prazo de val
 
 ### Resumo do Contrato
 
-**Total da assinatura do contrato:** `[TOTAL-CONTATO-ANUAL]`
+**Total da assinatura do contrato:** R$ {{ total_contrato_fmt }}
+
+*(Licença anual R$ {{ total_anual_fmt }} + Serviços de implantação R$ {{ total_servicos_fmt }})*
 
 ---
 
----
-
-## ANEXO II — Requisitos Técnicos
+## Anexo II — Requisitos Técnicos
 
 > Para o bom funcionamento do PROGRAMA. Equipamentos abaixo dos requisitos mínimos podem apresentar lentidão, travamentos ou incompatibilidade.
 
@@ -478,11 +470,9 @@ O CONTRATANTE declara, ainda, que assina este instrumento dentro do prazo de val
 
 ---
 
----
+## Anexo III — Contatos Administrativos
 
-## ANEXO III — Contatos Administrativos
-
-> A ser preenchido pelo CLIENTE.
+> A ser preenchido pelo CLIENTE no ato da assinatura.
 
 ### Responsável Administrativo/Financeiro
 *(Pessoa responsável pelo recebimento de boletos e assuntos de pagamento)*
@@ -510,7 +500,3 @@ O CONTRATANTE declara, ainda, que assina este instrumento dentro do prazo de val
 | Nome | |
 | Telefone | |
 | E-mail | |
-
----
-
-*Documento convertido de DOCX para Markdown em 2026-06-11. Original: `CONTRATO LICENÇA SOFTWARE - MODELO 2026.docx`*
