@@ -114,6 +114,7 @@ def registrar_contrato(numero: str, cnpj: str, empresa: str,
         "modalidade": modalidade,
         "data":       data.isoformat(),
         "arquivo":    str(output_path.name),
+        "status":     "ativo",
     })
     REGISTRO.write_text(json.dumps(registro, ensure_ascii=False, indent=2))
 

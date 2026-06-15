@@ -115,6 +115,7 @@ def registrar_contrato(numero: str, cnpj: str, empresa: str,
         "tipo":    tipo,
         "data":    data.isoformat(),
         "arquivo": str(output_path.name),
+        "status":  "ativo",
     }
     if vencimento is not None:
         entrada["vencimento_dia"] = vencimento
