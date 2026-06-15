@@ -99,20 +99,31 @@ def proximo_numero_contrato(data: date, prefixo: str = "LIC") -> str:
 
 
 def registrar_contrato(numero: str, cnpj: str, empresa: str,
-                       tipo: str, data: date, output_path: Path) -> None:
+                       tipo: str, data: date, output_path: Path,
+                       vencimento: int | None = None,
+                       softwares: list | None = None,
+                       total_mensal: float | None = None) -> None:
     """Salva o contrato gerado no registro JSON."""
     registro = {"contratos": []}
     if REGISTRO.exists():
         registro = json.loads(REGISTRO.read_text())
 
-    registro["contratos"].append({
+    entrada: dict = {
         "numero":  numero,
         "cnpj":    cnpj,
         "empresa": empresa,
         "tipo":    tipo,
         "data":    data.isoformat(),
         "arquivo": str(output_path.name),
-    })
+    }
+    if vencimento is not None:
+        entrada["vencimento_dia"] = vencimento
+    if softwares:
+        entrada["softwares"] = [s["nome"] for s in softwares]
+    if total_mensal is not None:
+        entrada["total_mensal"] = round(total_mensal, 2)
+
+    registro["contratos"].append(entrada)
     REGISTRO.write_text(json.dumps(registro, ensure_ascii=False, indent=2))
 
 
@@ -361,7 +372,12 @@ def gerar_contrato(caminho_json: str) -> Path:
     from weasyprint import HTML
     HTML(string=html_full).write_pdf(str(output_path))
 
-    registrar_contrato(numero_contrato, cnpj_limpo, empresa_nome, "licenca", data, output_path)
+    registrar_contrato(
+        numero_contrato, cnpj_limpo, empresa_nome, "licenca", data, output_path,
+        vencimento=dados["vencimento"],
+        softwares=dados["softwares"],
+        total_mensal=total_mensal,
+    )
 
     print(f"\n✓ PDF gerado: {output_path}")
     return output_path
