@@ -24,6 +24,14 @@ Perguntar ao usuário:
 - **Desconto de licença** em R$ (0 se não houver)
 - **Serviços de implantação**: nome, descrição e valor de cada um (mínimo 1)
 - **Desconto de serviços** em R$ (0 se não houver)
+- **Parceiro/Revendedor**: "Esse contrato tem participação de um parceiro ou revendedor?" (sim/não)
+  - Se sim:
+    1. Ler `ADWs/scripts/legal/parceiros.json`
+    2. Listar os parceiros ativos com número, empresa e representante
+    3. Usuário escolhe pelo número ou nome
+    4. Usar os dados do cadastro (empresa, representante, cpf, email) — não pedir novamente
+    - Se o parceiro não estiver no cadastro: coletar empresa, representante, CPF e email manualmente
+      e orientar o usuário a adicionar em `ADWs/scripts/legal/parceiros.json` para uso futuro
 - **Data** da assinatura (padrão: hoje — só perguntar se o usuário indicar outra)
 
 Não calcular preços unitários — o usuário informa o **valor_mensal total da linha**.
@@ -51,7 +59,12 @@ Não calcular preços unitários — o usuário informa o **valor_mensal total d
     {"nome": "Treinamento", "descricao": "8 horas presenciais", "valor": 300.00}
   ],
   "desconto_servicos": 0.00,
-  "data": "2026-06-12"
+  "data": "2026-06-12",
+  "parceiro": {                          // omitir se não houver parceiro
+    "empresa": "Distribuidora ABC Ltda",
+    "representante": "João da Silva",
+    "cpf": "123.456.789-00"
+  }
 }
 ```
 
@@ -75,6 +88,11 @@ Não calcular preços unitários — o usuário informa o **valor_mensal total d
 | `servicos[].valor` | float | sim | Valor do serviço |
 | `desconto_servicos` | float | não | Desconto em R$ sobre subtotal de serviços |
 | `data` | string | não | YYYY-MM-DD; padrão: hoje |
+| `parceiro.empresa` | string | não* | Nome da empresa parceira/revendedora |
+| `parceiro.representante` | string | não* | Nome do representante do parceiro |
+| `parceiro.cpf` | string | não* | CPF do representante (validado) |
+
+\* Omitir o objeto `parceiro` inteiro quando não houver. Se presente, os 3 campos são obrigatórios.
 
 ### 3. Salvar JSON e executar o script
 
@@ -105,6 +123,7 @@ O script exibe o resumo — confirme os dados com o usuário antes de responder 
   Total anual: R$ X,XX
   Vencimento : dia N de cada mês
   Signatário : [nome] — [cargo]
+  Parceiro   : [empresa] — [representante] (CPF: [cpf])   ← só exibir se houver
   Data       : [data extenso]
 ────────────────────────────────────────────────────
 ```
@@ -113,7 +132,8 @@ O script exibe o resumo — confirme os dados com o usuário antes de responder 
 
 Ao final, informar o caminho do PDF gerado e oferecer as próximas ações:
 - Abrir/visualizar o arquivo
-- Enviar para assinatura eletrônica (DocuSign/ClickSign)
+- Enviar para assinatura eletrônica via `legal-enviar-assinatura`
+  - Se tiver parceiro: o email já vem do cadastro — não precisa pedir novamente
 - Gerar outro contrato
 
 ## Cálculos realizados pelo script (não fazer manualmente)
@@ -139,6 +159,27 @@ Ao final, informar o caminho do PDF gerado e oferecer as próximas ações:
 ## Numeração
 
 Sequência `LIC-YYYY-NNNN`, separada da numeração TEF. Ambas compartilham o mesmo arquivo `contratos_registro.json`.
+
+## Cadastro de parceiros
+
+Arquivo: `ADWs/scripts/legal/parceiros.json`
+
+Estrutura de cada entrada:
+```json
+{
+  "id": "slug-unico",
+  "empresa": "Nome da Empresa Parceira Ltda",
+  "cnpj": "12.345.678/0001-90",
+  "representante": "Nome do Representante",
+  "cpf": "123.456.789-00",
+  "email": "representante@parceiro.com.br",
+  "ativo": true
+}
+```
+
+- `id` — slug curto para identificação (ex: `"abc-distribuidora"`)
+- `email` — obrigatório; usado pelo Documenso para envio de assinatura
+- `ativo: false` — desativa o parceiro sem apagar o histórico; não aparece na listagem
 
 ## Arquivos envolvidos
 

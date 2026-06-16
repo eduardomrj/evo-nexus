@@ -364,6 +364,16 @@ O CONTRATANTE declara, ainda, que assina este instrumento dentro do prazo de val
 
   <p class="testemunhas-titulo">Testemunhas</p>
 
+{% if parceiro %}
+  <div class="testemunha-bloco">
+    <div class="testemunha-nome-cpf">
+      1)&nbsp; <strong>Parceiro/Revendedor:</strong> <span class="t-nome">{{ parceiro.empresa }}</span>&nbsp;&nbsp; Rep.: <span class="t-nome">{{ parceiro.representante }}</span>&nbsp;&nbsp; CPF: <span class="t-cpf">{{ parceiro.cpf }}</span>
+    </div>
+    <div class="testemunha-assinatura">
+      Assinatura: <span>&nbsp;</span>
+    </div>
+  </div>
+{% else %}
   <div class="testemunha-bloco">
     <div class="testemunha-nome-cpf">
       1)&nbsp; Nome: <span class="t-nome">&nbsp;</span>&nbsp;&nbsp; CPF: <span class="t-cpf">&nbsp;</span>
@@ -372,6 +382,7 @@ O CONTRATANTE declara, ainda, que assina este instrumento dentro do prazo de val
       Assinatura: <span>&nbsp;</span>
     </div>
   </div>
+{% endif %}
 
   <div class="testemunha-bloco">
     <div class="testemunha-nome-cpf">

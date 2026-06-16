@@ -1,0 +1,13 @@
+{
+  "parceiros": [
+    {
+      "id": "inforcell-sistemas",
+      "empresa": "Inforcell Sistemas",
+      "cnpj": "",
+      "representante": "Eridan Alves",
+      "cpf": "026.902.583-90",
+      "email": "inforcellbvsistemas@gmail.com",
+      "ativo": true
+    }
+  ]
+}

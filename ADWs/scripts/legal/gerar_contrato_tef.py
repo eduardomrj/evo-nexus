@@ -105,7 +105,8 @@ def registrar_contrato(numero: str, cnpj: str, empresa: str,
                        qtd_smartpos: int = 0, qtd_pinpad: int = 0,
                        p_adesao_sp: float = 0, p_mensal_sp: float = 0, p_trans_sp: float = 0,
                        p_adesao_pp: float = 0, p_mensal_pp: float = 0, p_trans_pp: float = 0,
-                       vencimento_dia: int = 5) -> None:
+                       vencimento_dia: int = 5,
+                       parceiro: dict | None = None) -> None:
     """Salva o contrato gerado no registro JSON."""
     registro = {"contratos": []}
     if REGISTRO.exists():
@@ -136,6 +137,13 @@ def registrar_contrato(numero: str, cnpj: str, empresa: str,
             "adesao":    p_adesao_pp,
             "mensalidade": p_mensal_pp,
             "transacao": p_trans_pp,
+        }
+
+    if parceiro:
+        entrada["parceiro"] = {
+            "empresa":        parceiro["empresa"],
+            "representante":  parceiro["representante"],
+            "cpf":            parceiro["cpf"],
         }
 
     registro["contratos"].append(entrada)
@@ -276,6 +284,8 @@ def gerar_contrato(
     # Dados manuais (bypass BrasilAPI)
     empresa_nome_override: str | None = None,
     empresa_endereco_override: str | None = None,
+    # Parceiro/revendedor (opcional)
+    parceiro: dict | None = None,
 ) -> Path:
     if modalidade not in ("smartpos", "pinpad", "ambos"):
         raise ValueError("modalidade deve ser: smartpos | pinpad | ambos")
@@ -361,6 +371,8 @@ def gerar_contrato(
         if p_adesao_pp != PRECO_PADRAO["pinpad"]["adesao"] or p_mensal_pp != PRECO_PADRAO["pinpad"]["mensalidade"] or p_trans_pp != PRECO_PADRAO["pinpad"]["transacao"]:
             print(f"  ⚠ Pinpad preço customizado (adesão R$ {formatar_brl(p_adesao_pp)}, mensal R$ {formatar_brl(p_mensal_pp)}, transação R$ {formatar_brl(p_trans_pp)})")
     print(f"  Data      : {formatar_data_extenso(data)}")
+    if parceiro:
+        print(f"  Parceiro  : {parceiro['empresa']} — {parceiro['representante']} (CPF: {parceiro['cpf']})")
     print("────────────────────────────────────────────────────\n")
 
     resposta = input("Confirma a geração do contrato? [s/N] ").strip().lower()
@@ -400,6 +412,7 @@ def gerar_contrato(
         val_adesao_total          = formatar_brl(val_adesao_total),
         val_mensal_recorrente     = formatar_brl(val_mensal_recorrente),
         numero_contrato           = numero_contrato,
+        parceiro                  = parceiro,
     )
 
     # 4. Markdown → HTML → PDF
@@ -434,6 +447,7 @@ def gerar_contrato(
         p_adesao_sp=p_adesao_sp, p_mensal_sp=p_mensal_sp, p_trans_sp=p_trans_sp,
         p_adesao_pp=p_adesao_pp, p_mensal_pp=p_mensal_pp, p_trans_pp=p_trans_pp,
         vencimento_dia=5,
+        parceiro=parceiro,
     )
 
     print(f"\n✓ PDF gerado: {output_path}")
@@ -462,11 +476,32 @@ if __name__ == "__main__":
     parser.add_argument("--adesao-pinpad",     type=float, help="Taxa de adesão Pinpad (padrão: 360,00)")
     parser.add_argument("--mensal-pinpad",     type=float, help="Mensalidade Pinpad por equip. (padrão: 140,00)")
     parser.add_argument("--trans-pinpad",      type=float, help="Preço por transação Pinpad (padrão: 0,14)")
-    parser.add_argument("--empresa-nome",      help="Nome da empresa (bypass BrasilAPI — para CNPJs fictícios ou não cadastrados)")
-    parser.add_argument("--empresa-endereco",  help="Endereço da empresa (bypass BrasilAPI)")
+    parser.add_argument("--empresa-nome",          help="Nome da empresa (bypass BrasilAPI — para CNPJs fictícios ou não cadastrados)")
+    parser.add_argument("--empresa-endereco",      help="Endereço da empresa (bypass BrasilAPI)")
+    # Parceiro/revendedor (todos opcionais — omitir = sem parceiro)
+    parser.add_argument("--parceiro-empresa",      help="Nome da empresa parceira/revendedora")
+    parser.add_argument("--parceiro-representante",help="Nome do representante do parceiro")
+    parser.add_argument("--parceiro-cpf",          help="CPF do representante do parceiro")
     args = parser.parse_args()
 
     data_assinatura = date.fromisoformat(args.data) if args.data else None
+
+    parceiro = None
+    if args.parceiro_empresa or args.parceiro_representante or args.parceiro_cpf:
+        faltando = [f for f, v in [
+            ("--parceiro-empresa", args.parceiro_empresa),
+            ("--parceiro-representante", args.parceiro_representante),
+            ("--parceiro-cpf", args.parceiro_cpf),
+        ] if not v]
+        if faltando:
+            print(f"✗ Parceiro incompleto. Faltando: {', '.join(faltando)}", file=sys.stderr)
+            sys.exit(1)
+        parceiro = {
+            "empresa":       args.parceiro_empresa,
+            "representante": args.parceiro_representante,
+            "cpf":           args.parceiro_cpf,
+        }
+
     gerar_contrato(
         args.cnpj, args.modalidade,
         args.smartpos, args.pinpad,
@@ -480,4 +515,5 @@ if __name__ == "__main__":
         transacao_pinpad          = args.trans_pinpad,
         empresa_nome_override     = args.empresa_nome,
         empresa_endereco_override = args.empresa_endereco,
+        parceiro                  = parceiro,
     )

@@ -102,7 +102,8 @@ def registrar_contrato(numero: str, cnpj: str, empresa: str,
                        tipo: str, data: date, output_path: Path,
                        vencimento: int | None = None,
                        softwares: list | None = None,
-                       total_mensal: float | None = None) -> None:
+                       total_mensal: float | None = None,
+                       parceiro: dict | None = None) -> None:
     """Salva o contrato gerado no registro JSON."""
     registro = {"contratos": []}
     if REGISTRO.exists():
@@ -123,6 +124,12 @@ def registrar_contrato(numero: str, cnpj: str, empresa: str,
         entrada["softwares"] = [s["nome"] for s in softwares]
     if total_mensal is not None:
         entrada["total_mensal"] = round(total_mensal, 2)
+    if parceiro:
+        entrada["parceiro"] = {
+            "empresa":       parceiro["empresa"],
+            "representante": parceiro["representante"],
+            "cpf":           parceiro["cpf"],
+        }
 
     registro["contratos"].append(entrada)
     REGISTRO.write_text(json.dumps(registro, ensure_ascii=False, indent=2))
@@ -234,6 +241,15 @@ def validar_entrada(dados: dict) -> None:
         if not isinstance(s.get("valor"), (int, float)) or s.get("valor", 0) < 0:
             erros.append(f"servicos[{i}].valor deve ser >= 0")
 
+    # Parceiro (opcional) — se fornecido, valida campos obrigatórios
+    parceiro = dados.get("parceiro")
+    if parceiro is not None:
+        for campo in ("empresa", "representante", "cpf"):
+            if not parceiro.get(campo, "").strip():
+                erros.append(f"parceiro.{campo} é obrigatório quando parceiro está presente")
+        if parceiro.get("cpf") and not validar_cpf(parceiro["cpf"]):
+            erros.append(f"CPF do parceiro inválido: {parceiro.get('cpf', '')!r}")
+
     if erros:
         print("\nErros de validação encontrados:", file=sys.stderr)
         for e in erros:
@@ -262,6 +278,7 @@ def gerar_contrato(caminho_json: str) -> Path:
     desc_srv    = float(dados.get("desconto_servicos", 0.0))
     data_str    = dados.get("data")
     data        = date.fromisoformat(data_str) if data_str else date.today()
+    parceiro    = dados.get("parceiro")   # opcional: {empresa, representante, cpf}
 
     # 2. Consultar CNPJ (ou usar dados manuais se fornecidos no JSON)
     empresa_nome_override = dados.get("empresa_nome")
@@ -317,6 +334,8 @@ def gerar_contrato(caminho_json: str) -> Path:
     print(f"  Total anual: R$ {formatar_brl(total_contrato)}")
     print(f"  Vencimento : dia {vencimento} de cada mês")
     print(f"  Signatário : {signatario['nome']} — {signatario['cargo']}")
+    if parceiro:
+        print(f"  Parceiro   : {parceiro['empresa']} — {parceiro['representante']} (CPF: {parceiro['cpf']})")
     print(f"  Data       : {formatar_data_extenso(data)}")
     print("─" * 52)
 
@@ -354,6 +373,7 @@ def gerar_contrato(caminho_json: str) -> Path:
         desconto_servicos_fmt   = formatar_brl(desc_srv),
         total_servicos_fmt      = formatar_brl(total_servicos),
         total_contrato_fmt      = formatar_brl(total_contrato),
+        parceiro                = parceiro,
     )
 
     # 8. Markdown → HTML → PDF
@@ -386,6 +406,7 @@ def gerar_contrato(caminho_json: str) -> Path:
         vencimento=dados["vencimento"],
         softwares=dados["softwares"],
         total_mensal=total_mensal,
+        parceiro=parceiro,
     )
 
     print(f"\n✓ PDF gerado: {output_path}")
