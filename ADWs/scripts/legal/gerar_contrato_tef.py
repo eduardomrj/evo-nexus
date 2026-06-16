@@ -101,21 +101,44 @@ def proximo_numero_contrato(data: date) -> str:
 
 
 def registrar_contrato(numero: str, cnpj: str, empresa: str,
-                       modalidade: str, data: date, output_path: Path) -> None:
+                       modalidade: str, data: date, output_path: Path,
+                       qtd_smartpos: int = 0, qtd_pinpad: int = 0,
+                       p_adesao_sp: float = 0, p_mensal_sp: float = 0, p_trans_sp: float = 0,
+                       p_adesao_pp: float = 0, p_mensal_pp: float = 0, p_trans_pp: float = 0,
+                       vencimento_dia: int = 5) -> None:
     """Salva o contrato gerado no registro JSON."""
     registro = {"contratos": []}
     if REGISTRO.exists():
         registro = json.loads(REGISTRO.read_text())
 
-    registro["contratos"].append({
-        "numero":     numero,
-        "cnpj":       cnpj,
-        "empresa":    empresa,
-        "modalidade": modalidade,
-        "data":       data.isoformat(),
-        "arquivo":    str(output_path.name),
-        "status":     "ativo",
-    })
+    entrada: dict = {
+        "numero":        numero,
+        "cnpj":          cnpj,
+        "empresa":       empresa,
+        "tipo":          "tef",
+        "modalidade":    modalidade,
+        "data":          data.isoformat(),
+        "arquivo":       str(output_path.name),
+        "status":        "ativo",
+        "vencimento_dia": vencimento_dia,
+    }
+
+    if modalidade in ("smartpos", "ambos") and qtd_smartpos:
+        entrada["smartpos"] = {
+            "qtd":       qtd_smartpos,
+            "adesao":    p_adesao_sp,
+            "mensalidade": p_mensal_sp,
+            "transacao": p_trans_sp,
+        }
+    if modalidade in ("pinpad", "ambos") and qtd_pinpad:
+        entrada["pinpad"] = {
+            "qtd":       qtd_pinpad,
+            "adesao":    p_adesao_pp,
+            "mensalidade": p_mensal_pp,
+            "transacao": p_trans_pp,
+        }
+
+    registro["contratos"].append(entrada)
     REGISTRO.write_text(json.dumps(registro, ensure_ascii=False, indent=2))
 
 
@@ -398,7 +421,13 @@ def gerar_contrato(
     from weasyprint import HTML
     HTML(string=html_full).write_pdf(str(output_path))
 
-    registrar_contrato(numero_contrato, cnpj_limpo, empresa_nome, modalidade, data, output_path)
+    registrar_contrato(
+        numero_contrato, cnpj_limpo, empresa_nome, modalidade, data, output_path,
+        qtd_smartpos=qtd_smartpos, qtd_pinpad=qtd_pinpad,
+        p_adesao_sp=p_adesao_sp, p_mensal_sp=p_mensal_sp, p_trans_sp=p_trans_sp,
+        p_adesao_pp=p_adesao_pp, p_mensal_pp=p_mensal_pp, p_trans_pp=p_trans_pp,
+        vencimento_dia=5,
+    )
 
     print(f"\n✓ PDF gerado: {output_path}")
     return output_path

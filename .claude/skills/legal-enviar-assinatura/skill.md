@@ -28,25 +28,72 @@ Se `DOCUMENSO_API_KEY` não estiver configurada, o script avisa e interrompe.
 
 ## Fluxo de execução
 
-### 1. Coletar informações (se não fornecidas na mensagem)
+### 1. Coletar informações obrigatórias
 
-Perguntar:
-- **PDF**: qual contrato enviar? (número do contrato ou caminho do arquivo)
-  - Os PDFs ficam em `workspace/legal/contratos/clientes/gerados/`
-  - Consultar `ADWs/scripts/legal/contratos_registro.json` para localizar pelo número
-- **Nome do signatário**: nome completo do representante legal do cliente
-- **E-mail do signatário**: e-mail para onde o link de assinatura será enviado
-- **CC** (opcional): se quiser cópia para algum e-mail interno (ex: `contratos@automacaosoftware.com.br`)
+**NUNCA execute o script sem ter todos os campos obrigatórios.** Se qualquer um deles estiver faltando na mensagem do usuário, pergunte antes de prosseguir — um campo por vez se necessário.
 
-### 2. Confirmar antes de enviar
+| Campo | Obrigatório | Observação |
+|---|---|---|
+| **Contrato** (número ou arquivo) | ✅ Sim | Consultar `contratos_registro.json` pelo número (ex: LIC-2026-0001); o PDF fica em `workspace/legal/contratos/clientes/gerados/` |
+| **Nome do signatário** | ✅ Sim | Nome completo do representante legal do cliente |
+| **E-mail do signatário** | ✅ Sim | Para onde o Documenso enviará o link de assinatura |
+| **CC** | ❌ Opcional | E-mail de cópia interno (ex: `contratos@automacaosoftware.com.br`) |
+| **Enviar agora ou salvar como DRAFT?** | ✅ Sim | Se o usuário não especificar, perguntar: "Quer que o Documenso envie o e-mail agora, ou prefere revisar e enviar manualmente pela plataforma?" |
 
-Exibir resumo e aguardar confirmação:
+Exemplo de pergunta quando o e-mail estiver faltando:
+> "Para qual e-mail devo enviar o link de assinatura para o cliente?"
+
+### 2. Exibir resumo completo e pedir confirmação
+
+Antes de executar qualquer coisa, ler `ADWs/scripts/legal/contratos_registro.json` para buscar os dados do contrato pelo número informado e exibir um resumo completo para o usuário confirmar.
+
+**O resumo varia por tipo de contrato:**
+
+**Contrato de Licença (LIC):**
 ```
-Contrato  : CONTRATO_TEF_TEF-2026-0001_04056245000191.pdf
-Signatário: João da Silva <joao@empresa.com.br>
-Plataforma: https://signature.automacaosoftware.com.br
-Confirma o envio? [s/N]
+── Resumo do Contrato ───────────────────────────────────
+  Nº Contrato : LIC-2026-0004
+  Empresa     : Comercial Silva e Santos Ltda
+  CNPJ        : 12.345.678/0001-95
+  Tipo        : Licença de Software
+  Softwares   : Emporion PDV, Emporion Manager
+  Total mensal: R$ 198,00/mês
+  Vencimento  : dia 10 de cada mês
+  Data        : 16/06/2026
+  Arquivo     : CONTRATO_LIC_LIC-2026-0004_12345678000195.pdf
+
+── Envio para Assinatura ────────────────────────────────
+  Signatário  : Daniel Gomes <danielgsn99@gmail.com>
+  Contratada  : Automação Comercial LTDA. <eduardo@automacaosoftware.com.br>
+  Modo        : DRAFT (envio manual pela plataforma)
+  Plataforma  : https://signature.automacaosoftware.com.br
+─────────────────────────────────────────────────────────
+As informações acima estão corretas? Confirma? [s/N]
 ```
+
+**Contrato TEF (TEF):**
+```
+── Resumo do Contrato ───────────────────────────────────
+  Nº Contrato : TEF-2026-0001
+  Empresa     : Clebio Paiva Sampaio
+  CNPJ        : 04.056.245/0001-91
+  Tipo        : TEF SmartPOS
+  Equipamentos: 1 SmartPOS — R$ 90,00/mês + R$ 0,50/transação
+  Adesão      : R$ 300,00 (cobrança única)
+  Vencimento  : dia 5 de cada mês
+  Data        : 12/06/2026
+  Arquivo     : CONTRATO_TEF_TEF-2026-0001_04056245000191.pdf
+
+── Envio para Assinatura ────────────────────────────────
+  Signatário  : João da Silva <joao@empresa.com.br>
+  Contratada  : Automação Comercial LTDA. <eduardo@automacaosoftware.com.br>
+  Modo        : DRAFT (envio manual pela plataforma)
+  Plataforma  : https://signature.automacaosoftware.com.br
+─────────────────────────────────────────────────────────
+As informações acima estão corretas? Confirma? [s/N]
+```
+
+**Só execute o script após a confirmação explícita do usuário.** Se ele corrigir algum dado (ex: e-mail errado, nome errado), atualize antes de prosseguir.
 
 ### 3. Executar o script
 
