@@ -48,7 +48,7 @@ memory/**
 !memory/.gitkeep
 
 # ── Custom agents/skills/commands (user-specific) ────────
-.claude/agents/custom-*
+# .claude/agents/custom-* — rastreados (agentes fazem parte do produto)
 .claude/commands/custom-*
 .claude/skills/custom-*
 
