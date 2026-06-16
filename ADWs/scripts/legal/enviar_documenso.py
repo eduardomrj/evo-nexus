@@ -51,11 +51,26 @@ def checar_config() -> None:
 #   2. PUT <uploadUrl>          →  envia o PDF para o MinIO via URL pré-assinada
 #   3. POST /api/v1/documents/{id}/send  →  Documenso envia e-mail ao signatário
 
+ASSINANTE_CONTRATADA = {
+    "name":  "Automação Comercial LTDA.",
+    "email": "eduardo@automacaosoftware.com.br",
+    "role":  "SIGNER",
+}
+
+
 def criar_documento(titulo: str, nome: str, email: str, email_cc: str | None) -> dict:
-    """Etapa 1 — cria o documento com signatários em uma única chamada."""
+    """Etapa 1 — cria o documento com signatários em uma única chamada.
+
+    Sempre inclui dois SIGNERs:
+      [0] CONTRATANTE (cliente)       → campo de assinatura no lado direito
+      [1] CONTRATADA (Automação)      → campo de assinatura no lado esquerdo
+    """
     print(f"  Criando documento no Documenso...", end=" ", flush=True)
 
-    recipients = [{"name": nome, "email": email, "role": "SIGNER"}]
+    recipients = [
+        {"name": nome, "email": email, "role": "SIGNER"},
+        ASSINANTE_CONTRATADA,
+    ]
     if email_cc:
         recipients.append({"name": "Automação Software", "email": email_cc, "role": "CC"})
 
@@ -96,33 +111,52 @@ def upload_pdf(upload_url: str, pdf_path: Path) -> None:
     print("ok")
 
 
-def adicionar_campo_assinatura(doc_id: int, recipient_id: int, pdf_path: Path) -> None:
-    """Etapa 2b — adiciona campo de assinatura na última página (seção de assinaturas)."""
-    print(f"  Adicionando campo de assinatura...", end=" ", flush=True)
+def adicionar_campo_assinatura(doc_id: int, recipient_cliente_id: int,
+                               recipient_contratada_id: int,
+                               pagina: int = 11) -> None:
+    """Etapa 2b — adiciona campos de assinatura para ambos os signatários.
 
-    from pypdf import PdfReader
-    num_paginas = len(PdfReader(str(pdf_path)).pages)
+    - CONTRATANTE (cliente)  → lado direito (pageX=55), mesma altura
+    - CONTRATADA (Automação) → lado esquerdo (pageX=5), mesma altura
+    Coordenadas em % da página (0-100).
+    """
+    print(f"  Adicionando campos de assinatura (pág. {pagina})...", end=" ", flush=True)
 
-    resp = requests.post(
-        f"{API_URL}/api/v1/documents/{doc_id}/fields",
-        headers={**headers(), "Content-Type": "application/json"},
-        json={
-            "recipientId": recipient_id,
+    campos = [
+        # CONTRATANTE — lado direito
+        {
+            "recipientId": recipient_cliente_id,
             "type":        "SIGNATURE",
-            "pageNumber":  num_paginas,
+            "pageNumber":  pagina,
             "pageX":       55,
-            "pageY":       55,
-            "pageWidth":   40,
-            "pageHeight":  10,
+            "pageY":       32,
+            "pageWidth":   38,
+            "pageHeight":  9,
         },
-        timeout=30,
-    )
+        # CONTRATADA — lado esquerdo, mesma altura
+        {
+            "recipientId": recipient_contratada_id,
+            "type":        "SIGNATURE",
+            "pageNumber":  pagina,
+            "pageX":       5,
+            "pageY":       32,
+            "pageWidth":   38,
+            "pageHeight":  9,
+        },
+    ]
 
-    if resp.status_code not in (200, 201):
-        print(f"✗ ({resp.status_code}) — {resp.text[:200]}")
-        sys.exit(1)
+    for campo in campos:
+        resp = requests.post(
+            f"{API_URL}/api/v1/documents/{doc_id}/fields",
+            headers={**headers(), "Content-Type": "application/json"},
+            json=campo,
+            timeout=30,
+        )
+        if resp.status_code not in (200, 201):
+            print(f"✗ ({resp.status_code}) — {resp.text[:200]}")
+            sys.exit(1)
 
-    print(f"ok (página {num_paginas})")
+    print(f"ok (cliente=direita, contratada=esquerda)")
 
 
 def disparar_envio(doc_id: int) -> dict:
@@ -166,7 +200,16 @@ def main() -> None:
     parser.add_argument("--nome",   required=True, help="Nome completo do signatário (cliente)")
     parser.add_argument("--email",  required=True, help="E-mail do signatário (cliente)")
     parser.add_argument("--titulo", help="Título do documento no Documenso (padrão: nome do arquivo)")
-    parser.add_argument("--cc",     help="E-mail para cópia (ex: copia@automacaosoftware.com.br)")
+    parser.add_argument("--cc",               help="E-mail para cópia (ex: copia@automacaosoftware.com.br)")
+    parser.add_argument("--pagina-assinatura", type=int, default=None,
+                        help="Página onde o campo de assinatura será posicionado "
+                             "(padrão: 11 para licença, 8 para TEF — detectado pelo nome do arquivo)")
+    parser.add_argument("--tipo", choices=["licenca", "tef"], default=None,
+                        help="Tipo do contrato para definir página padrão (licenca=11, tef=8)")
+    parser.add_argument("--enviar", action="store_true", default=False,
+                        help="Dispara o e-mail de assinatura imediatamente via Documenso. "
+                             "Sem esta flag, o documento é criado como DRAFT e o envio "
+                             "deve ser feito manualmente pela plataforma.")
     args = parser.parse_args()
 
     checar_config()
@@ -178,9 +221,11 @@ def main() -> None:
 
     titulo = args.titulo or pdf_path.stem.replace("_", " ")
 
-    print(f"\n── Enviando para assinatura ─────────────────────────────")
+    modo = "ENVIO AUTOMÁTICO (e-mail disparado)" if args.enviar else "DRAFT (envio manual pela plataforma)"
+    print(f"\n── Documenso — {modo} ─────────────────")
     print(f"  Arquivo   : {pdf_path.name}")
     print(f"  Signatário: {args.nome} <{args.email}>")
+    print(f"  Contratada: Automação Comercial LTDA. <eduardo@automacaosoftware.com.br>")
     print(f"  Título    : {titulo}")
     print(f"  Documenso : {API_URL}")
     print(f"────────────────────────────────────────────────────────\n")
@@ -193,19 +238,34 @@ def main() -> None:
     # Etapa 2 — upload do PDF na URL pré-assinada do MinIO
     upload_pdf(upload_url, pdf_path)
 
-    # Etapa 2b — campo de assinatura (obrigatório pelo Documenso)
-    recipient_id = doc["recipients"][0]["recipientId"]
-    adicionar_campo_assinatura(doc_id, recipient_id, pdf_path)
+    # Etapa 2b — campos de assinatura para CONTRATANTE e CONTRATADA
+    if args.pagina_assinatura:
+        pagina = args.pagina_assinatura
+    elif args.tipo == "tef" or "TEF" in pdf_path.name:
+        pagina = 8
+    else:
+        pagina = 11   # licença de software (padrão)
 
-    # Etapa 3 — Documenso dispara e-mail ao signatário
-    disparar_envio(doc_id)
+    recipient_cliente_id    = doc["recipients"][0]["recipientId"]  # CONTRATANTE
+    recipient_contratada_id = doc["recipients"][1]["recipientId"]  # CONTRATADA
+    adicionar_campo_assinatura(doc_id, recipient_cliente_id,
+                               recipient_contratada_id, pagina=pagina)
+
+    # Etapa 3 — disparar e-mail (opcional)
+    if args.enviar:
+        disparar_envio(doc_id)
 
     # Resultado
     link = f"{API_URL}/documents/{doc_id}"
-    print(f"\n✓ Documento enviado ao Documenso com sucesso!")
+    print(f"\n✓ Documento criado no Documenso com sucesso!")
     print(f"  Link de acompanhamento : {link}")
     print(f"  Status atual           : {status_documento(doc_id)}")
-    print(f"  O Documenso enviará o e-mail ao signatário via signature@automacaosoftware.com.br\n")
+    if args.enviar:
+        print(f"  E-mail disparado pelo Documenso via signature@automacaosoftware.com.br")
+    else:
+        print(f"  Documento em DRAFT — acesse a plataforma para revisar e enviar manualmente:")
+        print(f"  {link}")
+    print()
 
     # Salvar referência local (JSON na mesma pasta dos contratos gerados)
     registro_path = pdf_path.parent / "envios_assinatura.json"

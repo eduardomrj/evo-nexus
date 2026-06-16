@@ -56,8 +56,23 @@ python3 /home/evonexus/evo-nexus/ADWs/scripts/legal/enviar_documenso.py \
   --nome "<NOME DO SIGNATÁRIO>" \
   --email "<EMAIL DO SIGNATÁRIO>" \
   [--titulo "<TÍTULO OPCIONAL>"] \
-  [--cc "<EMAIL DE CÓPIA>"]
+  [--cc "<EMAIL DE CÓPIA>"] \
+  [--tipo licenca|tef]           # define a página padrão automaticamente
+  [--pagina-assinatura N]        # override manual da página
+  [--enviar]                     # dispara o e-mail imediatamente (sem a flag = DRAFT)
 ```
+
+**Modo de envio:**
+- **Sem `--enviar` (padrão):** cria o documento como DRAFT no Documenso. O envio do e-mail é feito manualmente pela plataforma (`signature.automacaosoftware.com.br`).
+- **Com `--enviar`:** o Documenso dispara o e-mail automaticamente para os signatários após a criação.
+
+**Página de assinatura por tipo (detectada automaticamente pelo nome do arquivo):**
+- Contrato de **Licença de Software** (`CONTRATO_LIC_*`) → página **11**
+- Contrato **TEF** (`CONTRATO_TEF_*`) → página **8**
+
+**Signatários sempre incluídos:**
+- CONTRATANTE (cliente) → campo direito, e-mail informado pelo usuário
+- CONTRATADA (Automação) → campo esquerdo, `eduardo@automacaosoftware.com.br`
 
 ### 4. Reportar resultado
 

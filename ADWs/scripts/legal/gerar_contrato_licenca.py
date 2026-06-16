@@ -66,7 +66,7 @@ strong {{ color: #000; }}
 .assinatura-bloco {{ display: table-cell; width: 48%; vertical-align: top; padding-right: 4%; }}
 .assinatura-bloco:last-child {{ padding-right: 0; }}
 .assinatura-empresa {{ font-weight: bold; font-size: 10pt; margin: 0 0 2pt 0; }}
-.assinatura-cnpj {{ font-size: 9pt; color: #444; margin: 0 0 18pt 0; }}
+.assinatura-cnpj {{ font-size: 9pt; color: #444; margin: 0 0 32pt 0; }}
 .assinatura-linha {{ border-bottom: 1px solid #333; margin-bottom: 6pt; height: 20pt; }}
 .assinatura-cargo {{ font-size: 9pt; margin: 0 0 2pt 0; }}
 .assinatura-cpf {{ font-size: 9pt; color: #444; margin: 0; }}
