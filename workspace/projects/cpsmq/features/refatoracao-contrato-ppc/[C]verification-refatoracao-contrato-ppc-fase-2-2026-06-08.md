@@ -1,0 +1,1 @@
+/home/evonexus/evo-projects/cpsmq/features/refatoracao-contrato-ppc/[C]verification-refatoracao-contrato-ppc-fase-2-2026-06-08.md

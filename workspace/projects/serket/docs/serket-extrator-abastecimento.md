@@ -59,12 +59,14 @@ END
 | # | Tela | Rota | Status |
 |---|---|---|---|
 | 1 | Risco de Desabastecimento | `/serket-extract/analise/risco` | ✅ Entregue |
-| 2 | Gap Scatter (% COPAF vs % Horus) | `/serket-extract/analise/gap-scatter` | 🔲 Ticket #87e09d51 |
-| 3 | Evolução Mensal por Medicamento | `/serket-extract/analise/evolucao` | 🔲 Ticket #7c1af496 |
-| 4 | Ranking de Medicamentos Críticos | `/serket-extract/analise/ranking` | 🔲 Ticket #4cf29444 |
-| 5 | Performance por Estabelecimento | `/serket-extract/analise/estabelecimento` | 🔲 Ticket #fd2130d9 |
-| 6 | Alertas COPAF vs Demanda Real | `/serket-extract/analise/alertas` | 🔲 Ticket #92882c7b |
-| 7 | Resumo Executivo Mensal | `/serket-extract/analise/resumo` | 🔲 Ticket #e611a1ce |
+| 2 | Gap Scatter (% COPAF vs % Horus) | `/serket-extract/analise/gap-scatter` | 🔴 goal_task id=1 (bolt-executor, **BLOQUEADO ~50 dias** desde 2026-04-26) |
+| 3 | Evolução Mensal por Medicamento | `/serket-extract/analise/evolucao` | 🔴 goal_task id=2 (bolt-executor, **BLOQUEADO ~50 dias** desde 2026-04-26) |
+| 4 | Ranking de Medicamentos Críticos | `/serket-extract/analise/ranking` | 🔴 goal_task id=3 (bolt-executor, **BLOQUEADO ~50 dias** desde 2026-04-26) |
+| 5 | Performance por Estabelecimento | `/serket-extract/analise/estabelecimento` | 🔴 goal_task id=4 (bolt-executor, **BLOQUEADO ~50 dias** desde 2026-04-26) |
+| 6 | Alertas COPAF vs Demanda Real | `/serket-extract/analise/alertas` | 🔴 goal_task id=5 (bolt-executor, **BLOQUEADO ~50 dias** desde 2026-04-26) |
+| 7 | Resumo Executivo Mensal | `/serket-extract/analise/resumo` | 🔴 goal_task id=6 (bolt-executor, **BLOQUEADO ~50 dias** desde 2026-04-26) |
+
+> 🚨 **ESCALAÇÃO ATLAS — 2026-06-16:** 6/7 dashboards estagnados há ~51 dias (desde 2026-04-26). Deadline goal_id=8: 2026-07-31 (45 dias restantes). Ritmo atual: 0 entregas/mês → **META EM RISCO CRÍTICO**. Ação requerida: Eduardo deve abrir sessão `/bolt` com escopo explícito SERKET dashboards (goal_task ids 1–6). Sem intervenção manual, os 6 dashboards restantes não serão entregues no prazo.
 
 Dashboards sempre disponíveis:
 - Dashboard anual: `/serket-extract/`
@@ -78,8 +80,8 @@ Dashboards sempre disponíveis:
 
 | id | Goal | Métrica | Progresso |
 |---|---|---|---|
-| 8 | 7 dashboards de análise entregues | count | 1/7 |
-| 9 | Extrator estável em produção | boolean | 0/1 |
+| 8 | 7 dashboards de análise entregues | count | 1/7 (⚠️ 6 tasks abertas 48+ dias) |
+| 9 | Extrator estável em produção | boolean | ⚠️ status=achieved mas progress=0/1; task systemd id=7 ainda open |
 | 5 | Discovery Hub InovaAF concluído | boolean | 0/1 |
 | 6 | Processo credenciamento DATASUS iniciado | boolean | 0/1 |
 
