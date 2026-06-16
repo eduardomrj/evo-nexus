@@ -113,14 +113,16 @@ def upload_pdf(upload_url: str, pdf_path: Path) -> None:
 
 def adicionar_campo_assinatura(doc_id: int, recipient_cliente_id: int,
                                recipient_contratada_id: int,
-                               pagina: int = 11) -> None:
+                               pagina: int = 11,
+                               page_y: int = 32) -> None:
     """Etapa 2b — adiciona campos de assinatura para ambos os signatários.
 
-    - CONTRATANTE (cliente)  → lado direito (pageX=55), mesma altura
-    - CONTRATADA (Automação) → lado esquerdo (pageX=5), mesma altura
+    - CONTRATANTE (cliente)  → lado direito (pageX=55)
+    - CONTRATADA (Automação) → lado esquerdo (pageX=5)
     Coordenadas em % da página (0-100).
+    page_y padrão por tipo: LIC=29, TEF=32
     """
-    print(f"  Adicionando campos de assinatura (pág. {pagina})...", end=" ", flush=True)
+    print(f"  Adicionando campos de assinatura (pág. {pagina}, y={page_y})...", end=" ", flush=True)
 
     campos = [
         # CONTRATANTE — lado direito
@@ -129,9 +131,9 @@ def adicionar_campo_assinatura(doc_id: int, recipient_cliente_id: int,
             "type":        "SIGNATURE",
             "pageNumber":  pagina,
             "pageX":       55,
-            "pageY":       32,
+            "pageY":       page_y,
             "pageWidth":   38,
-            "pageHeight":  9,
+            "pageHeight":  7,
         },
         # CONTRATADA — lado esquerdo, mesma altura
         {
@@ -139,9 +141,9 @@ def adicionar_campo_assinatura(doc_id: int, recipient_cliente_id: int,
             "type":        "SIGNATURE",
             "pageNumber":  pagina,
             "pageX":       5,
-            "pageY":       32,
+            "pageY":       page_y,
             "pageWidth":   38,
-            "pageHeight":  9,
+            "pageHeight":  7,
         },
     ]
 
@@ -239,17 +241,22 @@ def main() -> None:
     upload_pdf(upload_url, pdf_path)
 
     # Etapa 2b — campos de assinatura para CONTRATANTE e CONTRATADA
+    is_tef = args.tipo == "tef" or "TEF" in pdf_path.name
+
     if args.pagina_assinatura:
         pagina = args.pagina_assinatura
-    elif args.tipo == "tef" or "TEF" in pdf_path.name:
+    elif is_tef:
         pagina = 8
     else:
-        pagina = 11   # licença de software (padrão)
+        pagina = 11   # licença de software
+
+    # pageY por tipo: TEF=22 (subiu 10 linhas), LIC=29 (subiu 3 linhas)
+    page_y = 22 if is_tef else 29
 
     recipient_cliente_id    = doc["recipients"][0]["recipientId"]  # CONTRATANTE
     recipient_contratada_id = doc["recipients"][1]["recipientId"]  # CONTRATADA
     adicionar_campo_assinatura(doc_id, recipient_cliente_id,
-                               recipient_contratada_id, pagina=pagina)
+                               recipient_contratada_id, pagina=pagina, page_y=page_y)
 
     # Etapa 3 — disparar e-mail (opcional)
     if args.enviar:

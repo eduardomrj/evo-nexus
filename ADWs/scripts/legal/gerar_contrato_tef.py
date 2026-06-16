@@ -66,7 +66,7 @@ strong {{ color: #000; }}
 .assinatura-bloco {{ display: table-cell; width: 48%; vertical-align: top; padding-right: 4%; }}
 .assinatura-bloco:last-child {{ padding-right: 0; }}
 .assinatura-empresa {{ font-weight: bold; font-size: 10pt; margin: 0 0 2pt 0; }}
-.assinatura-cnpj {{ font-size: 9pt; color: #444; margin: 0 0 32pt 0; }}
+.assinatura-cnpj {{ font-size: 9pt; color: #444; margin: 0 0 52pt 0; }}
 .assinatura-linha {{ border-bottom: 1px solid #333; margin-bottom: 6pt; height: 20pt; }}
 .assinatura-cargo {{ font-size: 9pt; margin: 0 0 2pt 0; }}
 .assinatura-cpf {{ font-size: 9pt; color: #444; margin: 0; }}
@@ -273,19 +273,26 @@ def gerar_contrato(
     adesao_pinpad: float | None = None,
     mensalidade_pinpad: float | None = None,
     transacao_pinpad: float | None = None,
+    # Dados manuais (bypass BrasilAPI)
+    empresa_nome_override: str | None = None,
+    empresa_endereco_override: str | None = None,
 ) -> Path:
     if modalidade not in ("smartpos", "pinpad", "ambos"):
         raise ValueError("modalidade deve ser: smartpos | pinpad | ambos")
 
     data = data or date.today()
 
-    # 1. Consultar CNPJ
-    print(f"Consultando CNPJ {formatar_cnpj(cnpj)}...", end=" ", flush=True)
-    dados = consultar_cnpj(cnpj)
-    print("ok")
-
-    empresa_nome = (dados.get("razao_social") or "").title()
-    endereco     = montar_endereco(dados)
+    # 1. Consultar CNPJ (ou usar dados manuais se fornecidos)
+    if empresa_nome_override and empresa_endereco_override:
+        print(f"Usando dados manuais para CNPJ {formatar_cnpj(cnpj)} (sem consulta BrasilAPI)")
+        empresa_nome = empresa_nome_override
+        endereco     = empresa_endereco_override
+    else:
+        print(f"Consultando CNPJ {formatar_cnpj(cnpj)}...", end=" ", flush=True)
+        dados = consultar_cnpj(cnpj)
+        print("ok")
+        empresa_nome = empresa_nome_override or (dados.get("razao_social") or "").title()
+        endereco     = empresa_endereco_override or montar_endereco(dados)
 
     # 2. Resolver preços (custom ou padrão)
     p_adesao_sp   = adesao_smartpos      if adesao_smartpos      is not None else PRECO_PADRAO["smartpos"]["adesao"]
@@ -455,6 +462,8 @@ if __name__ == "__main__":
     parser.add_argument("--adesao-pinpad",     type=float, help="Taxa de adesão Pinpad (padrão: 360,00)")
     parser.add_argument("--mensal-pinpad",     type=float, help="Mensalidade Pinpad por equip. (padrão: 140,00)")
     parser.add_argument("--trans-pinpad",      type=float, help="Preço por transação Pinpad (padrão: 0,14)")
+    parser.add_argument("--empresa-nome",      help="Nome da empresa (bypass BrasilAPI — para CNPJs fictícios ou não cadastrados)")
+    parser.add_argument("--empresa-endereco",  help="Endereço da empresa (bypass BrasilAPI)")
     args = parser.parse_args()
 
     data_assinatura = date.fromisoformat(args.data) if args.data else None
@@ -463,10 +472,12 @@ if __name__ == "__main__":
         args.smartpos, args.pinpad,
         args.vol_smartpos, args.vol_pinpad,
         data_assinatura,
-        adesao_smartpos      = args.adesao_smartpos,
-        mensalidade_smartpos = args.mensal_smartpos,
-        transacao_smartpos   = args.trans_smartpos,
-        adesao_pinpad        = args.adesao_pinpad,
-        mensalidade_pinpad   = args.mensal_pinpad,
-        transacao_pinpad     = args.trans_pinpad,
+        adesao_smartpos           = args.adesao_smartpos,
+        mensalidade_smartpos      = args.mensal_smartpos,
+        transacao_smartpos        = args.trans_smartpos,
+        adesao_pinpad             = args.adesao_pinpad,
+        mensalidade_pinpad        = args.mensal_pinpad,
+        transacao_pinpad          = args.trans_pinpad,
+        empresa_nome_override     = args.empresa_nome,
+        empresa_endereco_override = args.empresa_endereco,
     )
