@@ -56,6 +56,111 @@
         "Emporion Manager"
       ],
       "total_mensal": 198.0
+    },
+    {
+      "numero": "TEF-2026-0002",
+      "cnpj": "14709886000151",
+      "empresa": "Bike & Ciclo Motos Ltda",
+      "modalidade": "smartpos",
+      "data": "2026-06-16",
+      "arquivo": "CONTRATO_TEF_TEF-2026-0002_14709886000151.pdf",
+      "status": "ativo"
+    },
+    {
+      "numero": "LIC-2026-0005",
+      "cnpj": "12345678000195",
+      "empresa": "Comercial Silva e Santos Ltda",
+      "tipo": "licenca",
+      "data": "2026-06-16",
+      "arquivo": "CONTRATO_LIC_LIC-2026-0005_12345678000195.pdf",
+      "status": "ativo",
+      "vencimento_dia": 10,
+      "softwares": [
+        "Emporion PDV",
+        "Emporion Manager"
+      ],
+      "total_mensal": 198.0
+    },
+    {
+      "numero": "TEF-2026-0003",
+      "cnpj": "04056245000191",
+      "empresa": "Clebio Paiva Sampaio",
+      "tipo": "tef",
+      "modalidade": "smartpos",
+      "data": "2026-06-16",
+      "arquivo": "CONTRATO_TEF_TEF-2026-0003_04056245000191.pdf",
+      "status": "ativo",
+      "vencimento_dia": 5,
+      "smartpos": {
+        "qtd": 1,
+        "adesao": 300.0,
+        "mensalidade": 90.0,
+        "transacao": 0.5
+      }
+    },
+    {
+      "numero": "TEF-2026-0004",
+      "cnpj": "14709886000151",
+      "empresa": "Bike & Ciclo Motos Ltda",
+      "tipo": "tef",
+      "modalidade": "smartpos",
+      "data": "2026-06-16",
+      "arquivo": "CONTRATO_TEF_TEF-2026-0004_14709886000151.pdf",
+      "status": "ativo",
+      "vencimento_dia": 5,
+      "smartpos": {
+        "qtd": 1,
+        "adesao": 150.0,
+        "mensalidade": 49.9,
+        "transacao": 0.25
+      }
+    },
+    {
+      "numero": "LIC-2026-0006",
+      "cnpj": "12345678000195",
+      "empresa": "Comercial Silva e Santos Ltda",
+      "tipo": "licenca",
+      "data": "2026-06-16",
+      "arquivo": "CONTRATO_LIC_LIC-2026-0006_12345678000195.pdf",
+      "status": "ativo",
+      "vencimento_dia": 10,
+      "softwares": [
+        "Emporion PDV",
+        "Emporion Manager"
+      ],
+      "total_mensal": 198.0
+    },
+    {
+      "numero": "LIC-2026-0007",
+      "cnpj": "12345678000195",
+      "empresa": "Comercial Silva e Santos Ltda",
+      "tipo": "licenca",
+      "data": "2026-06-16",
+      "arquivo": "CONTRATO_LIC_LIC-2026-0007_12345678000195.pdf",
+      "status": "ativo",
+      "vencimento_dia": 10,
+      "softwares": [
+        "Emporion PDV",
+        "Emporion Manager"
+      ],
+      "total_mensal": 198.0
+    },
+    {
+      "numero": "TEF-2026-0005",
+      "cnpj": "12345678000195",
+      "empresa": "Comercial Silva e Santos Ltda",
+      "tipo": "tef",
+      "modalidade": "smartpos",
+      "data": "2026-06-16",
+      "arquivo": "CONTRATO_TEF_TEF-2026-0005_12345678000195.pdf",
+      "status": "ativo",
+      "vencimento_dia": 5,
+      "smartpos": {
+        "qtd": 1,
+        "adesao": 150.0,
+        "mensalidade": 49.9,
+        "transacao": 0.25
+      }
     }
   ]
 }

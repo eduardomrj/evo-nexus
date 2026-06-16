@@ -1,5 +1,15 @@
 {
   "mcpServers": {
+    "mempalace": {
+      "type": "stdio",
+      "command": "python3",
+      "args": [
+        "-m",
+        "mempalace.mcp_server",
+        "--palace",
+        "/home/evonexus/evo-nexus/dashboard/data/mempalace"
+      ]
+    },
     "linear-server": {
       "type": "http",
       "url": "https://mcp.linear.app/mcp"
@@ -35,6 +45,70 @@
     "intercom": {
       "type": "http",
       "url": "https://mcp.intercom.com/mcp"
+    },
+    "warden": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@icoretech/warden-mcp@latest",
+        "--stdio"
+      ],
+      "env": {
+        "BW_HOST": "https://keys.myworkhome.com.br",
+        "BW_CLIENTID": "user.603fe548-62cc-47c3-b15f-d6559dadf29c",
+        "BW_CLIENTSECRET": "DJJjCiLgt1cAy7Vul73e05EZrABhMN",
+        "BW_PASSWORD": "cb6wMw3BlGQowa"
+      }
+    },
+    "cloudflare": {
+      "type": "http",
+      "url": "https://mcp.cloudflare.com/mcp"
+    },
+    "markitdown": {
+      "type": "stdio",
+      "command": "/home/evonexus/venvs/markitdown/bin/markitdown-mcp"
+    },
+    "github": {
+      "type": "stdio",
+      "command": "docker",
+      "args": [
+        "run", "-i", "--rm",
+        "-e", "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "ghcr.io/github/github-mcp-server"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "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"
+      }
+    },
+    "postgres": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "mcp-postgres"],
+      "env": {
+        "DB_HOST": "192.168.88.106",
+        "DB_PORT": "5432",
+        "DB_USER": "go_erp",
+        "DB_PASSWORD": "go_erp",
+        "DB_NAME": "go_erp_dev",
+        "DB_READ_ONLY": "false"
+      }
+    },
+    "proxmox": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "/home/evonexus/venvs/proxmox-mcp/node_modules/@bldg-7/proxmox-mcp/dist/index.js"
+      ],
+      "env": {
+        "PROXMOX_HOST": "192.168.88.201",
+        "PROXMOX_PORT": "8006",
+        "PROXMOX_USER": "root@pam",
+        "PROXMOX_TOKEN_NAME": "mcp-server",
+        "PROXMOX_TOKEN_VALUE": "061cdc05-6b62-460d-b818-01a7492507a6",
+        "PROXMOX_SSL_MODE": "insecure",
+        "PROXMOX_ALLOW_ELEVATED": "true"
+      }
     }
   }
 }
