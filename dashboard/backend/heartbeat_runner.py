@@ -379,6 +379,16 @@ def step8_persist(run_id: str, heartbeat_id: str, result: dict, trigger_id: str 
         "ts": now,
         "error": result.get("error"),
     }
+    # On failure, capture the CLI output so subtype (e.g. error_max_turns) is visible in logs
+    if result.get("status") != "success":
+        raw_output = result.get("output", "")
+        if raw_output:
+            try:
+                parsed = json.loads(raw_output)
+                log_entry["error_subtype"] = parsed.get("subtype")
+                log_entry["output_preview"] = raw_output[:500]
+            except Exception:
+                log_entry["output_preview"] = raw_output[:500]
     with open(log_file, "a", encoding="utf-8") as f:
         f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
 

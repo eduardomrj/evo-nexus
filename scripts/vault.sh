@@ -10,6 +10,10 @@
 
 set -euo pipefail
 
+BW_APPDATA_DIR="${BITWARDENCLI_APPDATA_DIR:-/home/evonexus/evo-projects-data/evonexus-secrets/bitwarden-cli}"
+install -d -m 700 "$BW_APPDATA_DIR"
+export BITWARDENCLI_APPDATA_DIR="$BW_APPDATA_DIR"
+
 BW_SERVER="https://keys.myworkhome.com.br"
 BW_EMAIL="oracle-evo@automacaosoftware.com.br"
 
