@@ -243,10 +243,23 @@ def main() -> None:
     parser.add_argument("--parceiro-email",      help="E-mail do parceiro para assinatura eletrônica")
     parser.add_argument("--y-parceiro",          type=int, default=None,
                         help="pageY (0-100) do campo de assinatura do parceiro na seção de testemunhas "
-                             "(padrão: 52 para TEF, 57 para LIC — ajuste se necessário)")
+                             "(padrão: 46 para TEF, 57 para LIC — ajuste se necessário)")
+    parser.add_argument("--api-key-parceiro-env", default=None,
+                        help="Nome da variável de ambiente com o token da equipe do parceiro no Documenso "
+                             "(ex: DOCUMENSO_API_KEY_INFORCELL). Quando fornecido, o documento é criado "
+                             "na equipe do parceiro.")
     args = parser.parse_args()
 
     checar_config()
+
+    # Sobrescrever API_KEY com a da equipe do parceiro, se fornecida
+    if args.api_key_parceiro_env:
+        parceiro_key = os.getenv(args.api_key_parceiro_env)
+        if not parceiro_key:
+            print(f"✗ Variável {args.api_key_parceiro_env} não encontrada no .env")
+            sys.exit(1)
+        global API_KEY
+        API_KEY = parceiro_key
 
     pdf_path = Path(args.pdf)
     if not pdf_path.exists():
@@ -266,7 +279,8 @@ def main() -> None:
     print(f"  Arquivo   : {pdf_path.name}")
     print(f"  Signatário: {args.nome} <{args.email}>")
     if tem_parceiro:
-        print(f"  Parceiro  : {args.parceiro_nome} <{args.parceiro_email}>")
+        equipe_info = f" → equipe {args.api_key_parceiro_env}" if args.api_key_parceiro_env else ""
+        print(f"  Parceiro  : {args.parceiro_nome} <{args.parceiro_email}>{equipe_info}")
     print(f"  Contratada: Automação Comercial LTDA. <eduardo@automacaosoftware.com.br>")
     print(f"  Título    : {titulo}")
     print(f"  Documenso : {API_URL}")

@@ -77,7 +77,9 @@ Aguardar confirmação do usuário antes de prosseguir.
 Ao final, informar o caminho do PDF gerado e oferecer as próximas ações:
 - Abrir/visualizar o arquivo
 - Enviar para assinatura eletrônica via `legal-enviar-assinatura`
-  - Se tiver parceiro: o email já vem do cadastro — não precisa pedir novamente
+  - Se tiver parceiro: email e `documenso_api_key_env` já vêm do cadastro
+  - Passar `--api-key-parceiro-env <documenso_api_key_env>` ao chamar enviar_documenso.py
+    para que o documento seja criado na equipe do parceiro no Documenso
 - Gerar outro contrato
 
 ## Valores padrão (referência)
