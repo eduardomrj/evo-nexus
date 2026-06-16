@@ -62,10 +62,10 @@ python3 /home/evonexus/evo-nexus/ADWs/scripts/legal/enviar_documenso.py \
 ### 4. Reportar resultado
 
 Ao final, informar ao usuário:
-- ✓ Confirmação de envio
+- ✓ Confirmação de que o documento foi enviado ao Documenso
 - Link de acompanhamento no Documenso
 - Status atual do documento
-- Que o cliente receberá o e-mail em instantes
+- Que o Documenso enviará o e-mail ao cliente via SMTP (`signature@automacaosoftware.com.br`)
 
 ---
 
@@ -76,7 +76,7 @@ Ao final, informar ao usuário:
 | 1 | Upload do PDF para o Documenso (`POST /api/v1/documents`) |
 | 2 | Adiciona signatário com papel `SIGNER` (`POST /api/v1/documents/{id}/recipients`) |
 | 2b | Adiciona cópia com papel `CC` (opcional) |
-| 3 | Dispara e-mail de assinatura (`POST /api/v1/documents/{id}/send`) |
+| 3 | Instrui o Documenso a iniciar o fluxo de assinatura (`POST /api/v1/documents/{id}/send`) — **é o Documenso quem envia o e-mail ao cliente** via SMTP Zoho configurado em `smtppro.zoho.com:587`, remetente `signature@automacaosoftware.com.br` |
 | 4 | Registra o envio em `workspace/legal/contratos/clientes/gerados/envios_assinatura.json` |
 
 ---

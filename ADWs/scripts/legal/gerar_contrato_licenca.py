@@ -263,12 +263,20 @@ def gerar_contrato(caminho_json: str) -> Path:
     data_str    = dados.get("data")
     data        = date.fromisoformat(data_str) if data_str else date.today()
 
-    # 2. Consultar CNPJ
-    print(f"Consultando CNPJ {formatar_cnpj(cnpj_limpo)}...", end=" ", flush=True)
-    dados_cnpj   = consultar_cnpj(cnpj_limpo)
-    print("ok")
-    empresa_nome = (dados_cnpj.get("razao_social") or "").title()
-    endereco     = montar_endereco(dados_cnpj)
+    # 2. Consultar CNPJ (ou usar dados manuais se fornecidos no JSON)
+    empresa_nome_override = dados.get("empresa_nome")
+    empresa_endereco_override = dados.get("empresa_endereco")
+
+    if empresa_nome_override and empresa_endereco_override:
+        print(f"Usando dados manuais para CNPJ {formatar_cnpj(cnpj_limpo)} (sem consulta BrasilAPI)")
+        empresa_nome = empresa_nome_override
+        endereco     = empresa_endereco_override
+    else:
+        print(f"Consultando CNPJ {formatar_cnpj(cnpj_limpo)}...", end=" ", flush=True)
+        dados_cnpj   = consultar_cnpj(cnpj_limpo)
+        print("ok")
+        empresa_nome = empresa_nome_override or (dados_cnpj.get("razao_social") or "").title()
+        endereco     = empresa_endereco_override or montar_endereco(dados_cnpj)
 
     # 3. Calcular valores
     subtotal_licenca    = sum(float(s["valor_mensal"]) for s in softwares)

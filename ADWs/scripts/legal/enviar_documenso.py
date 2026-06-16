@@ -45,19 +45,26 @@ def checar_config() -> None:
         sys.exit(1)
 
 
-# ── Etapas do fluxo ──────────────────────────────────────────────────────────
-def upload_documento(pdf_path: Path, titulo: str) -> dict:
-    """Etapa 1 — faz upload do PDF e cria o documento no Documenso."""
-    print(f"  Enviando PDF para o Documenso...", end=" ", flush=True)
+# ── Etapas do fluxo (API Documenso v2) ───────────────────────────────────────
+# Fluxo correto:
+#   1. POST /api/v1/documents  →  cria documento + signatários, retorna uploadUrl + documentId
+#   2. PUT <uploadUrl>          →  envia o PDF para o MinIO via URL pré-assinada
+#   3. POST /api/v1/documents/{id}/send  →  Documenso envia e-mail ao signatário
 
-    with open(pdf_path, "rb") as f:
-        resp = requests.post(
-            f"{API_URL}/api/v1/documents",
-            headers=headers(),
-            files={"file": (pdf_path.name, f, "application/pdf")},
-            data={"title": titulo},
-            timeout=30,
-        )
+def criar_documento(titulo: str, nome: str, email: str, email_cc: str | None) -> dict:
+    """Etapa 1 — cria o documento com signatários em uma única chamada."""
+    print(f"  Criando documento no Documenso...", end=" ", flush=True)
+
+    recipients = [{"name": nome, "email": email, "role": "SIGNER"}]
+    if email_cc:
+        recipients.append({"name": "Automação Software", "email": email_cc, "role": "CC"})
+
+    resp = requests.post(
+        f"{API_URL}/api/v1/documents",
+        headers={**headers(), "Content-Type": "application/json"},
+        json={"title": titulo, "recipients": recipients},
+        timeout=60,
+    )
 
     if resp.status_code not in (200, 201):
         print(f"✗ ({resp.status_code})")
@@ -65,51 +72,63 @@ def upload_documento(pdf_path: Path, titulo: str) -> dict:
         sys.exit(1)
 
     doc = resp.json()
-    print(f"ok (id={doc['id']})")
+    print(f"ok (documentId={doc['documentId']})")
     return doc
 
 
-def adicionar_signatario(doc_id: int, nome: str, email: str) -> dict:
-    """Etapa 2 — adiciona o signatário (cliente) ao documento."""
-    print(f"  Adicionando signatário {nome} <{email}>...", end=" ", flush=True)
+def upload_pdf(upload_url: str, pdf_path: Path) -> None:
+    """Etapa 2 — envia o PDF para a URL pré-assinada do MinIO."""
+    print(f"  Enviando PDF ({pdf_path.name})...", end=" ", flush=True)
 
-    resp = requests.post(
-        f"{API_URL}/api/v1/documents/{doc_id}/recipients",
-        headers={**headers(), "Content-Type": "application/json"},
-        json={"name": nome, "email": email, "role": "SIGNER"},
-        timeout=15,
-    )
+    with open(pdf_path, "rb") as f:
+        resp = requests.put(
+            upload_url,
+            data=f,
+            headers={"Content-Type": "application/pdf"},
+            timeout=60,
+        )
 
-    if resp.status_code not in (200, 201):
+    if resp.status_code not in (200, 201, 204):
         print(f"✗ ({resp.status_code})")
         print(f"  Resposta: {resp.text[:300]}")
         sys.exit(1)
 
-    rec = resp.json()
-    print(f"ok (recipientId={rec['id']})")
-    return rec
+    print("ok")
 
 
-def adicionar_copia(doc_id: int, email_cc: str) -> None:
-    """Etapa 2b (opcional) — adiciona cópia em CC (sem necessidade de assinar)."""
-    print(f"  Adicionando cópia para {email_cc}...", end=" ", flush=True)
+def adicionar_campo_assinatura(doc_id: int, recipient_id: int, pdf_path: Path) -> None:
+    """Etapa 2b — adiciona campo de assinatura na última página (seção de assinaturas)."""
+    print(f"  Adicionando campo de assinatura...", end=" ", flush=True)
+
+    from pypdf import PdfReader
+    num_paginas = len(PdfReader(str(pdf_path)).pages)
 
     resp = requests.post(
-        f"{API_URL}/api/v1/documents/{doc_id}/recipients",
+        f"{API_URL}/api/v1/documents/{doc_id}/fields",
         headers={**headers(), "Content-Type": "application/json"},
-        json={"name": "Automação Software", "email": email_cc, "role": "CC"},
-        timeout=15,
+        json={
+            "recipientId": recipient_id,
+            "type":        "SIGNATURE",
+            "pageNumber":  num_paginas,
+            "pageX":       55,
+            "pageY":       55,
+            "pageWidth":   40,
+            "pageHeight":  10,
+        },
+        timeout=30,
     )
 
     if resp.status_code not in (200, 201):
-        print(f"✗ ({resp.status_code}) — cópia ignorada")
-    else:
-        print("ok")
+        print(f"✗ ({resp.status_code}) — {resp.text[:200]}")
+        sys.exit(1)
+
+    print(f"ok (página {num_paginas})")
 
 
 def disparar_envio(doc_id: int) -> dict:
-    """Etapa 3 — dispara o e-mail de assinatura para o signatário."""
-    print(f"  Disparando e-mail de assinatura...", end=" ", flush=True)
+    """Etapa 3 — instrui o Documenso a iniciar o fluxo de assinatura.
+    É o Documenso quem envia o e-mail ao signatário via SMTP configurado."""
+    print(f"  Iniciando fluxo de assinatura no Documenso...", end=" ", flush=True)
 
     resp = requests.post(
         f"{API_URL}/api/v1/documents/{doc_id}/send",
@@ -166,26 +185,27 @@ def main() -> None:
     print(f"  Documenso : {API_URL}")
     print(f"────────────────────────────────────────────────────────\n")
 
-    # Etapa 1 — upload
-    doc = upload_documento(pdf_path, titulo)
-    doc_id = doc["id"]
+    # Etapa 1 — criar documento + signatários
+    doc = criar_documento(titulo, args.nome, args.email, args.cc)
+    doc_id     = doc["documentId"]
+    upload_url = doc["uploadUrl"]
 
-    # Etapa 2 — signatário
-    adicionar_signatario(doc_id, args.nome, args.email)
+    # Etapa 2 — upload do PDF na URL pré-assinada do MinIO
+    upload_pdf(upload_url, pdf_path)
 
-    # Etapa 2b — cópia (opcional)
-    if args.cc:
-        adicionar_copia(doc_id, args.cc)
+    # Etapa 2b — campo de assinatura (obrigatório pelo Documenso)
+    recipient_id = doc["recipients"][0]["recipientId"]
+    adicionar_campo_assinatura(doc_id, recipient_id, pdf_path)
 
-    # Etapa 3 — disparar
+    # Etapa 3 — Documenso dispara e-mail ao signatário
     disparar_envio(doc_id)
 
     # Resultado
     link = f"{API_URL}/documents/{doc_id}"
-    print(f"\n✓ Documento enviado com sucesso!")
+    print(f"\n✓ Documento enviado ao Documenso com sucesso!")
     print(f"  Link de acompanhamento : {link}")
     print(f"  Status atual           : {status_documento(doc_id)}")
-    print(f"  O cliente receberá o e-mail em instantes.\n")
+    print(f"  O Documenso enviará o e-mail ao signatário via signature@automacaosoftware.com.br\n")
 
     # Salvar referência local (JSON na mesma pasta dos contratos gerados)
     registro_path = pdf_path.parent / "envios_assinatura.json"
