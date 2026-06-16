@@ -161,6 +161,110 @@
         "mensalidade": 49.9,
         "transacao": 0.25
       }
+    },
+    {
+      "numero": "TEF-2026-0006",
+      "cnpj": "04056245000191",
+      "empresa": "Clebio Paiva Sampaio",
+      "tipo": "tef",
+      "modalidade": "smartpos",
+      "data": "2026-06-16",
+      "arquivo": "CONTRATO_TEF_TEF-2026-0006_04056245000191.pdf",
+      "status": "ativo",
+      "vencimento_dia": 5,
+      "smartpos": {
+        "qtd": 1,
+        "adesao": 150.0,
+        "mensalidade": 49.9,
+        "transacao": 0.25
+      },
+      "parceiro": {
+        "empresa": "Inforcell Sistemas",
+        "representante": "Eridan Alves",
+        "cpf": "026.902.583-90"
+      }
+    },
+    {
+      "numero": "LIC-2026-0008",
+      "cnpj": "04056245000191",
+      "empresa": "Clebio Paiva Sampaio",
+      "tipo": "licenca",
+      "data": "2026-06-16",
+      "arquivo": "CONTRATO_LIC_LIC-2026-0008_04056245000191.pdf",
+      "status": "ativo",
+      "vencimento_dia": 10,
+      "softwares": [
+        "Emporion PDV"
+      ],
+      "total_mensal": 190.0,
+      "parceiro": {
+        "empresa": "Inforcell Sistemas",
+        "representante": "Eridan Alves",
+        "cpf": "026.902.583-90"
+      }
+    },
+    {
+      "numero": "LIC-2026-0009",
+      "cnpj": "04056245000191",
+      "empresa": "Clebio Paiva Sampaio",
+      "tipo": "licenca",
+      "data": "2026-06-16",
+      "arquivo": "CONTRATO_LIC_LIC-2026-0009_04056245000191.pdf",
+      "status": "ativo",
+      "vencimento_dia": 10,
+      "softwares": [
+        "Emporion PDV"
+      ],
+      "total_mensal": 190.0,
+      "parceiro": {
+        "empresa": "Inforcell Sistemas",
+        "representante": "Eridan Alves",
+        "cpf": "026.902.583-90"
+      }
+    },
+    {
+      "numero": "TEF-2026-0007",
+      "cnpj": "04056245000191",
+      "empresa": "Clebio Paiva Sampaio",
+      "tipo": "tef",
+      "modalidade": "smartpos",
+      "data": "2026-06-16",
+      "arquivo": "CONTRATO_TEF_TEF-2026-0007_04056245000191.pdf",
+      "status": "ativo",
+      "vencimento_dia": 5,
+      "smartpos": {
+        "qtd": 1,
+        "adesao": 150.0,
+        "mensalidade": 49.9,
+        "transacao": 0.25
+      },
+      "parceiro": {
+        "empresa": "Inforcell Sistemas",
+        "representante": "Eridan Alves",
+        "cpf": "026.902.583-90"
+      }
+    },
+    {
+      "numero": "TEF-2026-0008",
+      "cnpj": "04056245000191",
+      "empresa": "Clebio Paiva Sampaio",
+      "tipo": "tef",
+      "modalidade": "smartpos",
+      "data": "2026-06-16",
+      "arquivo": "CONTRATO_TEF_TEF-2026-0008_04056245000191.pdf",
+      "status": "ativo",
+      "vencimento_dia": 5,
+      "smartpos": {
+        "qtd": 1,
+        "adesao": 150.0,
+        "mensalidade": 49.9,
+        "transacao": 0.25
+      },
+      "parceiro": {
+        "empresa": "Inforcell Sistemas",
+        "representante": "Eridan Alves",
+        "cpf": "026.902.583-90"
+      }
     }
   ]
 }

@@ -306,7 +306,7 @@ def main() -> None:
     if tem_parceiro:
         recipient_parceiro_id = recipients[1]["recipientId"]   # PARCEIRO
         # pageY padrão da seção de testemunhas: TEF=52, LIC=57 (ajustável via --y-parceiro)
-        page_y_parceiro = args.y_parceiro if args.y_parceiro else (52 if is_tef else 57)
+        page_y_parceiro = args.y_parceiro if args.y_parceiro else (46 if is_tef else 57)
 
     adicionar_campo_assinatura(doc_id, recipient_cliente_id,
                                recipient_contratada_id, pagina=pagina, page_y=page_y,
