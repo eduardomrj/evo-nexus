@@ -38,6 +38,7 @@ DB_PATH = WORKSPACE / "dashboard" / "data" / "dashboard.db"
 INTEGRATIONS = [
     {"name": "Omie", "keys": ["OMIE_APP_KEY", "OMIE_APP_SECRET"], "category": "erp"},
     {"name": "Bling", "keys": ["BLING_CLIENT_ID", "BLING_CLIENT_SECRET"], "category": "erp"},
+    {"name": "Zoho Mail", "keys": ["ZOHO_MAIL_CLIENT_ID", "ZOHO_MAIL_CLIENT_SECRET"], "category": "email"},
     {"name": "Stripe", "keys": ["STRIPE_SECRET_KEY"], "category": "payments"},
     {"name": "Asaas", "keys": ["ASAAS_API_KEY"], "category": "payments"},
     {"name": "Todoist", "keys": ["TODOIST_API_TOKEN"], "category": "productivity"},

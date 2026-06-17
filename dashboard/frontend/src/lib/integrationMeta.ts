@@ -134,6 +134,16 @@ const INTEGRATION_META: IntegrationMeta[] = [
     ],
   },
   {
+    id: 'zoho-mail',
+    description: 'E-mail via Zoho Mail — inbox, busca, rascunho e envio confirmado',
+    docsUrl: 'https://www.zoho.com/mail/help/api/',
+    oauthFlow: true,
+    fields: [
+      { envKey: 'ZOHO_MAIL_CLIENT_ID', label: 'Client ID', hint: 'Client ID do app Zoho (OAuth2)', required: true },
+      { envKey: 'ZOHO_MAIL_CLIENT_SECRET', label: 'Client Secret', hint: 'Client Secret do app Zoho (OAuth2)', required: true },
+    ],
+  },
+  {
     id: 'asaas',
     description: 'Pagamentos brasileiros — Pix, boleto, cartão',
     docsUrl: 'https://asaasv3.docs.apiary.io/',

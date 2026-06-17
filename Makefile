@@ -150,6 +150,9 @@ uninstall:          ## 🗑️  Full cleanup — stop services, remove nginx, da
 bling-auth:         ## 🔐 Bling OAuth2 login (one-time: capture access + refresh tokens into .env)
 	@python3 .claude/skills/int-bling/scripts/bling_auth.py
 
+zoho-mail-auth:     ## 🔐 Zoho Mail OAuth2 login (one-time: capture access + refresh tokens into .env)
+	@python3 .claude/skills/custom-int-zoho-mail/scripts/zoho_mail_auth.py
+
 telegram:           ## 📨 Start Telegram bot in background (screen)
 	@if screen -list | grep -q '\.telegram'; then \
 		echo "⚠ Telegram bot is already running. Use 'make telegram-stop' first or 'make telegram-attach' to connect."; \
@@ -276,6 +279,15 @@ print(f'OK — {len(cfg.heartbeats)} heartbeat(s) validated'); \
 heartbeat-run:      ## ▶️  Run a heartbeat manually: make heartbeat-run ID=atlas-4h
 	@cd dashboard/backend && $(PYTHON) heartbeat_runner.py --heartbeat-id $(ID)
 
+github-labels:      ## Bootstrap labels GitHub nos 12 repos do go-control
+	cd dashboard/backend && python3 scripts/bootstrap_github_labels.py
+
+github-backfill:    ## Sync retroativo de tickets com github_repo para GitHub Issues
+	cd dashboard/backend && ../../.venv/bin/python3 scripts/backfill_github_sync.py
+
+github-backfill-dry: ## Dry-run do sync retroativo (só lista, não sincroniza)
+	cd dashboard/backend && ../../.venv/bin/python3 scripts/backfill_github_sync.py --dry-run
+
 worktree-clean:     ## 🧹 Remove stale agent worktrees from .claude/worktrees/
 	@bash .claude/hooks/worktree-cleanup.sh
 
@@ -285,5 +297,5 @@ worktree-clean-dry: ## 🔍 Preview worktrees that would be removed (dry-run)
 help:               ## 📖 Show this help
 	@grep -E '^[a-zA-Z_-]+:.*##' Makefile | sort | awk 'BEGIN {FS = ":.*## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
 
-.PHONY: morning eod memory memory-lint weekly run list-routines daily scheduler dashboard-app terminal-logs terminal-stop telegram telegram-stop telegram-attach discord-channel discord-channel-stop discord-channel-attach imessage imessage-stop imessage-attach backup backup-s3 restore backup-list backup-daily logs logs-detail logs-tail metrics clean-logs docker-dashboard docker-telegram docker-down docker-logs docker-run docker-build help docs-build setup team-strategy team-dashboard team-weekly learn-weekly heartbeat-lint heartbeat-run worktree-clean worktree-clean-dry
+.PHONY: morning eod memory memory-lint weekly run list-routines daily scheduler dashboard-app terminal-logs terminal-stop telegram telegram-stop telegram-attach discord-channel discord-channel-stop discord-channel-attach imessage imessage-stop imessage-attach backup backup-s3 restore backup-list backup-daily logs logs-detail logs-tail metrics clean-logs docker-dashboard docker-telegram docker-down docker-logs docker-run docker-build help docs-build setup team-strategy team-dashboard team-weekly learn-weekly heartbeat-lint heartbeat-run worktree-clean worktree-clean-dry github-labels github-backfill github-backfill-dry
 .DEFAULT_GOAL := help
