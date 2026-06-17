@@ -8,12 +8,13 @@ import json
 import os
 import re
 import shutil
+import threading
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-from flask import Blueprint, Response, jsonify, request
+from flask import Blueprint, Response, current_app, jsonify, request
 from flask_login import current_user
 
 # Trigger a summary job after this many turns (fixed in v1, Q9)
@@ -31,6 +32,22 @@ from models import (
 bp = Blueprint("tickets", __name__)
 
 WORKSPACE = Path(__file__).resolve().parent.parent.parent.parent
+
+
+def _enqueue_github_sync(ticket_id: str, event: str, app) -> None:
+    """Dispara sync com GitHub em thread daemon. Nunca bloqueia o request."""
+    def _run():
+        try:
+            with app.app_context():
+                from github_issues import sync_ticket_to_github
+                sync_ticket_to_github(ticket_id)
+        except Exception as exc:
+            import logging
+            logging.getLogger(__name__).error(
+                "github sync failed for ticket %s (%s): %s", ticket_id, event, exc
+            )
+    t = threading.Thread(target=_run, daemon=True, name=f"gh-sync-{ticket_id[:8]}")
+    t.start()
 
 # Max mentions per comment to prevent heartbeat storms
 MAX_MENTIONS_PER_COMMENT = 3
@@ -135,7 +152,9 @@ def list_tickets():
     limit = min(int(request.args.get("limit", 50)), 500)
     offset = int(request.args.get("offset", 0))
 
-    query = Ticket.query
+    from sqlalchemy.orm import joinedload
+    from models import TicketGithubLink
+    query = Ticket.query.options(joinedload(Ticket.github_link))
 
     if statuses:
         query = query.filter(Ticket.status.in_(statuses))
@@ -261,6 +280,7 @@ def create_ticket():
 
     source_agent = (data.get("source_agent") or "").strip() or None
     source_session_id = (data.get("source_session_id") or "").strip() or None
+    github_repo = (data.get("github_repo") or "").strip() or None
 
     now = _now()
     ticket = Ticket(
@@ -276,6 +296,7 @@ def create_ticket():
         created_by=current_user.username,
         source_agent=source_agent,
         source_session_id=source_session_id,
+        github_repo=github_repo,
         created_at=now,
         updated_at=now,
     )
@@ -287,6 +308,9 @@ def create_ticket():
         activity_payload["source_session_id"] = source_session_id
     _log_activity(ticket.id, current_user.username, "created", activity_payload)
     db.session.commit()
+
+    if ticket.github_repo:
+        _enqueue_github_sync(ticket.id, "created", current_app._get_current_object())
 
     audit(current_user, "create", "tickets", f"created ticket {ticket.id}: {title}")
     return jsonify(ticket.to_dict()), 201
@@ -346,12 +370,34 @@ def update_ticket(ticket_id: str):
         ticket.thread_session_id = data["thread_session_id"] or None
         changes["thread_session_id"] = ticket.thread_session_id
 
+    if "github_repo" in data:
+        ticket.github_repo = (data["github_repo"] or "").strip() or None
+        changes["github_repo"] = ticket.github_repo
+
     ticket.updated_at = _now()
     _log_activity(ticket_id, current_user.username, "status_changed" if "status" in changes else "updated", changes)
     db.session.commit()
 
+    if ticket.github_repo:
+        _enqueue_github_sync(ticket.id, "updated", current_app._get_current_object())
+
     audit(current_user, "update", "tickets", f"updated ticket {ticket_id}: {list(data.keys())}")
     return jsonify(ticket.to_dict())
+
+
+# --------------- GitHub Link ---------------
+
+@bp.route("/api/tickets/<string:ticket_id>/github-link", methods=["GET"])
+def get_ticket_github_link(ticket_id: str):
+    denied = _require("view")
+    if denied:
+        return denied
+    from models import TicketGithubLink
+    ticket = Ticket.query.get(ticket_id)
+    if not ticket:
+        return jsonify({"error": "not_found"}), 404
+    link = ticket.github_link
+    return jsonify({"github_link": link.to_dict() if link else None})
 
 
 # --------------- Delete (soft close or admin hard delete) ---------------

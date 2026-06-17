@@ -80,6 +80,81 @@ def release_expired_locks(app=None) -> int:
     return released
 
 
+def check_deleted_github_issues(app) -> int:
+    """Detecta issues deletadas no GitHub (404) e fecha os tickets correspondentes.
+
+    Roda no ciclo do janitor. Limita a 50 checks por ciclo para não estourar rate-limit.
+    Retorna número de tickets fechados.
+    """
+    closed = 0
+    try:
+        from github_issues import get_issue
+        from models import db, Ticket, TicketGithubLink, TicketActivity
+
+        # Tickets sincronizados, não resolvidos/fechados, com last_synced_at > 1h atrás
+        cutoff = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+        rows = db.session.execute(db.text("""
+            SELECT tgl.id, tgl.ticket_id, tgl.github_repo, tgl.issue_number
+            FROM ticket_github_links tgl
+            JOIN tickets t ON t.id = tgl.ticket_id
+            WHERE tgl.issue_number IS NOT NULL
+              AND t.status NOT IN ('resolved', 'closed', 'archived')
+              AND (
+                tgl.last_synced_at IS NULL
+                OR datetime(tgl.last_synced_at) < datetime(:cutoff, '-1 hour')
+              )
+            ORDER BY tgl.last_synced_at ASC NULLS FIRST
+            LIMIT 50
+        """), {"cutoff": cutoff}).fetchall()
+
+        now = _now()
+        for row in rows:
+            link_id, ticket_id, github_repo, issue_number = row
+
+            status_code, _ = get_issue(github_repo, issue_number)
+
+            if status_code == 404:
+                # Issue deletada — fechar ticket
+                db.session.execute(
+                    db.text("UPDATE tickets SET status = 'closed', updated_at = :now WHERE id = :id"),
+                    {"id": ticket_id, "now": now},
+                )
+                activity = TicketActivity(
+                    id=str(uuid.uuid4()),
+                    ticket_id=ticket_id,
+                    actor="system:github-janitor",
+                    action="auto_closed_issue_deleted",
+                    payload=json.dumps({"github_repo": github_repo, "issue_number": issue_number}),
+                    created_at=now,
+                )
+                db.session.add(activity)
+                db.session.commit()
+                closed += 1
+                print(f"[ticket_janitor] closed ticket {ticket_id} — GitHub issue #{issue_number} deleted", flush=True)
+
+            elif status_code == 200:
+                # Issue existe — atualizar last_synced_at
+                db.session.execute(
+                    db.text("UPDATE ticket_github_links SET last_synced_at = :now WHERE id = :id"),
+                    {"id": link_id, "now": now},
+                )
+                db.session.commit()
+
+            # status 0 (network error) ou outros: ignorar silenciosamente
+
+    except ImportError:
+        pass  # github_issues não disponível
+    except Exception as exc:
+        try:
+            from models import db
+            db.session.rollback()
+        except Exception:
+            pass
+        print(f"[ticket_janitor] ERROR in check_deleted_github_issues: {exc}", flush=True)
+
+    return closed
+
+
 def _janitor_loop(app):
     """Background loop — reclaims expired ticket AND brain-repo locks.
 
@@ -103,6 +178,11 @@ def _janitor_loop(app):
             pass  # brain_repo not installed / disabled
         except Exception as exc:
             print(f"[ticket_janitor] brain-repo sweep error: {exc}", flush=True)
+        try:
+            with app.app_context():
+                check_deleted_github_issues(app)
+        except Exception as exc:
+            print(f"[ticket_janitor] github-check error: {exc}", flush=True)
 
 
 def start_janitor_thread():

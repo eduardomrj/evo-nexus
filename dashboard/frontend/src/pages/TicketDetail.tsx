@@ -5,7 +5,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import {
   Ticket, ArrowLeft, Lock, Unlock, MessageSquare, Activity,
   RefreshCw, Send, Trash2, RotateCcw, Pencil, Archive, FolderPlus, Check, X,
-  PanelLeft,
+  PanelLeft, GitBranch,
 } from 'lucide-react'
 import { api } from '../lib/api'
 import AgentChat from '../components/AgentChat'
@@ -40,6 +40,13 @@ interface TicketItem {
   created_at: string
   updated_at: string
   resolved_at: string | null
+  github_repo: string | null
+  github_link: {
+    issue_number: number | null
+    issue_url: string | null
+    sync_error: string | null
+    project_item_id: string | null
+  } | null
   comments: CommentItem[]
   activity: ActivityItem[]
 }
@@ -689,6 +696,34 @@ export default function TicketDetail() {
             </div>
           )}
         </div>
+
+        {ticket.github_repo && (
+          <div className="pt-3 border-t border-[#21262d] mt-3">
+            <p className="text-xs text-[#667085] mb-1.5">GitHub</p>
+            {ticket.github_link?.issue_number ? (
+              <a
+                href={ticket.github_link.issue_url || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs text-[#00FFA7] hover:underline"
+              >
+                <GitBranch size={12} />
+                {ticket.github_repo.split('/')[1]} #{ticket.github_link.issue_number}
+              </a>
+            ) : ticket.github_link?.sync_error ? (
+              <span
+                className="inline-flex items-center gap-1.5 text-xs text-red-400"
+                title={ticket.github_link.sync_error}
+              >
+                <GitBranch size={12} /> Erro no sync
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 text-xs text-[#667085]">
+                <GitBranch size={12} /> Sincronizando...
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Timeline */}

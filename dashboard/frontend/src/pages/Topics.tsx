@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import {
   Ticket, Plus, RefreshCw, Filter, Search, Download, CheckSquare, Square,
   X, AlertTriangle, ArrowUp, Minus, ArrowDown,
-  Lock, Clock, CheckCircle, XCircle, Eye, MessageSquare,
+  Lock, Clock, CheckCircle, XCircle, Eye, MessageSquare, GitBranch,
 } from 'lucide-react'
 import { api } from '../lib/api'
 import { useTranslation } from 'react-i18next'
@@ -33,6 +33,13 @@ interface TicketItem {
   updated_at: string
   resolved_at: string | null
   is_thread: boolean
+  github_repo: string | null
+  github_link: {
+    issue_number: number | null
+    issue_url: string | null
+    sync_error: string | null
+    project_item_id: string | null
+  } | null
 }
 
 // ── Style maps ────────────────────────────────────────────────────────────────
@@ -106,6 +113,13 @@ function PriorityBadge({ priority }: { priority: TicketPriority }) {
   )
 }
 
+const GITHUB_REPOS = [
+  'go-control-erp', 'go-control-platform', 'go-control-admin',
+  'go-control-auth', 'go-control-account', 'go-control-sdk',
+  'go-control-app-template', 'go-payment-hub', 'go-message',
+  'go-produtos', 'go-pessoas', 'go-cobranca',
+]
+
 // ── TicketRow ─────────────────────────────────────────────────────────────────
 
 interface TicketRowProps {
@@ -145,6 +159,16 @@ function TicketRow({ ticket, selected, onSelect, onClick }: TicketRowProps) {
               <Lock size={12} className="text-orange-400 shrink-0" />
             </span>
           )}
+          {ticket.github_repo && (
+            <span
+              className="shrink-0 text-[#667085] hover:text-[#e6edf3]"
+              title={ticket.github_link?.issue_number
+                ? `GitHub #${ticket.github_link.issue_number} · ${ticket.github_repo.split('/')[1]}`
+                : `Sync GitHub: ${ticket.github_repo.split('/')[1]}`}
+            >
+              <GitBranch size={12} />
+            </span>
+          )}
         </div>
         {ticket.description && (
           <p className="text-xs text-[#667085] truncate mt-0.5">{ticket.description}</p>
@@ -178,6 +202,7 @@ function CreateModal({ onClose, onCreated }: CreateModalProps) {
     description: '',
     priority: 'medium' as TicketPriority,
     assignee_agent: '',
+    github_repo: null as string | null,
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -208,6 +233,7 @@ function CreateModal({ onClose, onCreated }: CreateModalProps) {
         description: form.description.trim() || undefined,
         priority: form.priority,
         assignee_agent: form.assignee_agent.trim() || undefined,
+        github_repo: form.github_repo || undefined,
       })
       onCreated(res as TicketItem)
     } catch (err: any) {
@@ -299,6 +325,20 @@ function CreateModal({ onClose, onCreated }: CreateModalProps) {
                 </div>
               )}
             </div>
+          </div>
+
+          <div>
+            <label className="block text-xs text-[#667085] mb-1">Sync com GitHub</label>
+            <select
+              className="w-full bg-[#0C111D] border border-[#21262d] rounded-lg px-3 py-2 text-sm text-[#e6edf3] focus:outline-none focus:border-[#00FFA7]/50 transition-colors"
+              value={form.github_repo || ''}
+              onChange={e => setForm(f => ({ ...f, github_repo: e.target.value || null }))}
+            >
+              <option value="">(nenhum)</option>
+              {GITHUB_REPOS.map(r => (
+                <option key={r} value={`Automacao-Software/${r}`}>{r}</option>
+              ))}
+            </select>
           </div>
 
           {error && (

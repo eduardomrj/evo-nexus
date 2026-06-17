@@ -2,6 +2,7 @@
 
 import json
 import secrets
+import uuid
 from datetime import datetime, timezone
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
@@ -808,6 +809,7 @@ class Ticket(db.Model):
     created_at = db.Column(db.String(30), nullable=False)
     updated_at = db.Column(db.String(30), nullable=False)
     resolved_at = db.Column(db.String(30), nullable=True)
+    github_repo = db.Column(db.Text, nullable=True)
 
     comments = db.relationship("TicketComment", backref="ticket", lazy="dynamic", cascade="all, delete-orphan")
     activity = db.relationship("TicketActivity", backref="ticket", lazy="dynamic", cascade="all, delete-orphan")
@@ -839,6 +841,8 @@ class Ticket(db.Model):
             "created_at": self.created_at,
             "updated_at": self.updated_at,
             "resolved_at": self.resolved_at,
+            "github_repo": self.github_repo,
+            "github_link": self.github_link.to_dict() if self.github_link else None,
         }
 
 
@@ -900,6 +904,38 @@ class TicketActivity(db.Model):
             "action": self.action,
             "payload": self.payload_dict,
             "created_at": self.created_at,
+        }
+
+
+class TicketGithubLink(db.Model):
+    __tablename__ = "ticket_github_links"
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    ticket_id = db.Column(db.String(36), db.ForeignKey("tickets.id", ondelete="CASCADE"),
+                          nullable=False, unique=True)
+    github_repo = db.Column(db.Text, nullable=False)
+    issue_number = db.Column(db.Integer, nullable=True)
+    issue_url = db.Column(db.Text, nullable=True)
+    project_item_id = db.Column(db.Text, nullable=True)
+    last_synced_at = db.Column(db.String(30), nullable=True)
+    sync_error = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.String(30), nullable=False, default=lambda: datetime.utcnow().isoformat())
+    updated_at = db.Column(db.String(30), nullable=False, default=lambda: datetime.utcnow().isoformat(),
+                           onupdate=lambda: datetime.utcnow().isoformat())
+
+    ticket = db.relationship("Ticket", backref=db.backref("github_link", uselist=False))
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "ticket_id": self.ticket_id,
+            "github_repo": self.github_repo,
+            "issue_number": self.issue_number,
+            "issue_url": self.issue_url,
+            "project_item_id": self.project_item_id,
+            "last_synced_at": self.last_synced_at,
+            "sync_error": self.sync_error,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at,
         }
 
 

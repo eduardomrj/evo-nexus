@@ -639,6 +639,14 @@ with app.app_context():
         _conn.commit()
     # --- End B3 safe_uninstall migration ---
 
+    # --- GitHub Sync migration (Fase 1) ---
+    try:
+        from migrations.add_github_sync import run as _run_github_sync_migration
+        _run_github_sync_migration(_db_path)
+    except Exception as _gh_mig_exc:
+        print(f"WARNING: github sync migration failed: {_gh_mig_exc}")
+    # --- End GitHub Sync migration ---
+
     # Fix corrupted datetime columns (NULL or non-string values crash SQLAlchemy)
     for _tbl, _col in [("roles", "created_at"), ("users", "created_at"), ("users", "last_login")]:
         try:
@@ -878,6 +886,7 @@ from routes.shares import bp as shares_bp
 from routes.heartbeats import bp as heartbeats_bp
 from routes.goals import bp as goals_bp
 from routes.tickets import bp as tickets_bp
+from routes.github_sync import bp as github_sync_bp
 from routes.health import bp as health_bp
 from routes.knowledge import bp as knowledge_bp
 from routes.knowledge_public import bp as knowledge_public_bp
@@ -951,6 +960,7 @@ app.register_blueprint(shares_bp)
 app.register_blueprint(heartbeats_bp)
 app.register_blueprint(goals_bp)
 app.register_blueprint(tickets_bp)
+app.register_blueprint(github_sync_bp)
 app.register_blueprint(health_bp)
 app.register_blueprint(knowledge_bp)
 app.register_blueprint(knowledge_public_bp)
