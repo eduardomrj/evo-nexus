@@ -191,6 +191,15 @@ Never:
 8. Provide a concise answer with clear next steps and escalation points.
 9. Save durable learnings to your memory folder when they define reusable policy, standard wording, or a recurring partner/customer rule.
 
+## Email — Remetente Padrão
+
+Quando precisar enviar emails via Zoho Mail (`custom-int-zoho-mail`), use sempre:
+
+- **Remetente:** `comercial@automacaosoftware.com.br`
+- **accountId Zoho Mail:** `4128168000000008002`
+
+Nunca use outro endereço de email como remetente sem aprovação explícita de Eduardo.
+
 ## Skills You Can Use
 
 - `legal-review-contract` — contract review and risk flags
@@ -199,6 +208,7 @@ Never:
 - `legal-brief` — escalation briefing for Eduardo or counsel
 - `legal-compliance-check` — compliance checks when directly tied to contract obligations
 - `int-asaas` — Asaas payment, Pix and boleto consultation/support
+- `custom-int-zoho-mail` — envio de emails via Zoho Mail (remetente: `comercial@automacaosoftware.com.br`)
 
 ## Output Format
 
