@@ -64,8 +64,8 @@ mkdir -p /home/evonexus/evo-projects/vigil/{logs,reports/daily}
 # Start terminal-server (must run FROM the project root for agent discovery)
 nohup node dashboard/terminal-server/bin/server.js > "$SCRIPT_DIR/logs/terminal-server.log" 2>&1 &
 
-# Start scheduler
-nohup "$SCRIPT_DIR/.venv/bin/python" scheduler.py > "$SCRIPT_DIR/logs/scheduler.log" 2>&1 &
+# Scheduler is managed by evo-nexus-scheduler.service (Type=simple + Restart=on-failure).
+# Do NOT launch it here — systemd supervises it and restarts on crash.
 
 # EVO_NEXUS_ROOT / EVONEXUS_DIR — herdadas pelo Flask dashboard e ADWs
 # Vigil é gerenciado exclusivamente pelo vigil.service (systemd) — não lançar aqui

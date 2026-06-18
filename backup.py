@@ -248,6 +248,20 @@ def backup_local(s3_upload: bool = False, s3_bucket: str = None) -> Path:
         print(f"{YELLOW}No gitignored files found to backup.{RESET}")
         sys.exit(0)
 
+    # Filter out inaccessible files (broken symlinks, permission denied).
+    # A single OSError from stat() would abort the entire backup — instead
+    # we skip the offending file, log a warning, and continue.
+    skipped: list[tuple[str, str]] = []
+    accessible: list[str] = []
+    for rel in files:
+        try:
+            (WORKSPACE / rel).stat()  # follows symlinks — raises if broken/denied
+            accessible.append(rel)
+        except OSError as exc:
+            skipped.append((rel, str(exc)))
+            print(f"{YELLOW}  ⚠ Skipping inaccessible file: {rel} ({exc}){RESET}")
+    files = accessible
+
     BACKUPS_DIR.mkdir(exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     zip_name = f"evonexus-backup-{timestamp}.zip"
@@ -270,6 +284,7 @@ def backup_local(s3_upload: bool = False, s3_bucket: str = None) -> Path:
         "file_count": len(files),
         "total_size": total_size,
         "files": file_entries,
+        "skipped_files": [{"path": r, "reason": e} for r, e in skipped],
     }
 
     # Create ZIP
