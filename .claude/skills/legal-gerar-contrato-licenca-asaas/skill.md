@@ -42,7 +42,7 @@ curl -s "https://api.asaas.com/v3/customers?cpfCnpj=<CNPJ_LIMPO>" \
 ```
 
 - Se `totalCount = 0`: informar ao usuário que o cliente não foi encontrado no ASAAS e interromper.
-- Se encontrado: guardar `customer.id`, `customer.name`, `customer.email`.
+- Se encontrado: guardar `customer.id`, `customer.name`, `customer.email`, `customer.mobilePhone` (preferir sobre `customer.phone`).
 
 #### 2b. Buscar assinatura ativa
 
@@ -55,13 +55,15 @@ curl -s "https://api.asaas.com/v3/subscriptions?customer=<CUSTOMER_ID>&status=AC
 - Se mais de uma assinatura ativa: listar todas e perguntar qual usar.
 - Se uma assinatura: usar diretamente.
 
-#### 2c. Extrair dados da assinatura
+#### 2c. Extrair dados do cliente e da assinatura
 
-| Campo ASAAS | Uso no contrato |
-|---|---|
-| `value` | Valor mensal do pacote |
-| `nextDueDate` | Extrair o dia (ex: `2026-08-20` → dia `20`) |
-| `description` | Nomes dos sistemas (ex: "Emporion PDV Fiscal\nEmporion Manager\nEmporion NFe") |
+| Campo ASAAS | Origem | Uso no contrato |
+|---|---|---|
+| `value` | Assinatura | Valor mensal do pacote |
+| `nextDueDate` | Assinatura | Extrair o dia (ex: `2026-08-20` → dia `20`) |
+| `description` | Assinatura | Nomes dos sistemas |
+| `email` | Cliente | E-mail do signatário |
+| `mobilePhone` | Cliente | Telefone do signatário (se vazio, usar `phone`) |
 
 **Montar o nome do pacote:**
 - Limpar a `description`: remover `\t`, `\r`, normalizar espaços, separar por `\n`
@@ -80,10 +82,11 @@ Perguntar na seguinte ordem:
 | **Nome do signatário** | ✅ Sim | Representante legal que vai assinar |
 | **CPF do signatário** | ✅ Sim | Validar dígitos verificadores |
 | **Cargo do signatário** | ✅ Sim | Ex: Sócio-Administrador, Diretor |
-| **E-mail do signatário** | ✅ Sim | Para o Documenso |
-| **Telefone do signatário** | ✅ Sim | WhatsApp/celular |
 | **Parceiro/Revendedor?** | ✅ Sim | Sim/não → se sim, listar `parceiros.json` |
 | **Implantação** | ❌ Opcional | Se não informada, lançar R$ 0,00 automaticamente |
+
+E-mail e telefone vêm do ASAAS (`customer.email` e `customer.mobilePhone`).
+Se estiverem vazios no ASAAS, perguntar ao usuário.
 
 Sobre a implantação: perguntar uma vez:
 > "Há serviços de implantação a lançar no contrato? (ex: instalação, treinamento) Se não, deixo como R$ 0,00."
@@ -106,6 +109,8 @@ Se não houver, montar automaticamente:
   Implantação: R$ 0,00
   Signatário : João da Silva — Sócio-Administrador
   CPF        : 123.456.789-00
+  E-mail     : elitanioveiculos@hotmail.com  ← ASAAS
+  Telefone   : (88) 99956-3702              ← ASAAS
   Parceiro   : Inforcell Sistemas — Eridan Alves
 ─────────────────────────────────────────────────────────
 Os dados acima estão corretos? Confirma? [s/N]
