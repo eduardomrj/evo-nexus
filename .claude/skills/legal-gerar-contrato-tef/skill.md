@@ -18,8 +18,10 @@ Exemplos de trigger:
 Perguntar:
 - **CNPJ** do cliente (aceitar com ou sem formatação)
 - **Modalidade**: SmartPOS / Pinpad / Ambos
-- **Nome do responsável legal** do cliente (representante legal que vai assinar)
-- **CPF do responsável legal** (validar dígitos verificadores antes de prosseguir)
+- **Signatário**: antes de perguntar, verificar `ADWs/scripts/legal/representantes.json` pelo CNPJ.
+  - Se encontrado: mostrar `ℹ Representante na base: [nome] — [cargo] (CPF: [cpf]) — confirma usar?`
+  - Se confirmado: pré-preencher `--signatario-nome` e `--signatario-cpf` automaticamente.
+  - Se não encontrado ou recusado: coletar **Nome do responsável legal** e **CPF do responsável legal** (validar dígitos verificadores).
 - **Parceiro/Revendedor**: "Esse contrato tem participação de um parceiro ou revendedor?" (sim/não)
   - Se sim:
     1. Ler `ADWs/scripts/legal/parceiros.json`
@@ -123,6 +125,7 @@ Estrutura de cada entrada:
 | `ADWs/scripts/legal/gerar_contrato_tef.py` | Script principal |
 | `workspace/legal/contratos/modelos/contrato-tef-template.md.j2` | Template Jinja2 |
 | `workspace/legal/contratos/clientes/gerados/` | PDFs gerados |
+| `ADWs/scripts/legal/representantes.json` | Base de representantes legais (pré-fill de signatário) |
 | `workspace/legal/contratos/modelos/contrato-tef-cliente-final-v1.md` | Modelo de referência (leitura humana) |
 
 ## Erros comuns

@@ -19,7 +19,10 @@ Exemplos de trigger:
 Perguntar ao usuário:
 - **CNPJ** do cliente (aceitar com ou sem formatação)
 - **Vencimento** do boleto mensal: 5, 10, 15 ou 20 (obrigatório)
-- **Signatário**: nome, CPF, cargo, e-mail, telefone
+- **Signatário**: antes de perguntar, verificar `ADWs/scripts/legal/representantes.json` pelo CNPJ.
+  - Se encontrado: mostrar `ℹ Representante na base: [nome] — [cargo] (CPF: [cpf]) — confirma usar?`
+  - Se confirmado: pré-preencher automaticamente.
+  - Se não encontrado ou recusado: coletar nome, CPF, cargo, e-mail e telefone.
 - **Softwares contratados**: nome, quantidade e valor mensal total (já inclui qtd × unitário)
 - **Desconto de licença** em R$ (0 se não houver)
 - **Serviços de implantação**: nome, descrição e valor de cada um (mínimo 1)
@@ -191,6 +194,7 @@ Estrutura de cada entrada:
 | `workspace/legal/contratos/modelos/contrato-licenca-template.md.j2` | Template Jinja2 |
 | `workspace/legal/contratos/clientes/gerados/` | PDFs gerados (nome: `CONTRATO_LIC_{numero}_{cnpj}.pdf`) |
 | `ADWs/scripts/legal/contratos_registro.json` | Registro de todos os contratos (TEF + LIC) |
+| `ADWs/scripts/legal/representantes.json` | Base de representantes legais (pré-fill de signatário) |
 | `workspace/legal/contratos/modelos/contrato-licenca-software-modelo-2026.md` | Modelo de referência (leitura humana) |
 
 ## Erros comuns

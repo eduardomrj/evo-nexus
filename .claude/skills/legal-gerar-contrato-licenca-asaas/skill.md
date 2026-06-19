@@ -79,9 +79,9 @@ Perguntar na seguinte ordem:
 
 | Campo | Obrigatório | Observação |
 |---|---|---|
-| **Nome do signatário** | ✅ Sim | Representante legal que vai assinar |
-| **CPF do signatário** | ✅ Sim | Validar dígitos verificadores |
-| **Cargo do signatário** | ✅ Sim | Ex: Sócio-Administrador, Diretor |
+| **Signatário** | ✅ Sim | Verificar `ADWs/scripts/legal/representantes.json` pelo CNPJ primeiro. Se encontrado, mostrar `ℹ Representante na base: [nome] — [cargo] — confirma usar?` e pré-preencher se confirmado. Se não, coletar nome, CPF e cargo. |
+| **CPF do signatário** | ✅ Sim | Validar dígitos verificadores (pular se pré-preenchido da base) |
+| **Cargo do signatário** | ✅ Sim | Ex: Sócio-Administrador, Diretor (pular se pré-preenchido da base) |
 | **Parceiro/Revendedor?** | ✅ Sim | Sim/não → se sim, listar `parceiros.json` |
 | **Implantação** | ❌ Opcional | Se não informada, lançar R$ 0,00 automaticamente |
 
@@ -185,4 +185,5 @@ Ao final, informar:
 | `ADWs/scripts/legal/parceiros.json` | Cadastro de parceiros |
 | `ADWs/scripts/legal/contratos_registro.json` | Histórico de contratos gerados |
 | `ADWs/scripts/legal/contratos_sequencia.json` | Controle de numeração |
+| `ADWs/scripts/legal/representantes.json` | Base de representantes legais (pré-fill de signatário) |
 | `/tmp/contrato_licenca_asaas.json` | JSON temporário de entrada para o script |
