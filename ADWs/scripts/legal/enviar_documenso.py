@@ -38,12 +38,20 @@ def headers() -> dict:
     return {"Authorization": f"Bearer {API_KEY}"}
 
 
-def ultima_pagina_pdf(pdf_path: Path) -> int:
-    """Retorna o número da última página do PDF (1-based)."""
+def pagina_assinaturas_pdf(pdf_path: Path) -> int:
+    """Detecta a página de assinaturas buscando 'CPF: ___' — linha em branco do
+    bloco de assinaturas da CONTRATADA, que só aparece na página de assinaturas.
+    Retorna o número da página (1-based).
+    Fallback: última página do PDF.
+    """
     doc = fitz.open(str(pdf_path))
-    total = doc.page_count
+    fallback = doc.page_count
+    for i in range(doc.page_count):
+        if "CPF: ___" in doc[i].get_text():
+            doc.close()
+            return i + 1  # 1-based
     doc.close()
-    return total
+    return fallback
 
 
 def checar_config() -> None:
@@ -312,9 +320,9 @@ def main() -> None:
     upload_pdf(upload_url, pdf_path)
 
     # Etapa 2b — campos de assinatura
-    # A página de assinaturas é sempre a última (page-break-before no template)
-    pagina = ultima_pagina_pdf(pdf_path)
-    print(f"  Página de assinaturas detectada: {pagina} (última página do PDF)")
+    # Detecta a página de assinaturas pelo texto âncora no PDF
+    pagina = pagina_assinaturas_pdf(pdf_path)
+    print(f"  Página de assinaturas detectada: {pagina}")
 
     # Índices dependem da presença do parceiro — assinatura sequencial:
     # Com parceiro   : [0]=PARCEIRO (ordem 1), [1]=CONTRATANTE (ordem 2), [-1]=CONTRATADA (ordem 3)
