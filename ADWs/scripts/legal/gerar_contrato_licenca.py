@@ -297,6 +297,11 @@ def gerar_contrato(caminho_json: str) -> Path:
     data        = date.fromisoformat(data_str) if data_str else date.today()
     parceiro    = dados.get("parceiro")   # opcional: {empresa, representante, cpf}
 
+    # Contatos administrativos — obrigatórios: financeiro e contador; opcional: ti
+    contato_financeiro = dados.get("contato_financeiro", {})
+    contato_contador   = dados.get("contato_contador", {})
+    contato_ti         = dados.get("contato_ti")  # None se não informado
+
     # 2. Consultar CNPJ (ou usar dados manuais se fornecidos no JSON)
     empresa_nome_override = dados.get("empresa_nome")
     empresa_endereco_override = dados.get("empresa_endereco")
@@ -354,6 +359,10 @@ def gerar_contrato(caminho_json: str) -> Path:
     if parceiro:
         print(f"  Parceiro   : {parceiro['empresa']} — {parceiro['representante']} (CPF: {parceiro['cpf']})")
     print(f"  Data       : {formatar_data_extenso(data)}")
+    if contato_financeiro:
+        print(f"  Adm/Fin    : {contato_financeiro.get('nome','—')} | {contato_financeiro.get('email','—')}")
+    if contato_contador:
+        print(f"  Contador   : {contato_contador.get('nome','—')} | {contato_contador.get('email','—')}")
     print("─" * 52)
 
     resposta = input("\nConfirma a geração do contrato? [s/N] ").strip().lower()
@@ -391,6 +400,9 @@ def gerar_contrato(caminho_json: str) -> Path:
         total_servicos_fmt      = formatar_brl(total_servicos),
         total_contrato_fmt      = formatar_brl(total_contrato),
         parceiro                = parceiro,
+        contato_financeiro      = contato_financeiro,
+        contato_contador        = contato_contador,
+        contato_ti              = contato_ti,
     )
 
     # 8. Markdown → HTML → PDF

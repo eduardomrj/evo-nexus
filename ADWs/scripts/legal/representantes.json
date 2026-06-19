@@ -1,3 +1,19 @@
 {
-  "representantes": []
+  "representantes": [
+    {
+      "cnpj": "04056245000191",
+      "nome": "CLÉBIO PAIVA SAMPAIO",
+      "cpf": "289.834.833-34",
+      "cargo": "Administrador da Empresa",
+      "email": null,
+      "telefone": null,
+      "doc_tipo": "CNH",
+      "doc_numero": "5013349799",
+      "doc_validade": "2030-05-07",
+      "data_nascimento": "1971-04-27",
+      "filiacao_mae": null,
+      "filiacao_pai": null,
+      "atualizado_em": "2026-06-19"
+    }
+  ]
 }
