@@ -23,6 +23,7 @@ BASE_DIR   = Path(__file__).resolve().parents[3]   # evo-nexus/
 TEMPLATE   = BASE_DIR / "workspace/legal/contratos/modelos/contrato-licenca-template.md.j2"
 OUTPUT_DIR = BASE_DIR / "workspace/legal/contratos/clientes/gerados"
 REGISTRO   = Path(__file__).resolve().parent / "contratos_registro.json"
+SEQUENCIA  = Path(__file__).resolve().parent / "contratos_sequencia.json"
 
 # ── CSS embutido para o PDF ───────────────────────────────────────────────────
 CSS_BASE = """
@@ -83,19 +84,20 @@ strong {{ color: #000; }}
 
 # ── Numeração de contratos ────────────────────────────────────────────────────
 def proximo_numero_contrato(data: date, prefixo: str = "LIC") -> str:
-    """Retorna o próximo número no formato {prefixo}-YYYY-NNNN."""
-    ano = data.year
-    registro = {"contratos": []}
-    if REGISTRO.exists():
-        registro = json.loads(REGISTRO.read_text())
+    """Retorna o próximo número no formato {prefixo}-YYYY-NNNN.
 
-    seq = max(
-        (int(c["numero"].split("-")[2]) for c in registro["contratos"]
-         if c["numero"].startswith(f"{prefixo}-{ano}-")),
-        default=0,
-    ) + 1
+    A sequência é controlada por contratos_sequencia.json — sempre incrementa,
+    nunca reseta por ano nem por remoção de entradas do registro.
+    """
+    seq_data = {"LIC": 0, "TEF": 0}
+    if SEQUENCIA.exists():
+        seq_data = json.loads(SEQUENCIA.read_text())
 
-    return f"{prefixo}-{ano}-{seq:04d}"
+    seq = seq_data.get(prefixo, 0) + 1
+    seq_data[prefixo] = seq
+    SEQUENCIA.write_text(json.dumps(seq_data, indent=2))
+
+    return f"{prefixo}-{data.year}-{seq:04d}"
 
 
 def registrar_contrato(numero: str, cnpj: str, empresa: str,
