@@ -182,15 +182,17 @@ def upload_pdf(upload_url: str, pdf_path: Path) -> None:
 def adicionar_campo_assinatura(doc_id: int, recipient_cliente_id: int,
                                recipient_contratada_id: int,
                                pagina: int = 1,
-                               recipient_parceiro_id: int | None = None) -> None:
-    """Etapa 2b — adiciona campos de assinatura na página dedicada (última página).
+                               recipient_parceiro_id: int | None = None,
+                               y_partes: float = 36.0,
+                               y_parceiro: float = 65.5) -> None:
+    """Etapa 2b — adiciona campos de assinatura na página dedicada.
 
-    A página de assinaturas é sempre uma página nova isolada (page-break-before no template),
-    portanto as coordenadas são fixas independente do tamanho do contrato:
+    Coordenadas padrão calibradas para contrato LIC (pág. ~11):
+    - CONTRATADA/CONTRATANTE → y=36%
+    - PARCEIRO (testemunha)  → y=65.5%
 
-    - CONTRATADA (Automação) → esquerda, y=22%
-    - CONTRATANTE (cliente)  → direita,  y=22%
-    - PARCEIRO (testemunha)  → esquerda, y=55%  (se houver)
+    Para contrato TEF (pág. ~8), usar y_partes=31.8, y_parceiro=61.3
+    (página mais curta → bloco de assinaturas proporcionalmente mais acima).
 
     Coordenadas em % da página (0–100).
     """
@@ -199,23 +201,23 @@ def adicionar_campo_assinatura(doc_id: int, recipient_cliente_id: int,
     print(f"  Adicionando campos de assinatura ({info})...", end=" ", flush=True)
 
     campos = [
-        # CONTRATADA — lado esquerdo, y=22%
+        # CONTRATADA — lado esquerdo
         {
             "recipientId": recipient_contratada_id,
             "type":        "SIGNATURE",
             "pageNumber":  pagina,
             "pageX":       5,
-            "pageY":       22,
+            "pageY":       y_partes,
             "pageWidth":   38,
             "pageHeight":  7,
         },
-        # CONTRATANTE — lado direito, y=22%
+        # CONTRATANTE — lado direito
         {
             "recipientId": recipient_cliente_id,
             "type":        "SIGNATURE",
             "pageNumber":  pagina,
             "pageX":       55,
-            "pageY":       22,
+            "pageY":       y_partes,
             "pageWidth":   38,
             "pageHeight":  7,
         },
@@ -228,7 +230,7 @@ def adicionar_campo_assinatura(doc_id: int, recipient_cliente_id: int,
             "type":        "SIGNATURE",
             "pageNumber":  pagina,
             "pageX":       5,
-            "pageY":       55,
+            "pageY":       y_parceiro,
             "pageWidth":   60,
             "pageHeight":  7,
         })
@@ -244,9 +246,9 @@ def adicionar_campo_assinatura(doc_id: int, recipient_cliente_id: int,
             print(f"✗ ({resp.status_code}) — {resp.text[:200]}")
             sys.exit(1)
 
-    partes_info = "contratada=esquerda, cliente=direita"
+    partes_info = f"contratada=esquerda y={y_partes}%, cliente=direita y={y_partes}%"
     if tem_parceiro:
-        partes_info += ", parceiro=testemunha y=55%"
+        partes_info += f", parceiro=testemunha y={y_parceiro}%"
     print(f"ok ({partes_info})")
 
 
@@ -303,14 +305,15 @@ def adicionar_campos_texto_contato(doc_id: int, recipient_cliente_id: int,
             campo_type = "TEXT"
             meta_type  = "text"
 
+        # y_offset: -3.5% ≈ 40px na escala de renderização A4 do Documenso (~1155px)
         campo = {
             "recipientId": recipient_cliente_id,
             "type":        campo_type,
             "pageNumber":  pagina,
             "pageX":       50,
-            "pageY":       y_pct,
+            "pageY":       round(y_pct + 0.5, 1),
             "pageWidth":   43,
-            "pageHeight":  3,
+            "pageHeight":  1.5,
             "fieldMeta": {
                 "type":        meta_type,
                 "label":       f"{label} — {secao}",
@@ -454,9 +457,18 @@ def main() -> None:
         recipient_cliente_id    = signers[0]["recipientId"]   # CONTRATANTE (ordem 1)
         recipient_contratada_id = signers[1]["recipientId"]   # CONTRATADA  (ordem 2)
 
+    # Posições de assinatura variam por tipo de contrato:
+    #   licenca → y_partes=36.0, y_parceiro=65.5  (pág. ~11, calibrada)
+    #   tef     → y_partes=31.8, y_parceiro=61.3  (pág. ~8, bloco mais acima)
+    if args.tipo == "tef":
+        y_partes, y_parceiro_pos = 24.8, 54.3
+    else:
+        y_partes, y_parceiro_pos = 36.0, 65.5
+
     adicionar_campo_assinatura(doc_id, recipient_cliente_id,
                                recipient_contratada_id, pagina=pagina,
-                               recipient_parceiro_id=recipient_parceiro_id)
+                               recipient_parceiro_id=recipient_parceiro_id,
+                               y_partes=y_partes, y_parceiro=y_parceiro_pos)
 
     # Etapa 2c — campos TEXT para Contatos Administrativos (Anexo III, se existir)
     pagina_iii = pagina_anexo_iii_pdf(pdf_path)

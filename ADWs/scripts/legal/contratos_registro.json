@@ -133,6 +133,28 @@
       },
       "asaas_customer_id": "cus_000103863229",
       "asaas_subscription_id": "sub_u5vexpfhchg1bz1z"
+    },
+    {
+      "numero": "TEF-2026-0012",
+      "cnpj": "04056245000191",
+      "empresa": "Clebio Paiva Sampaio",
+      "tipo": "tef",
+      "modalidade": "smartpos",
+      "data": "2026-06-19",
+      "arquivo": "CONTRATO_TEF_TEF-2026-0012_04056245000191.pdf",
+      "status": "ativo",
+      "vencimento_dia": 5,
+      "smartpos": {
+        "qtd": 1,
+        "adesao": 300.0,
+        "mensalidade": 90.0,
+        "transacao": 0.5
+      },
+      "parceiro": {
+        "empresa": "Inforcell Sistemas",
+        "representante": "Eridan Alves",
+        "cpf": "026.902.583-90"
+      }
     }
   ]
 }

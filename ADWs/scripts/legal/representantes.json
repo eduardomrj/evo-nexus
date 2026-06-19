@@ -14,6 +14,21 @@
       "filiacao_mae": null,
       "filiacao_pai": null,
       "atualizado_em": "2026-06-19"
+    },
+    {
+      "cnpj": "07894234000179",
+      "nome": "FRANCISCO DENIER DE SOUZA SILVA",
+      "cpf": "579.622.351-87",
+      "cargo": "Administrador",
+      "email": null,
+      "telefone": null,
+      "doc_tipo": "CNH",
+      "doc_numero": "01488010830",
+      "doc_validade": "2028-08-29",
+      "data_nascimento": "1972-06-07",
+      "filiacao_mae": "ANTONIA DE SOUZA SILVA",
+      "filiacao_pai": "ANTONIO CHAVES DA SILVA",
+      "atualizado_em": "2026-06-19"
     }
   ]
 }
