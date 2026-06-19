@@ -252,39 +252,71 @@ def adicionar_campo_assinatura(doc_id: int, recipient_cliente_id: int,
 
 def adicionar_campos_texto_contato(doc_id: int, recipient_cliente_id: int,
                                    pdf_path: Path, pagina: int) -> None:
-    """Adiciona campos TEXT na página do Anexo III para o CONTRATANTE preencher
-    Nome/Telefone/E-mail de Adm-Financeiro, Contador e TI durante a assinatura.
+    """Adiciona campos TEXT/EMAIL na página do Anexo III para o CONTRATANTE.
 
-    Usa PyMuPDF para detectar a posição Y de cada label na coluna esquerda da
-    tabela e posiciona o campo TEXT na coluna direita (~50% a 93% de largura).
+    Usa PyMuPDF para detectar a posição Y de cada label na coluna esquerda e
+    posiciona o campo na coluna direita (~50–93% de largura).
+
+    Seções e obrigatoriedade:
+      Seção 0 — Adm/Financeiro  → required=True
+      Seção 1 — Contador        → required=True
+      Seção 2 — TI              → required=False (opcional)
+
+    Tipos de campo:
+      "Nome", "Telefone" → TEXT com fieldMeta (label + required)
+      "E-mail"           → EMAIL com fieldMeta (label + required)
     """
     labels_pos = posicoes_labels_pdf(pdf_path, pagina)
 
     if not labels_pos:
         # Fallback: posições estimadas para A4 com margens padrão do template
         labels_pos = [
-            (20.0, "Nome"), (24.0, "Telefone"), (28.0, "E-mail"),   # Adm/Fin
-            (46.0, "Nome"), (50.0, "Telefone"), (54.0, "E-mail"),   # Contador
-            (68.0, "Nome"), (72.0, "Telefone"), (76.0, "E-mail"),   # TI
+            (20.0, "Nome"), (24.0, "Telefone"), (28.0, "E-mail"),
+            (46.0, "Nome"), (50.0, "Telefone"), (54.0, "E-mail"),
+            (68.0, "Nome"), (72.0, "Telefone"), (76.0, "E-mail"),
         ]
-        print(f"  (labels não detectados — usando posições estimadas)")
+        print("  (labels não detectados no PDF — usando posições estimadas)")
 
-    n_secoes = ["Adm/Fin", "Contador", "TI"]
-    # Agrupar: primeiros 3 resultados de cada label → indexar por ordem Y
-    # A lista já está ordenada por Y, então as 3 primeiras ocorrências de 'Nome'
-    # correspondem a Adm/Fin, Contador, TI respectivamente.
+    # Determinar a seção de cada campo pela ordem de aparição de "Nome"
+    SECOES    = ["Adm/Financeiro", "Contador", "TI"]
+    REQUIRED  = [True,             True,        False]
+    contagem_nome = 0
+    secao_atual   = 0
+    contadores_label: dict[str, int] = {"Nome": 0, "Telefone": 0, "E-mail": 0}
+
     info_txt = f"pág. {pagina}, {len(labels_pos)} campos"
-    print(f"  Adicionando campos TEXT — Contatos Administrativos ({info_txt})...", end=" ", flush=True)
+    print(f"  Adicionando campos de contato ({info_txt})...", end=" ", flush=True)
 
     for y_pct, label in labels_pos:
+        # Avança a seção a cada novo "Nome" (marca início de bloco)
+        if label == "Nome":
+            secao_atual = contadores_label["Nome"]
+        contadores_label[label] += 1
+
+        secao    = SECOES[secao_atual]
+        required = REQUIRED[secao_atual]
+
+        if label == "E-mail":
+            campo_type = "EMAIL"
+            meta_type  = "email"
+        else:
+            campo_type = "TEXT"
+            meta_type  = "text"
+
         campo = {
             "recipientId": recipient_cliente_id,
-            "type":        "NAME",   # TEXT não suportado nesta versão — NAME aceita entrada de texto livre
+            "type":        campo_type,
             "pageNumber":  pagina,
-            "pageX":       50,       # coluna direita da tabela (~50–93%)
+            "pageX":       50,
             "pageY":       y_pct,
             "pageWidth":   43,
             "pageHeight":  3,
+            "fieldMeta": {
+                "type":        meta_type,
+                "label":       f"{label} — {secao}",
+                "placeholder": label,
+                "required":    required,
+            },
         }
         resp = requests.post(
             f"{API_URL}/api/v1/documents/{doc_id}/fields",
