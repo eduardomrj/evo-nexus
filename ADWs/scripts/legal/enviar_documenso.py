@@ -39,12 +39,14 @@ def headers() -> dict:
 
 
 def pagina_anexo_iii_pdf(pdf_path: Path) -> int | None:
-    """Detecta a página do Anexo III buscando 'Anexo III' no texto.
-    Retorna o número da página (1-based) ou None se o anexo não existir no PDF.
+    """Detecta a página do Anexo III buscando 'Contatos Administrativos'.
+    Usa âncora específica porque 'Anexo III' aparece múltiplas vezes no corpo
+    do contrato (referências ao anexo).
+    Retorna o número da página (1-based) ou None se o anexo não existir.
     """
     doc = fitz.open(str(pdf_path))
     for i in range(doc.page_count):
-        if "Anexo III" in doc[i].get_text():
+        if "Contatos Administrativos" in doc[i].get_text():
             doc.close()
             return i + 1
     doc.close()
@@ -277,7 +279,7 @@ def adicionar_campos_texto_contato(doc_id: int, recipient_cliente_id: int,
     for y_pct, label in labels_pos:
         campo = {
             "recipientId": recipient_cliente_id,
-            "type":        "TEXT",
+            "type":        "NAME",   # TEXT não suportado nesta versão — NAME aceita entrada de texto livre
             "pageNumber":  pagina,
             "pageX":       50,       # coluna direita da tabela (~50–93%)
             "pageY":       y_pct,

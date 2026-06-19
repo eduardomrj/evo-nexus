@@ -105,6 +105,34 @@
       },
       "asaas_customer_id": "cus_000103863229",
       "asaas_subscription_id": "sub_u5vexpfhchg1bz1z"
+    },
+    {
+      "numero": "LIC-2026-0014",
+      "cnpj": "04056245000191",
+      "empresa": "Clebio Paiva Sampaio",
+      "tipo": "licenca",
+      "data": "2026-06-19",
+      "arquivo": "CONTRATO_LIC_LIC-2026-0014_04056245000191.pdf",
+      "status": "ativo",
+      "vencimento_dia": 20,
+      "softwares": [
+        "PACOTE EMPORION (Emporion PDV Fiscal, Emporion Manager, Emporion NFe)"
+      ],
+      "total_mensal": 220.31,
+      "signatario": {
+        "nome": "CLÉBIO PAIVA SAMPAIO",
+        "cpf": "289.834.833-34",
+        "cargo": "Administrador da Empresa",
+        "email": "elitanioveiculos@hotmail.com",
+        "telefone": "(88) 99956-3702"
+      },
+      "parceiro": {
+        "empresa": "Inforcell Sistemas",
+        "representante": "Eridan Alves",
+        "cpf": "026.902.583-90"
+      },
+      "asaas_customer_id": "cus_000103863229",
+      "asaas_subscription_id": "sub_u5vexpfhchg1bz1z"
     }
   ]
 }
