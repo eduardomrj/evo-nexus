@@ -100,7 +100,7 @@ Se não houver, montar automaticamente:
 
 ```
 ── Contrato via ASAAS ───────────────────────────────────
-  Cliente    : Elitanio Veículos
+  Cliente    : Elitanio Veículos          (cus_000103863229)
   CNPJ       : 04.056.245/0001-91
   Assinatura : sub_u5vexpfhchg1bz1z — ATIVA
   Software   : PACOTE EMPORION (Emporion PDV Fiscal, Emporion Manager, Emporion NFe)
@@ -128,8 +128,8 @@ Os dados acima estão corretos? Confirma? [s/N]
     "nome": "<NOME>",
     "cpf": "<CPF>",
     "cargo": "<CARGO>",
-    "email": "<EMAIL>",
-    "telefone": "<TELEFONE>"
+    "email": "<EMAIL_DO_ASAAS>",
+    "telefone": "<TELEFONE_DO_ASAAS>"
   },
   "softwares": [
     {
@@ -142,7 +142,9 @@ Os dados acima estão corretos? Confirma? [s/N]
   "servicos": [
     {"nome": "Implantação", "descricao": "Incluso", "valor": 0.00}
   ],
-  "desconto_servicos": 0.00
+  "desconto_servicos": 0.00,
+  "asaas_customer_id": "<CUSTOMER_ID>",
+  "asaas_subscription_id": "<SUBSCRIPTION_ID>"
 }
 ```
 

@@ -105,7 +105,10 @@ def registrar_contrato(numero: str, cnpj: str, empresa: str,
                        vencimento: int | None = None,
                        softwares: list | None = None,
                        total_mensal: float | None = None,
-                       parceiro: dict | None = None) -> None:
+                       parceiro: dict | None = None,
+                       signatario: dict | None = None,
+                       asaas_customer_id: str | None = None,
+                       asaas_subscription_id: str | None = None) -> None:
     """Salva o contrato gerado no registro JSON."""
     registro = {"contratos": []}
     if REGISTRO.exists():
@@ -126,12 +129,24 @@ def registrar_contrato(numero: str, cnpj: str, empresa: str,
         entrada["softwares"] = [s["nome"] for s in softwares]
     if total_mensal is not None:
         entrada["total_mensal"] = round(total_mensal, 2)
+    if signatario:
+        entrada["signatario"] = {
+            "nome":     signatario.get("nome", ""),
+            "cpf":      signatario.get("cpf", ""),
+            "cargo":    signatario.get("cargo", ""),
+            "email":    signatario.get("email", ""),
+            "telefone": signatario.get("telefone", ""),
+        }
     if parceiro:
         entrada["parceiro"] = {
             "empresa":       parceiro["empresa"],
             "representante": parceiro["representante"],
             "cpf":           parceiro["cpf"],
         }
+    if asaas_customer_id:
+        entrada["asaas_customer_id"] = asaas_customer_id
+    if asaas_subscription_id:
+        entrada["asaas_subscription_id"] = asaas_subscription_id
 
     registro["contratos"].append(entrada)
     REGISTRO.write_text(json.dumps(registro, ensure_ascii=False, indent=2))
@@ -408,6 +423,9 @@ def gerar_contrato(caminho_json: str) -> Path:
         vencimento=dados["vencimento"],
         softwares=dados["softwares"],
         total_mensal=total_mensal,
+        signatario=dados.get("signatario"),
+        asaas_customer_id=dados.get("asaas_customer_id"),
+        asaas_subscription_id=dados.get("asaas_subscription_id"),
         parceiro=parceiro,
     )
 
