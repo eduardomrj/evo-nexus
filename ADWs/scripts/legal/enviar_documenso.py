@@ -309,6 +309,11 @@ def adicionar_campos_texto_contato(doc_id: int, recipient_cliente_id: int,
             campo_type = "TEXT"
             meta_type  = "text"
 
+        # Slug único por campo: "email_adm", "nome_contador", "telefone_ti", etc.
+        SECAO_SLUG = {"Adm/Financeiro": "adm", "Contador": "contador", "TI": "ti"}
+        LABEL_SLUG = {"Nome": "nome", "Telefone": "telefone", "E-mail": "email"}
+        field_slug = f"{LABEL_SLUG[label]}_{SECAO_SLUG[secao]}"
+
         # y_offset: -3.5% ≈ 40px na escala de renderização A4 do Documenso (~1155px)
         campo = {
             "recipientId": recipient_cliente_id,
@@ -321,7 +326,7 @@ def adicionar_campos_texto_contato(doc_id: int, recipient_cliente_id: int,
             "fieldMeta": {
                 "type":        meta_type,
                 "label":       f"{label} — {secao}",
-                "placeholder": label,
+                "placeholder": field_slug,
                 "required":    required,
             },
         }
