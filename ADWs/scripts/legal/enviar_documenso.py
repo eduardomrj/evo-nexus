@@ -145,7 +145,11 @@ def criar_documento(titulo: str, nome: str, email: str, email_cc: str | None,
     resp = requests.post(
         f"{API_URL}/api/v1/documents",
         headers={**headers(), "Content-Type": "application/json"},
-        json={"title": titulo, "recipients": recipients},
+        json={
+            "title": titulo,
+            "meta": {"signingOrder": "SEQUENTIAL"},
+            "recipients": recipients,
+        },
         timeout=60,
     )
 
