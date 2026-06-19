@@ -22,6 +22,7 @@ import argparse
 from pathlib import Path
 
 import requests
+import fitz  # PyMuPDF
 from dotenv import load_dotenv
 
 # ── Config ────────────────────────────────────────────────────────────────────
@@ -35,6 +36,14 @@ API_KEY = os.getenv("DOCUMENSO_API_KEY", "")
 # ── Helpers ───────────────────────────────────────────────────────────────────
 def headers() -> dict:
     return {"Authorization": f"Bearer {API_KEY}"}
+
+
+def ultima_pagina_pdf(pdf_path: Path) -> int:
+    """Retorna o número da última página do PDF (1-based)."""
+    doc = fitz.open(str(pdf_path))
+    total = doc.page_count
+    doc.close()
+    return total
 
 
 def checar_config() -> None:
@@ -130,54 +139,54 @@ def upload_pdf(upload_url: str, pdf_path: Path) -> None:
 
 def adicionar_campo_assinatura(doc_id: int, recipient_cliente_id: int,
                                recipient_contratada_id: int,
-                               pagina: int = 11,
-                               page_y: int = 32,
-                               recipient_parceiro_id: int | None = None,
-                               page_y_parceiro: int | None = None) -> None:
-    """Etapa 2b — adiciona campos de assinatura para todos os signatários.
+                               pagina: int = 1,
+                               recipient_parceiro_id: int | None = None) -> None:
+    """Etapa 2b — adiciona campos de assinatura na página dedicada (última página).
 
-    - CONTRATANTE (cliente)  → lado direito (pageX=55)
-    - CONTRATADA (Automação) → lado esquerdo (pageX=5)
-    - PARCEIRO (revendedor)  → seção de testemunhas, linha abaixo (pageX=5, y=page_y_parceiro)
-    Coordenadas em % da página (0-100).
-    page_y padrão por tipo: LIC=29, TEF=22
-    page_y_parceiro padrão: LIC=57, TEF=52
+    A página de assinaturas é sempre uma página nova isolada (page-break-before no template),
+    portanto as coordenadas são fixas independente do tamanho do contrato:
+
+    - CONTRATADA (Automação) → esquerda, y=22%
+    - CONTRATANTE (cliente)  → direita,  y=22%
+    - PARCEIRO (testemunha)  → esquerda, y=55%  (se houver)
+
+    Coordenadas em % da página (0–100).
     """
     tem_parceiro = recipient_parceiro_id is not None
-    info = f"pág. {pagina}, y={page_y}" + (f", parceiro y={page_y_parceiro}" if tem_parceiro else "")
+    info = f"pág. {pagina} (dedicada)" + (", +parceiro" if tem_parceiro else "")
     print(f"  Adicionando campos de assinatura ({info})...", end=" ", flush=True)
 
     campos = [
-        # CONTRATANTE — lado direito
-        {
-            "recipientId": recipient_cliente_id,
-            "type":        "SIGNATURE",
-            "pageNumber":  pagina,
-            "pageX":       55,
-            "pageY":       page_y,
-            "pageWidth":   38,
-            "pageHeight":  7,
-        },
-        # CONTRATADA — lado esquerdo, mesma altura
+        # CONTRATADA — lado esquerdo, y=22%
         {
             "recipientId": recipient_contratada_id,
             "type":        "SIGNATURE",
             "pageNumber":  pagina,
             "pageX":       5,
-            "pageY":       page_y,
+            "pageY":       22,
+            "pageWidth":   38,
+            "pageHeight":  7,
+        },
+        # CONTRATANTE — lado direito, y=22%
+        {
+            "recipientId": recipient_cliente_id,
+            "type":        "SIGNATURE",
+            "pageNumber":  pagina,
+            "pageX":       55,
+            "pageY":       22,
             "pageWidth":   38,
             "pageHeight":  7,
         },
     ]
 
-    # PARCEIRO — testemunha 1, linha abaixo das partes principais
+    # PARCEIRO — testemunha 1, linha abaixo das partes
     if tem_parceiro:
         campos.append({
             "recipientId": recipient_parceiro_id,
             "type":        "SIGNATURE",
             "pageNumber":  pagina,
             "pageX":       5,
-            "pageY":       page_y_parceiro,
+            "pageY":       55,
             "pageWidth":   60,
             "pageHeight":  7,
         })
@@ -193,9 +202,9 @@ def adicionar_campo_assinatura(doc_id: int, recipient_cliente_id: int,
             print(f"✗ ({resp.status_code}) — {resp.text[:200]}")
             sys.exit(1)
 
-    partes_info = "cliente=direita, contratada=esquerda"
+    partes_info = "contratada=esquerda, cliente=direita"
     if tem_parceiro:
-        partes_info += ", parceiro=testemunha"
+        partes_info += ", parceiro=testemunha y=55%"
     print(f"ok ({partes_info})")
 
 
@@ -241,11 +250,8 @@ def main() -> None:
     parser.add_argument("--email",  required=True, help="E-mail do signatário (cliente)")
     parser.add_argument("--titulo", help="Título do documento no Documenso (padrão: nome do arquivo)")
     parser.add_argument("--cc",                  help="E-mail para cópia (ex: copia@automacaosoftware.com.br)")
-    parser.add_argument("--pagina-assinatura",   type=int, default=None,
-                        help="Página onde o campo de assinatura será posicionado "
-                             "(padrão: 11 para licença, 8 para TEF — detectado pelo nome do arquivo)")
     parser.add_argument("--tipo",                choices=["licenca", "tef"], default=None,
-                        help="Tipo do contrato para definir página padrão (licenca=11, tef=8)")
+                        help="Tipo do contrato (informativo — página de assinatura detectada automaticamente)")
     parser.add_argument("--enviar",              action="store_true", default=False,
                         help="Dispara o e-mail de assinatura imediatamente via Documenso. "
                              "Sem esta flag, o documento é criado como DRAFT e o envio "
@@ -253,9 +259,6 @@ def main() -> None:
     # Parceiro/revendedor (opcionais — ambos obrigatórios se um for fornecido)
     parser.add_argument("--parceiro-nome",       help="Nome do representante do parceiro/revendedor")
     parser.add_argument("--parceiro-email",      help="E-mail do parceiro para assinatura eletrônica")
-    parser.add_argument("--y-parceiro",          type=int, default=None,
-                        help="pageY (0-100) do campo de assinatura do parceiro na seção de testemunhas "
-                             "(padrão: 46 para TEF, 57 para LIC — ajuste se necessário)")
     parser.add_argument("--api-key-parceiro-env", default=None,
                         help="Nome da variável de ambiente com o token da equipe do parceiro no Documenso "
                              "(ex: DOCUMENSO_API_KEY_INFORCELL). Quando fornecido, o documento é criado "
@@ -309,27 +312,18 @@ def main() -> None:
     upload_pdf(upload_url, pdf_path)
 
     # Etapa 2b — campos de assinatura
-    is_tef = args.tipo == "tef" or "TEF" in pdf_path.name
-
-    if args.pagina_assinatura:
-        pagina = args.pagina_assinatura
-    elif is_tef:
-        pagina = 8
-    else:
-        pagina = 11   # licença de software
-
-    # pageY por tipo: TEF=22, LIC=29
-    page_y = 22 if is_tef else 29
+    # A página de assinaturas é sempre a última (page-break-before no template)
+    pagina = ultima_pagina_pdf(pdf_path)
+    print(f"  Página de assinaturas detectada: {pagina} (última página do PDF)")
 
     # Índices dependem da presença do parceiro — assinatura sequencial:
     # Com parceiro   : [0]=PARCEIRO (ordem 1), [1]=CONTRATANTE (ordem 2), [-1]=CONTRATADA (ordem 3)
     # Sem parceiro   : [0]=CONTRATANTE (ordem 1), [-1]=CONTRATADA (ordem 2)
     recipients = doc["recipients"]
-    # Filtra só SIGNERs para mapear por e-mail (ignora CC)
     signers = [r for r in recipients if r.get("role") == "SIGNER"]
 
     if tem_parceiro:
-        recipient_parceiro_id   = signers[0]["recipientId"]   # PARCEIRO   (ordem 1)
+        recipient_parceiro_id   = signers[0]["recipientId"]   # PARCEIRO    (ordem 1)
         recipient_cliente_id    = signers[1]["recipientId"]   # CONTRATANTE (ordem 2)
         recipient_contratada_id = signers[2]["recipientId"]   # CONTRATADA  (ordem 3)
     else:
@@ -337,15 +331,9 @@ def main() -> None:
         recipient_cliente_id    = signers[0]["recipientId"]   # CONTRATANTE (ordem 1)
         recipient_contratada_id = signers[1]["recipientId"]   # CONTRATADA  (ordem 2)
 
-    page_y_parceiro = None
-    if tem_parceiro:
-        # pageY padrão da seção de testemunhas: TEF=46, LIC=57 (ajustável via --y-parceiro)
-        page_y_parceiro = args.y_parceiro if args.y_parceiro else (46 if is_tef else 57)
-
     adicionar_campo_assinatura(doc_id, recipient_cliente_id,
-                               recipient_contratada_id, pagina=pagina, page_y=page_y,
-                               recipient_parceiro_id=recipient_parceiro_id,
-                               page_y_parceiro=page_y_parceiro)
+                               recipient_contratada_id, pagina=pagina,
+                               recipient_parceiro_id=recipient_parceiro_id)
 
     # Etapa 3 — disparar e-mail (opcional)
     if args.enviar:
