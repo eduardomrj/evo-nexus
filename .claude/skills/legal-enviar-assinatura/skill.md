@@ -73,7 +73,7 @@ Antes de executar qualquer coisa, ler `ADWs/scripts/legal/contratos_registro.jso
   Arquivo     : CONTRATO_LIC_LIC-2026-0004_12345678000195.pdf
 
 ── Envio para Assinatura ────────────────────────────────
-  Signatário  : Daniel Gomes <danielgsn99@gmail.com>
+  Signatário  : João da Silva <joao@empresa.com.br>
   Contratada  : Automação Comercial LTDA. <eduardo@automacaosoftware.com.br>
   Modo        : DRAFT (envio manual pela plataforma)
   Plataforma  : https://signature.automacaosoftware.com.br
@@ -95,9 +95,9 @@ As informações acima estão corretas? Confirma? [s/N]
   Arquivo     : CONTRATO_LIC_LIC-2026-0004_12345678000195.pdf
 
 ── Envio para Assinatura ────────────────────────────────
-  Signatário  : Daniel Gomes <danielgsn99@gmail.com>
+  Signatário  : João da Silva <joao@empresa.com.br>
   Parceiro    : Eridan Alves <inforcellbvsistemas@gmail.com> (Inforcell Sistemas)
-                → campo de assinatura: seção de testemunhas, pág. 11
+                → assina 1º (sequencial), campo na seção de testemunhas, pág. 11
                 → documento criado na equipe do parceiro no Documenso
   Contratada  : Automação Comercial LTDA. <eduardo@automacaosoftware.com.br>
   Modo        : DRAFT (envio manual pela plataforma)
@@ -203,10 +203,18 @@ python3 /home/evonexus/evo-nexus/ADWs/scripts/legal/enviar_documenso.py \
 - Contrato de **Licença de Software** (`CONTRATO_LIC_*`) → página **11**
 - Contrato **TEF** (`CONTRATO_TEF_*`) → página **8**
 
-**Signatários e campos de assinatura:**
-- CONTRATANTE (cliente) → campo direito, e-mail informado pelo usuário
-- PARCEIRO (revendedor, se houver) → seção de testemunhas (LIC: y=57%, TEF: y=46%), e-mail do cadastro
-- CONTRATADA (Automação) → campo esquerdo, `eduardo@automacaosoftware.com.br`
+**Ordem de assinatura (sequencial):**
+
+Com parceiro:
+1. PARCEIRO → seção de testemunhas (LIC: y=57%, TEF: y=46%), e-mail do cadastro
+2. CONTRATANTE (cliente) → campo direito, e-mail informado pelo usuário
+3. CONTRATADA (Automação) → campo esquerdo, `eduardo@automacaosoftware.com.br`
+
+Sem parceiro:
+1. CONTRATANTE (cliente) → campo direito
+2. CONTRATADA (Automação) → campo esquerdo
+
+Cada signatário só recebe o e-mail após o anterior concluir a assinatura.
 
 **Equipe no Documenso:**
 - Se o parceiro tiver `documenso_api_key_env` no cadastro → documento criado na equipe do parceiro

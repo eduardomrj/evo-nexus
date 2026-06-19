@@ -63,19 +63,31 @@ def criar_documento(titulo: str, nome: str, email: str, email_cc: str | None,
                     parceiro_email: str | None = None) -> dict:
     """Etapa 1 — cria o documento com signatários em uma única chamada.
 
-    Ordem sempre: CONTRATANTE → (PARCEIRO, se houver) → CONTRATADA
-      [0] CONTRATANTE (cliente)       → campo de assinatura no lado direito
-      [1] PARCEIRO (revendedor)       → campo na seção de testemunhas  (opcional)
-      [-1] CONTRATADA (Automação)     → campo de assinatura no lado esquerdo
+    Assinatura SEQUENCIAL:
+      Com parceiro   : PARCEIRO (1) → CONTRATANTE (2) → CONTRATADA (3)
+      Sem parceiro   : CONTRATANTE (1) → CONTRATADA (2)
+
+    Índices em doc['recipients']:
+      [0] PARCEIRO (se houver) ou CONTRATANTE
+      [1] CONTRATANTE (se houver parceiro) ou CONTRATADA
+      [-1] CONTRATADA (sempre o último SIGNER)
     """
     print(f"  Criando documento no Documenso...", end=" ", flush=True)
 
-    recipients = [
-        {"name": nome, "email": email, "role": "SIGNER"},
-    ]
-    if parceiro_nome and parceiro_email:
-        recipients.append({"name": parceiro_nome, "email": parceiro_email, "role": "SIGNER"})
-    recipients.append(ASSINANTE_CONTRATADA)
+    tem_parceiro = bool(parceiro_nome and parceiro_email)
+
+    if tem_parceiro:
+        recipients = [
+            {"name": parceiro_nome,                    "email": parceiro_email,                    "role": "SIGNER", "signingOrder": 1},
+            {"name": nome,                             "email": email,                             "role": "SIGNER", "signingOrder": 2},
+            {**ASSINANTE_CONTRATADA,                                                                                  "signingOrder": 3},
+        ]
+    else:
+        recipients = [
+            {"name": nome,                             "email": email,                             "role": "SIGNER", "signingOrder": 1},
+            {**ASSINANTE_CONTRATADA,                                                                                  "signingOrder": 2},
+        ]
+
     if email_cc:
         recipients.append({"name": "Automação Software", "email": email_cc, "role": "CC"})
 
@@ -309,17 +321,25 @@ def main() -> None:
     # pageY por tipo: TEF=22, LIC=29
     page_y = 22 if is_tef else 29
 
-    # Índices dependem da presença do parceiro
-    # Ordem dos recipients: [0]=CONTRATANTE, [1]=PARCEIRO (se houver), [-1]=CONTRATADA
+    # Índices dependem da presença do parceiro — assinatura sequencial:
+    # Com parceiro   : [0]=PARCEIRO (ordem 1), [1]=CONTRATANTE (ordem 2), [-1]=CONTRATADA (ordem 3)
+    # Sem parceiro   : [0]=CONTRATANTE (ordem 1), [-1]=CONTRATADA (ordem 2)
     recipients = doc["recipients"]
-    recipient_cliente_id    = recipients[0]["recipientId"]   # CONTRATANTE
-    recipient_contratada_id = recipients[-1]["recipientId"]  # CONTRATADA (sempre o último)
+    # Filtra só SIGNERs para mapear por e-mail (ignora CC)
+    signers = [r for r in recipients if r.get("role") == "SIGNER"]
 
-    recipient_parceiro_id = None
-    page_y_parceiro       = None
     if tem_parceiro:
-        recipient_parceiro_id = recipients[1]["recipientId"]   # PARCEIRO
-        # pageY padrão da seção de testemunhas: TEF=52, LIC=57 (ajustável via --y-parceiro)
+        recipient_parceiro_id   = signers[0]["recipientId"]   # PARCEIRO   (ordem 1)
+        recipient_cliente_id    = signers[1]["recipientId"]   # CONTRATANTE (ordem 2)
+        recipient_contratada_id = signers[2]["recipientId"]   # CONTRATADA  (ordem 3)
+    else:
+        recipient_parceiro_id   = None
+        recipient_cliente_id    = signers[0]["recipientId"]   # CONTRATANTE (ordem 1)
+        recipient_contratada_id = signers[1]["recipientId"]   # CONTRATADA  (ordem 2)
+
+    page_y_parceiro = None
+    if tem_parceiro:
+        # pageY padrão da seção de testemunhas: TEF=46, LIC=57 (ajustável via --y-parceiro)
         page_y_parceiro = args.y_parceiro if args.y_parceiro else (46 if is_tef else 57)
 
     adicionar_campo_assinatura(doc_id, recipient_cliente_id,
