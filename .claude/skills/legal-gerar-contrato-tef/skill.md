@@ -18,6 +18,8 @@ Exemplos de trigger:
 Perguntar:
 - **CNPJ** do cliente (aceitar com ou sem formatação)
 - **Modalidade**: SmartPOS / Pinpad / Ambos
+- **Nome do responsável legal** do cliente (representante legal que vai assinar)
+- **CPF do responsável legal** (validar dígitos verificadores antes de prosseguir)
 - **Parceiro/Revendedor**: "Esse contrato tem participação de um parceiro ou revendedor?" (sim/não)
   - Se sim:
     1. Ler `ADWs/scripts/legal/parceiros.json`
@@ -40,6 +42,8 @@ python3 /home/evonexus/evo-nexus/ADWs/scripts/legal/gerar_contrato_tef.py \
   [--vol-smartpos N]                # volume estimado transações SmartPOS/mês (padrão: 500)
   [--vol-pinpad N]                  # volume estimado transações Pinpad/mês (padrão: 500)
   [--data YYYY-MM-DD]               # data da assinatura (padrão: hoje)
+  --signatario-nome "<NOME>"        # nome do responsável legal do cliente
+  --signatario-cpf "<CPF>"          # CPF do responsável legal do cliente
   # Preços customizáveis — omitir usa o padrão da tabela
   [--adesao-smartpos X]             # taxa de adesão SmartPOS (padrão: 150,00)
   [--mensal-smartpos X]             # mensalidade por equip. SmartPOS (padrão: 49,90)

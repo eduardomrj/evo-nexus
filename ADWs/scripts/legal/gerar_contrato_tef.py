@@ -284,6 +284,9 @@ def gerar_contrato(
     # Dados manuais (bypass BrasilAPI)
     empresa_nome_override: str | None = None,
     empresa_endereco_override: str | None = None,
+    # Responsável legal do CONTRATANTE
+    signatario_nome: str | None = None,
+    signatario_cpf: str | None = None,
     # Parceiro/revendedor (opcional)
     parceiro: dict | None = None,
 ) -> Path:
@@ -371,6 +374,8 @@ def gerar_contrato(
         if p_adesao_pp != PRECO_PADRAO["pinpad"]["adesao"] or p_mensal_pp != PRECO_PADRAO["pinpad"]["mensalidade"] or p_trans_pp != PRECO_PADRAO["pinpad"]["transacao"]:
             print(f"  ⚠ Pinpad preço customizado (adesão R$ {formatar_brl(p_adesao_pp)}, mensal R$ {formatar_brl(p_mensal_pp)}, transação R$ {formatar_brl(p_trans_pp)})")
     print(f"  Data      : {formatar_data_extenso(data)}")
+    if signatario_nome:
+        print(f"  Responsável: {signatario_nome}" + (f" — CPF: {signatario_cpf}" if signatario_cpf else ""))
     if parceiro:
         print(f"  Parceiro  : {parceiro['empresa']} — {parceiro['representante']} (CPF: {parceiro['cpf']})")
     print("────────────────────────────────────────────────────\n")
@@ -413,6 +418,7 @@ def gerar_contrato(
         val_mensal_recorrente     = formatar_brl(val_mensal_recorrente),
         numero_contrato           = numero_contrato,
         parceiro                  = parceiro,
+        signatario                = {"nome": signatario_nome or "", "cpf": signatario_cpf or ""},
     )
 
     # 4. Markdown → HTML → PDF
@@ -478,6 +484,9 @@ if __name__ == "__main__":
     parser.add_argument("--trans-pinpad",      type=float, help="Preço por transação Pinpad (padrão: 0,14)")
     parser.add_argument("--empresa-nome",          help="Nome da empresa (bypass BrasilAPI — para CNPJs fictícios ou não cadastrados)")
     parser.add_argument("--empresa-endereco",      help="Endereço da empresa (bypass BrasilAPI)")
+    # Responsável legal do CONTRATANTE
+    parser.add_argument("--signatario-nome",       help="Nome do responsável legal do cliente")
+    parser.add_argument("--signatario-cpf",        help="CPF do responsável legal do cliente")
     # Parceiro/revendedor (todos opcionais — omitir = sem parceiro)
     parser.add_argument("--parceiro-empresa",      help="Nome da empresa parceira/revendedora")
     parser.add_argument("--parceiro-representante",help="Nome do representante do parceiro")
@@ -515,5 +524,7 @@ if __name__ == "__main__":
         transacao_pinpad          = args.trans_pinpad,
         empresa_nome_override     = args.empresa_nome,
         empresa_endereco_override = args.empresa_endereco,
+        signatario_nome           = args.signatario_nome,
+        signatario_cpf            = args.signatario_cpf,
         parceiro                  = parceiro,
     )
