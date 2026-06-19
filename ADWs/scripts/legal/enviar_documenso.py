@@ -38,6 +38,38 @@ def headers() -> dict:
     return {"Authorization": f"Bearer {API_KEY}"}
 
 
+def pagina_anexo_iii_pdf(pdf_path: Path) -> int | None:
+    """Detecta a página do Anexo III buscando 'Anexo III' no texto.
+    Retorna o número da página (1-based) ou None se o anexo não existir no PDF.
+    """
+    doc = fitz.open(str(pdf_path))
+    for i in range(doc.page_count):
+        if "Anexo III" in doc[i].get_text():
+            doc.close()
+            return i + 1
+    doc.close()
+    return None
+
+
+def posicoes_labels_pdf(pdf_path: Path, pagina: int) -> list[tuple[float, str]]:
+    """Retorna lista de (y_percent, label) para cada ocorrência de
+    'Nome', 'Telefone' e 'E-mail' na página do Anexo III, ordenada por Y.
+
+    Cada label aparece exatamente 3 vezes na página (uma por seção):
+      Adm/Financeiro → Contador → TI  (ordem Y crescente)
+    """
+    doc = fitz.open(str(pdf_path))
+    page = doc[pagina - 1]
+    rect = page.rect
+    resultado = []
+    for label in ("Nome", "Telefone", "E-mail"):
+        for r in page.search_for(label):
+            y_pct = round((r.y0 / rect.height) * 100, 1)
+            resultado.append((y_pct, label))
+    doc.close()
+    return sorted(resultado)   # ordena por Y crescente
+
+
 def pagina_assinaturas_pdf(pdf_path: Path) -> int:
     """Detecta a página de assinaturas buscando 'CPF: ___' — linha em branco do
     bloco de assinaturas da CONTRATADA, que só aparece na página de assinaturas.
@@ -216,6 +248,55 @@ def adicionar_campo_assinatura(doc_id: int, recipient_cliente_id: int,
     print(f"ok ({partes_info})")
 
 
+def adicionar_campos_texto_contato(doc_id: int, recipient_cliente_id: int,
+                                   pdf_path: Path, pagina: int) -> None:
+    """Adiciona campos TEXT na página do Anexo III para o CONTRATANTE preencher
+    Nome/Telefone/E-mail de Adm-Financeiro, Contador e TI durante a assinatura.
+
+    Usa PyMuPDF para detectar a posição Y de cada label na coluna esquerda da
+    tabela e posiciona o campo TEXT na coluna direita (~50% a 93% de largura).
+    """
+    labels_pos = posicoes_labels_pdf(pdf_path, pagina)
+
+    if not labels_pos:
+        # Fallback: posições estimadas para A4 com margens padrão do template
+        labels_pos = [
+            (20.0, "Nome"), (24.0, "Telefone"), (28.0, "E-mail"),   # Adm/Fin
+            (46.0, "Nome"), (50.0, "Telefone"), (54.0, "E-mail"),   # Contador
+            (68.0, "Nome"), (72.0, "Telefone"), (76.0, "E-mail"),   # TI
+        ]
+        print(f"  (labels não detectados — usando posições estimadas)")
+
+    n_secoes = ["Adm/Fin", "Contador", "TI"]
+    # Agrupar: primeiros 3 resultados de cada label → indexar por ordem Y
+    # A lista já está ordenada por Y, então as 3 primeiras ocorrências de 'Nome'
+    # correspondem a Adm/Fin, Contador, TI respectivamente.
+    info_txt = f"pág. {pagina}, {len(labels_pos)} campos"
+    print(f"  Adicionando campos TEXT — Contatos Administrativos ({info_txt})...", end=" ", flush=True)
+
+    for y_pct, label in labels_pos:
+        campo = {
+            "recipientId": recipient_cliente_id,
+            "type":        "TEXT",
+            "pageNumber":  pagina,
+            "pageX":       50,       # coluna direita da tabela (~50–93%)
+            "pageY":       y_pct,
+            "pageWidth":   43,
+            "pageHeight":  3,
+        }
+        resp = requests.post(
+            f"{API_URL}/api/v1/documents/{doc_id}/fields",
+            headers={**headers(), "Content-Type": "application/json"},
+            json=campo,
+            timeout=30,
+        )
+        if resp.status_code not in (200, 201):
+            print(f"✗ ({resp.status_code}) — {resp.text[:200]}")
+            sys.exit(1)
+
+    print("ok")
+
+
 def disparar_envio(doc_id: int) -> dict:
     """Etapa 3 — instrui o Documenso a iniciar o fluxo de assinatura.
     É o Documenso quem envia o e-mail ao signatário via SMTP configurado."""
@@ -342,6 +423,13 @@ def main() -> None:
     adicionar_campo_assinatura(doc_id, recipient_cliente_id,
                                recipient_contratada_id, pagina=pagina,
                                recipient_parceiro_id=recipient_parceiro_id)
+
+    # Etapa 2c — campos TEXT para Contatos Administrativos (Anexo III, se existir)
+    pagina_iii = pagina_anexo_iii_pdf(pdf_path)
+    if pagina_iii:
+        adicionar_campos_texto_contato(doc_id, recipient_cliente_id, pdf_path, pagina_iii)
+    else:
+        print("  Anexo III não encontrado — campos de contato não adicionados")
 
     # Etapa 3 — disparar e-mail (opcional)
     if args.enviar:

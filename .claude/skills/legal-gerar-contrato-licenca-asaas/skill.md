@@ -84,9 +84,6 @@ Perguntar na seguinte ordem:
 | **Cargo do signatário** | ✅ Sim | Ex: Sócio-Administrador, Diretor (pular se pré-preenchido da base) |
 | **Parceiro/Revendedor?** | ✅ Sim | Sim/não → se sim, listar `parceiros.json` |
 | **Implantação** | ❌ Opcional | Se não informada, lançar R$ 0,00 automaticamente |
-| **Contato Adm/Financeiro** | ✅ Sim | Nome, telefone, e-mail — oferecer pré-preencher com dados do signatário |
-| **Contato Contador** | ✅ Sim | Nome, telefone, e-mail |
-| **Contato TI** | ❌ Opcional | Nome, telefone, e-mail — pular se não houver |
 
 E-mail e telefone vêm do ASAAS (`customer.email` e `customer.mobilePhone`).
 Se estiverem vazios no ASAAS, perguntar ao usuário.

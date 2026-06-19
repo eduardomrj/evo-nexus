@@ -35,10 +35,6 @@ Perguntar ao usuário:
     4. Usar os dados do cadastro (empresa, representante, cpf, email) — não pedir novamente
     - Se o parceiro não estiver no cadastro: coletar empresa, representante, CPF e email manualmente
       e orientar o usuário a adicionar em `ADWs/scripts/legal/parceiros.json` para uso futuro
-- **Contato Administrativo/Financeiro** (obrigatório): nome, telefone, e-mail
-  - Dica: oferecer pré-preencher com os dados do signatário se for a mesma pessoa
-- **Contato Contábil / Contador** (obrigatório): nome, telefone, e-mail
-- **Contato Técnico de TI** (opcional): nome, telefone, e-mail — pular se não houver
 - **Data** da assinatura (padrão: hoje — só perguntar se o usuário indicar outra)
 
 Não calcular preços unitários — o usuário informa o **valor_mensal total da linha**.
@@ -67,17 +63,6 @@ Não calcular preços unitários — o usuário informa o **valor_mensal total d
   ],
   "desconto_servicos": 0.00,
   "data": "2026-06-12",
-  "contato_financeiro": {
-    "nome": "Maria Silva",
-    "telefone": "(85) 99999-0001",
-    "email": "financeiro@empresa.com.br"
-  },
-  "contato_contador": {
-    "nome": "João Contador",
-    "telefone": "(85) 99999-0002",
-    "email": "contador@escritorio.com.br"
-  },
-  "contato_ti": null,                    // omitir ou null se não houver
   "parceiro": {                          // omitir se não houver parceiro
     "empresa": "Distribuidora ABC Ltda",
     "representante": "João da Silva",
@@ -111,6 +96,8 @@ Não calcular preços unitários — o usuário informa o **valor_mensal total d
 | `parceiro.cpf` | string | não* | CPF do representante (validado) |
 
 \* Omitir o objeto `parceiro` inteiro quando não houver. Se presente, os 3 campos são obrigatórios.
+
+> **Contatos Administrativos (Anexo III):** não coletados durante a geração. O CONTRATANTE preenche Nome/Telefone/E-mail de Adm-Financeiro, Contador e TI diretamente no Documenso durante a assinatura eletrônica — campos TEXT são inseridos automaticamente pelo `enviar_documenso.py`.
 
 ### 3. Salvar JSON e executar o script
 
