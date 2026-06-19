@@ -1,0 +1,1 @@
+/home/evonexus/evo-projects/go-control/go-cobranca/docs/plans/mvp/[C]verification-go-cobranca-mvp.md

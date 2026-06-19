@@ -1,0 +1,1 @@
+/home/evonexus/evo-projects/go-control/go-cobranca/docs/plans/adr-alignment/[C]plan-adr-alignment.md
