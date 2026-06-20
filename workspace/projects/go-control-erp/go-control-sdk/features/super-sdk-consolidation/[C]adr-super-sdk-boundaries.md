@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/go-control/go-control-sdk/docs/features/super-sdk-consolidation/[C]adr-super-sdk-boundaries.md

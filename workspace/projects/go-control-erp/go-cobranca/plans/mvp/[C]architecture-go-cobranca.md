@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/go-control/go-cobranca/docs/plans/mvp/[C]architecture-go-cobranca.md

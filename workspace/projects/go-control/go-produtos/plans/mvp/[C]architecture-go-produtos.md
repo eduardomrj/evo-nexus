@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/go-control/go-produtos/docs/plans/mvp/[C]architecture-go-produtos.md

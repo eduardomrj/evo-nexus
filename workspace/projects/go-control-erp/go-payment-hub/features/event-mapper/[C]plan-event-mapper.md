@@ -1,1 +1,0 @@
-/home/evonexus/evo-projects/go-control/go-payment-hub/docs/features/event-mapper/[C]plan-event-mapper.md
