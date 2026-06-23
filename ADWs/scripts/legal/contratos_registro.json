@@ -1,28 +1,6 @@
 {
   "contratos": [
     {
-      "numero": "TEF-2026-0010",
-      "cnpj": "04056245000191",
-      "empresa": "Clebio Paiva Sampaio",
-      "tipo": "tef",
-      "modalidade": "smartpos",
-      "data": "2026-06-19",
-      "arquivo": "CONTRATO_TEF_TEF-2026-0010_04056245000191.pdf",
-      "status": "ativo",
-      "vencimento_dia": 5,
-      "smartpos": {
-        "qtd": 1,
-        "adesao": 150.0,
-        "mensalidade": 49.9,
-        "transacao": 0.25
-      },
-      "parceiro": {
-        "empresa": "Inforcell Sistemas",
-        "representante": "Eridan Alves",
-        "cpf": "026.902.583-90"
-      }
-    },
-    {
       "numero": "LIC-2026-0011",
       "cnpj": "04056245000191",
       "empresa": "Clebio Paiva Sampaio",
@@ -154,7 +132,199 @@
         "empresa": "Inforcell Sistemas",
         "representante": "Eridan Alves",
         "cpf": "026.902.583-90"
+      },
+      "asaas_customer_id": "cus_000103863229",
+      "asaas_adesao_payment_id": "pay_15s32xtl37rgwroz",
+      "asaas_adesao_due_date": "2026-06-24",
+      "asaas_adesao_valor": 300.0,
+      "asaas_subscription_id": "sub_dz0z2bnanlv16bvo",
+      "asaas_subscription_next_due": "2026-08-05"
+    },
+    {
+      "numero": "LIC-2026-0015",
+      "cnpj": "07894234000179",
+      "empresa": "Francisco Denier De Souza Silva",
+      "tipo": "licenca",
+      "data": "2026-06-19",
+      "arquivo": "CONTRATO_LIC_LIC-2026-0015_07894234000179.pdf",
+      "status": "ativo",
+      "vencimento_dia": 20,
+      "softwares": [
+        "PACOTE EMPORION (Emporion PDV Fiscal, Emporion Manager, PDV Recovery)"
+      ],
+      "total_mensal": 253.63,
+      "signatario": {
+        "nome": "FRANCISCO DENIER DE SOUZA SILVA",
+        "cpf": "579.622.351-87",
+        "cargo": "Administrador",
+        "email": "msfdenier@gmail.com",
+        "telefone": "(88) 98141-8710"
+      },
+      "parceiro": {
+        "empresa": "Inforcell Sistemas",
+        "representante": "Eridan Alves",
+        "cpf": "026.902.583-90"
+      },
+      "asaas_customer_id": "cus_000103865243",
+      "asaas_subscription_id": "sub_sq3tjxhhjpwibml7"
+    },
+    {
+      "numero": "TEF-2026-0013",
+      "cnpj": "07894234000179",
+      "empresa": "Francisco Denier De Souza Silva",
+      "tipo": "tef",
+      "modalidade": "smartpos",
+      "data": "2026-06-19",
+      "arquivo": "CONTRATO_TEF_TEF-2026-0013_07894234000179.pdf",
+      "status": "ativo",
+      "vencimento_dia": 5,
+      "smartpos": {
+        "qtd": 1,
+        "adesao": 250.0,
+        "mensalidade": 90.0,
+        "transacao": 0.5
+      },
+      "parceiro": {
+        "empresa": "Inforcell Sistemas",
+        "representante": "Eridan Alves",
+        "cpf": "026.902.583-90"
       }
+    },
+    {
+      "numero": "LIC-2026-0016",
+      "cnpj": "15234197000109",
+      "empresa": "Maria Rosimeiry Pereira De Sousa",
+      "tipo": "licenca",
+      "data": "2026-06-19",
+      "arquivo": "CONTRATO_LIC_LIC-2026-0016_15234197000109.pdf",
+      "status": "ativo",
+      "vencimento_dia": 20,
+      "softwares": [
+        "PACOTE EMPORION (Emporion PDV Fiscal, Emporion Manager, PDV Recovery)"
+      ],
+      "total_mensal": 253.63,
+      "signatario": {
+        "nome": "MARIA ROSIMEIRY PEREIRA DE SOUSA",
+        "cpf": "614.623.223-87",
+        "cargo": "Administradora da Empresa",
+        "email": "msfdenier@gmail.com",
+        "telefone": "(88) 98141-8710"
+      },
+      "parceiro": {
+        "empresa": "Inforcell Sistemas",
+        "representante": "Eridan Alves",
+        "cpf": "026.902.583-90"
+      },
+      "asaas_customer_id": "cus_000103989514",
+      "asaas_subscription_id": "sub_qadpk5gcbtoykbby"
+    },
+    {
+      "numero": "TEF-2026-0014",
+      "cnpj": "15234197000109",
+      "empresa": "Maria Rosimeiry Pereira De Sousa",
+      "tipo": "tef",
+      "modalidade": "smartpos",
+      "data": "2026-06-19",
+      "arquivo": "CONTRATO_TEF_TEF-2026-0014_15234197000109.pdf",
+      "status": "ativo",
+      "vencimento_dia": 5,
+      "smartpos": {
+        "qtd": 1,
+        "adesao": 250.0,
+        "mensalidade": 90.0,
+        "transacao": 0.5
+      },
+      "parceiro": {
+        "empresa": "Inforcell Sistemas",
+        "representante": "Eridan Alves",
+        "cpf": "026.902.583-90"
+      }
+    },
+    {
+      "numero": "LIC-2026-0017",
+      "cnpj": "29628459000116",
+      "empresa": "Deposito De Gas Nossa Senhora Aparecida Ltda",
+      "tipo": "licenca",
+      "data": "2026-06-19",
+      "arquivo": "CONTRATO_LIC_LIC-2026-0017_29628459000116.pdf",
+      "status": "ativo",
+      "vencimento_dia": 20,
+      "softwares": [
+        "PACOTE EMPORION (PDV Recovery, Emporion PDV Fiscal, Emporion Manager, Emporion NFe)"
+      ],
+      "total_mensal": 273.04,
+      "signatario": {
+        "nome": "MARIA ROSIMEIRY PEREIRA DE SOUSA",
+        "cpf": "614.623.223-87",
+        "cargo": "Administradora da Empresa",
+        "email": "msfdenier@gmail.com",
+        "telefone": "(88) 98141-8710"
+      },
+      "asaas_customer_id": "cus_000103970445",
+      "asaas_subscription_id": "sub_1sapi12ivynz31xi"
+    },
+    {
+      "numero": "TEF-2026-0016",
+      "cnpj": "29628459000116",
+      "empresa": "Deposito De Gas Nossa Senhora Aparecida Ltda",
+      "tipo": "tef",
+      "modalidade": "smartpos",
+      "data": "2026-06-19",
+      "arquivo": "CONTRATO_TEF_TEF-2026-0016_29628459000116.pdf",
+      "status": "ativo",
+      "vencimento_dia": 5,
+      "smartpos": {
+        "qtd": 1,
+        "adesao": 250.0,
+        "mensalidade": 90.0,
+        "transacao": 0.5
+      }
+    },
+    {
+      "numero": "LIC-2026-0018",
+      "cnpj": "07233020000151",
+      "empresa": "Natalio Fernandes Amaro",
+      "tipo": "licenca",
+      "data": "2026-06-19",
+      "arquivo": "CONTRATO_LIC_LIC-2026-0018_07233020000151.pdf",
+      "status": "ativo",
+      "vencimento_dia": 10,
+      "softwares": [
+        "PACOTE EMPORION (Emporion PDV Fiscal, Emporion NFe, Emporion Plus, Emporion Manager)"
+      ],
+      "total_mensal": 398.38,
+      "signatario": {
+        "nome": "NATALIO FERNANDES AMARO",
+        "cpf": "016.590.773-89",
+        "cargo": "Administrador",
+        "email": "nataliofernandes.a@gmail.com",
+        "telefone": "(88) 99930-1925"
+      },
+      "asaas_customer_id": "cus_000103877471",
+      "asaas_subscription_id": "sub_mb4gs15c4a6yx9b8"
+    },
+    {
+      "numero": "TEF-2026-0017",
+      "cnpj": "07233020000151",
+      "empresa": "Natalio Fernandes Amaro",
+      "tipo": "tef",
+      "modalidade": "smartpos",
+      "data": "2026-06-19",
+      "arquivo": "CONTRATO_TEF_TEF-2026-0017_07233020000151.pdf",
+      "status": "ativo",
+      "vencimento_dia": 5,
+      "smartpos": {
+        "qtd": 1,
+        "adesao": 300.0,
+        "mensalidade": 90.0,
+        "transacao": 0.5
+      },
+      "asaas_customer_id": "cus_000103877471",
+      "asaas_adesao_payment_id": "pay_sg5tlpcad21crbmd",
+      "asaas_adesao_due_date": "2026-06-24",
+      "asaas_adesao_valor": 300.0,
+      "asaas_subscription_id": "sub_mnfmo5kbzkqo0ygk",
+      "asaas_subscription_next_due": "2026-08-05"
     }
   ]
 }
