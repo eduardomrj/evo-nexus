@@ -17,6 +17,7 @@ Requer no .env:
 
 import sys
 import os
+import re
 import json
 import argparse
 from pathlib import Path
@@ -302,7 +303,10 @@ def adicionar_campos_texto_contato(doc_id: int, recipient_cliente_id: int,
         secao    = SECOES[secao_atual]
         required = REQUIRED[secao_atual]
 
-        if label == "E-mail":
+        if label == "E-mail" and secao_atual == 0:
+            # Apenas Adm/Financeiro usa tipo EMAIL (auto-preenchido pelo Documenso
+            # com o e-mail do signatário). Contador e TI ficam como TEXT para
+            # evitar que o Documenso replique o mesmo e-mail nos três campos.
             campo_type = "EMAIL"
             meta_type  = "email"
         else:
@@ -422,7 +426,18 @@ def main() -> None:
         print("✗ --parceiro-nome e --parceiro-email devem ser fornecidos juntos")
         sys.exit(1)
 
-    titulo = args.titulo or pdf_path.stem.replace("_", " ")
+    def _fmt_cnpj(c: str) -> str:
+        c = re.sub(r"\D", "", c)
+        return f"{c[:2]}.{c[2:5]}.{c[5:8]}/{c[8:12]}-{c[12:14]}" if len(c) == 14 else c
+
+    if args.titulo:
+        titulo = args.titulo
+    else:
+        _m = re.match(r"CONTRATO_(?:LIC|TEF)_(.+)_(\d{14})$", pdf_path.stem)
+        if _m:
+            titulo = f"{_fmt_cnpj(_m.group(2))} - {args.nome} - {_m.group(1)}"
+        else:
+            titulo = pdf_path.stem.replace("_", " ")
 
     modo = "ENVIO AUTOMÁTICO (e-mail disparado)" if args.enviar else "DRAFT (envio manual pela plataforma)"
     print(f"\n── Documenso — {modo} ─────────────────")
