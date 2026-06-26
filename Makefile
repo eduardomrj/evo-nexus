@@ -154,17 +154,19 @@ zoho-mail-auth:     ## 🔐 Zoho Mail OAuth2 login (one-time: capture access + r
 	@python3 .claude/skills/custom-int-zoho-mail/scripts/zoho_mail_auth.py
 
 telegram:           ## 📨 Start Telegram bot in background (screen)
-	@if screen -list | grep -q '\.telegram'; then \
-		echo "⚠ Telegram bot is already running. Use 'make telegram-stop' first or 'make telegram-attach' to connect."; \
-	else \
-		screen -dmS telegram claude --channels plugin:telegram@claude-plugins-official --dangerously-skip-permissions; \
-		echo "✅ Telegram bot running in background (screen: telegram)"; \
-		echo "📺 Ver: screen -r telegram"; \
-		echo "🛑 Parar: make telegram-stop"; \
-	fi
+	@pkill -9 -f 'claude.*plugin:telegram' 2>/dev/null || true
+	@screen -S telegram -X quit 2>/dev/null || true
+	@sleep 1
+	@screen -dmS telegram claude --channels plugin:telegram@claude-plugins-official --dangerously-skip-permissions
+	@echo "✅ Telegram bot running in background (screen: telegram)"
+	@echo "📺 Ver: screen -r telegram"
+	@echo "🛑 Parar: make telegram-stop"
 
 telegram-stop:      ## 🛑 Stop the Telegram bot
-	@screen -S telegram -X quit 2>/dev/null && echo "✅ Telegram bot stopped" || echo "⚠ Was not running"
+	@screen -S telegram -X quit 2>/dev/null || true
+	@sleep 1
+	@pkill -9 -f 'claude.*plugin:telegram' 2>/dev/null || true
+	@echo "✅ Telegram bot stopped"
 
 telegram-attach:    ## 📺 Connect to Telegram terminal (Ctrl+A D to detach)
 	@screen -r telegram
