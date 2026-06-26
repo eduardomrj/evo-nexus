@@ -1,90 +1,6 @@
 {
   "contratos": [
     {
-      "numero": "LIC-2026-0011",
-      "cnpj": "04056245000191",
-      "empresa": "Clebio Paiva Sampaio",
-      "tipo": "licenca",
-      "data": "2026-06-19",
-      "arquivo": "CONTRATO_LIC_LIC-2026-0011_04056245000191.pdf",
-      "status": "ativo",
-      "vencimento_dia": 20,
-      "softwares": [
-        "PACOTE EMPORION (Emporion PDV Fiscal, Emporion Manager, Emporion NFe)"
-      ],
-      "total_mensal": 220.31,
-      "signatario": {
-        "nome": "CLÉBIO PAIVA SAMPAIO",
-        "cpf": "289.834.833-34",
-        "cargo": "Administrador da Empresa",
-        "email": "elitanioveiculos@hotmail.com",
-        "telefone": "(88) 99956-3702"
-      },
-      "parceiro": {
-        "empresa": "Inforcell Sistemas",
-        "representante": "Eridan Alves",
-        "cpf": "026.902.583-90"
-      },
-      "asaas_customer_id": "cus_000103863229",
-      "asaas_subscription_id": "sub_u5vexpfhchg1bz1z"
-    },
-    {
-      "numero": "LIC-2026-0012",
-      "cnpj": "04056245000191",
-      "empresa": "Clebio Paiva Sampaio",
-      "tipo": "licenca",
-      "data": "2026-06-19",
-      "arquivo": "CONTRATO_LIC_LIC-2026-0012_04056245000191.pdf",
-      "status": "ativo",
-      "vencimento_dia": 20,
-      "softwares": [
-        "PACOTE EMPORION (Emporion PDV Fiscal, Emporion Manager, Emporion NFe)"
-      ],
-      "total_mensal": 220.31,
-      "signatario": {
-        "nome": "CLÉBIO PAIVA SAMPAIO",
-        "cpf": "289.834.833-34",
-        "cargo": "Administrador da Empresa",
-        "email": "elitanioveiculos@hotmail.com",
-        "telefone": "(88) 99956-3702"
-      },
-      "parceiro": {
-        "empresa": "Inforcell Sistemas",
-        "representante": "Eridan Alves",
-        "cpf": "026.902.583-90"
-      },
-      "asaas_customer_id": "cus_000103863229",
-      "asaas_subscription_id": "sub_u5vexpfhchg1bz1z"
-    },
-    {
-      "numero": "LIC-2026-0013",
-      "cnpj": "04056245000191",
-      "empresa": "Clebio Paiva Sampaio",
-      "tipo": "licenca",
-      "data": "2026-06-19",
-      "arquivo": "CONTRATO_LIC_LIC-2026-0013_04056245000191.pdf",
-      "status": "ativo",
-      "vencimento_dia": 20,
-      "softwares": [
-        "PACOTE EMPORION (Emporion PDV Fiscal, Emporion Manager, Emporion NFe)"
-      ],
-      "total_mensal": 220.31,
-      "signatario": {
-        "nome": "CLÉBIO PAIVA SAMPAIO",
-        "cpf": "289.834.833-34",
-        "cargo": "Administrador da Empresa",
-        "email": "elitanioveiculos@hotmail.com",
-        "telefone": "(88) 99956-3702"
-      },
-      "parceiro": {
-        "empresa": "Inforcell Sistemas",
-        "representante": "Eridan Alves",
-        "cpf": "026.902.583-90"
-      },
-      "asaas_customer_id": "cus_000103863229",
-      "asaas_subscription_id": "sub_u5vexpfhchg1bz1z"
-    },
-    {
       "numero": "LIC-2026-0014",
       "cnpj": "04056245000191",
       "empresa": "Clebio Paiva Sampaio",
@@ -102,7 +18,9 @@
         "cpf": "289.834.833-34",
         "cargo": "Administrador da Empresa",
         "email": "elitanioveiculos@hotmail.com",
-        "telefone": "(88) 99956-3702"
+        "telefone": "(88) 99956-3702",
+        "rg": "101532086",
+        "data_nascimento": "1971-04-27"
       },
       "parceiro": {
         "empresa": "Inforcell Sistemas",
@@ -325,6 +243,187 @@
       "asaas_adesao_valor": 300.0,
       "asaas_subscription_id": "sub_mnfmo5kbzkqo0ygk",
       "asaas_subscription_next_due": "2026-08-05"
+    },
+    {
+      "numero": "LIC-2026-0021",
+      "cnpj": "13249364000232",
+      "empresa": "M F Diniz",
+      "tipo": "licenca",
+      "data": "2026-06-23",
+      "arquivo": "CONTRATO_LIC_LIC-2026-0021_13249364000232.pdf",
+      "status": "desistido",
+      "vencimento_dia": 20,
+      "softwares": [
+        "PACOTE EMPORION (Emporion PDV, Emporion Manager, Emporion NFe, Emporion PDV Fiscal, Hércules Assistência)"
+      ],
+      "total_mensal": 192.25,
+      "signatario": {
+        "nome": "MATHEUS FERREIRA DINIZ",
+        "cpf": "993.008.503-34",
+        "cargo": "Administrador da Empresa",
+        "email": "matheusfdiniz@hotmail.com",
+        "telefone": "(85) 99707-1632"
+      },
+      "asaas_customer_id": "cus_000103987805",
+      "asaas_subscription_id": "sub_wbr34v70lezdjent"
+    },
+    {
+      "numero": "LIC-2026-0022",
+      "cnpj": "13249364000151",
+      "empresa": "M F Diniz",
+      "tipo": "licenca",
+      "data": "2026-06-23",
+      "arquivo": "CONTRATO_LIC_LIC-2026-0022_13249364000151.pdf",
+      "status": "desistido",
+      "vencimento_dia": 15,
+      "softwares": [
+        "PACOTE EMPORION (Emporion PDV, Emporion Manager, Emporion NFe, Hércules Assistência)"
+      ],
+      "total_mensal": 248.54,
+      "signatario": {
+        "nome": "MATHEUS FERREIRA DINIZ",
+        "cpf": "993.008.503-34",
+        "cargo": "Administrador da Empresa",
+        "email": "matheusfdiniz@hotmail.com",
+        "telefone": "(85) 99707-1632"
+      },
+      "asaas_customer_id": "cus_000103837999",
+      "asaas_subscription_id": "sub_4cp4joeavgoyo2sa"
+    },
+    {
+      "numero": "TEF-2026-0020",
+      "cnpj": "13249364000232",
+      "empresa": "M F Diniz",
+      "tipo": "tef",
+      "modalidade": "smartpos",
+      "data": "2026-06-23",
+      "arquivo": "CONTRATO_TEF_TEF-2026-0020_13249364000232.pdf",
+      "status": "desistido",
+      "vencimento_dia": 5,
+      "smartpos": {
+        "qtd": 1,
+        "adesao": 150.0,
+        "mensalidade": 49.7,
+        "transacao": 0.25
+      }
+    },
+    {
+      "numero": "TEF-2026-0021",
+      "cnpj": "13249364000151",
+      "empresa": "M F Diniz",
+      "tipo": "tef",
+      "modalidade": "smartpos",
+      "data": "2026-06-23",
+      "arquivo": "CONTRATO_TEF_TEF-2026-0021_13249364000151.pdf",
+      "status": "desistido",
+      "vencimento_dia": 5,
+      "smartpos": {
+        "qtd": 1,
+        "adesao": 150.0,
+        "mensalidade": 49.7,
+        "transacao": 0.25
+      }
+    },
+    {
+      "numero": "TEF-2026-0024",
+      "cnpj": "09943401000150",
+      "empresa": "Papelaria & Presentes",
+      "tipo": "tef",
+      "modalidade": "smartpos",
+      "data": "2026-06-24",
+      "arquivo": "CONTRATO_TEF_TEF-2026-0024_09943401000150.pdf",
+      "status": "ativo",
+      "vencimento_dia": 5,
+      "smartpos": {
+        "qtd": 1,
+        "adesao": 150.0,
+        "mensalidade": 49.7,
+        "transacao": 0.25
+      },
+      "asaas_customer_id": "cus_000103988800",
+      "asaas_adesao_payment_id": "pay_f9ia50o2s40fppjf",
+      "asaas_adesao_due_date": "2026-06-26",
+      "asaas_adesao_valor": 150.0,
+      "asaas_subscription_id": "sub_is2j46rh6idgfpg8",
+      "asaas_subscription_next_due": "2026-09-05"
+    },
+    {
+      "numero": "LIC-2026-0025",
+      "cnpj": "12286379000127",
+      "empresa": "Vanuzia Cristina Santos Da Silva",
+      "tipo": "licenca",
+      "data": "2026-06-25",
+      "arquivo": "CONTRATO_LIC_LIC-2026-0025_12286379000127.pdf",
+      "status": "ativo",
+      "vencimento_dia": 10,
+      "softwares": [
+        "PACOTE EMPORION (PDV Fiscal, Manager)"
+      ],
+      "total_mensal": 201.03,
+      "signatario": {
+        "nome": "Vanuzia Cristina Santos Da Silva",
+        "cpf": "009.649.444-13",
+        "cargo": "Administradora da Empresa",
+        "email": "lojacanaapereiro.ce@gmail.com",
+        "telefone": "(88) 99709-0006"
+      },
+      "parceiro": {
+        "empresa": "Solutiontec Soluções Tecnológicas Ltda",
+        "representante": "Paulo Kleber Tavares Rodrigues",
+        "cpf": "228.920.103-06"
+      },
+      "asaas_customer_id": "cus_000103874386",
+      "asaas_subscription_id": "sub_ktn5iq5i1z867jxv"
+    },
+    {
+      "numero": "TEF-2026-0025",
+      "cnpj": "12286379000127",
+      "empresa": "Vanuzia Cristina Santos Da Silva",
+      "tipo": "tef",
+      "modalidade": "smartpos",
+      "data": "2026-06-25",
+      "arquivo": "CONTRATO_TEF_TEF-2026-0025_12286379000127.pdf",
+      "status": "ativo",
+      "vencimento_dia": 5,
+      "smartpos": {
+        "qtd": 1,
+        "adesao": 150.0,
+        "mensalidade": 49.7,
+        "transacao": 0.25
+      },
+      "parceiro": {
+        "empresa": "Solutiontec Soluções Tecnológicas Ltda",
+        "representante": "Paulo Kleber Tavares Rodrigues",
+        "cpf": "228.920.103-06"
+      }
+    },
+    {
+      "numero": "LIC-2026-0026",
+      "cnpj": "09943401000150",
+      "empresa": "Papelaria & Presentes",
+      "tipo": "licenca",
+      "data": "2026-06-25",
+      "arquivo": "CONTRATO_LIC_LIC-2026-0026_09943401000150.pdf",
+      "status": "ativo",
+      "vencimento_dia": 20,
+      "softwares": [
+        "PACOTE EMPORION (PDV Fiscal, Manager)"
+      ],
+      "total_mensal": 250.94,
+      "signatario": {
+        "nome": "Maria Helena de Queiróz Cavalcante",
+        "cpf": "195.384.483-91",
+        "cargo": "Administradora da Empresa",
+        "email": "papelariapresentes@hotmail.com",
+        "telefone": "(88) 99966-3358"
+      },
+      "parceiro": {
+        "empresa": "Solutiontec Soluções Tecnológicas Ltda",
+        "representante": "Paulo Kleber Tavares Rodrigues",
+        "cpf": "228.920.103-06"
+      },
+      "asaas_customer_id": "cus_000103988800",
+      "asaas_subscription_id": "sub_hmdrl573t5rh5u2g"
     }
   ]
 }
