@@ -1,0 +1,1 @@
+/home/evonexus/evo-projects/go-control/go-control-admin/features/core-services-independence/[C]architecture-core-services-independence.md

@@ -1,0 +1,1 @@
+/home/evonexus/evo-projects/go-control/go-control-admin/features/core-services-independence/[C]adr-step42-remocao-auth-central.md
