@@ -48,17 +48,15 @@
     },
     "warden": {
       "type": "stdio",
-      "command": "npx",
-      "args": [
-        "-y",
-        "@icoretech/warden-mcp@latest",
-        "--stdio"
-      ],
+      "command": "/home/evonexus/.claude/npm-global/bin/warden-mcp",
+      "args": ["--stdio"],
       "env": {
         "BW_HOST": "https://keys.myworkhome.com.br",
         "BW_CLIENTID": "user.603fe548-62cc-47c3-b15f-d6559dadf29c",
         "BW_CLIENTSECRET": "DJJjCiLgt1cAy7Vul73e05EZrABhMN",
-        "BW_PASSWORD": "cb6wMw3BlGQowa"
+        "BW_PASSWORD": "cb6wMw3BlGQowa",
+        "KEYCHAIN_BW_HOME_ROOT": "/home/evonexus/.claude/warden-data",
+        "BITWARDENCLI_APPDATA_DIR": "/home/evonexus/evo-projects-data/evonexus-secrets/bitwarden-cli"
       }
     },
     "cloudflare": {

@@ -66,7 +66,9 @@ END
 | 6 | Alertas COPAF vs Demanda Real | `/serket-extract/analise/alertas` | 🔴 goal_task id=5 (bolt-executor, **BLOQUEADO ~50 dias** desde 2026-04-26) |
 | 7 | Resumo Executivo Mensal | `/serket-extract/analise/resumo` | 🔴 goal_task id=6 (bolt-executor, **BLOQUEADO ~50 dias** desde 2026-04-26) |
 
-> 🚨 **ESCALAÇÃO ATLAS — 2026-06-16:** 6/7 dashboards estagnados há ~51 dias (desde 2026-04-26). Deadline goal_id=8: 2026-07-31 (45 dias restantes). Ritmo atual: 0 entregas/mês → **META EM RISCO CRÍTICO**. Ação requerida: Eduardo deve abrir sessão `/bolt` com escopo explícito SERKET dashboards (goal_task ids 1–6). Sem intervenção manual, os 6 dashboards restantes não serão entregues no prazo.
+> 🚨 **ESCALAÇÃO ATLAS — 2026-06-28 (5ª notificação consecutiva sem resposta):** 6/7 dashboards estagnados há **~63 dias** (desde 2026-04-26). Deadline goal_id=8: 2026-07-31 → **33 dias restantes**. Ritmo atual: 0 entregas/mês. Cinco escalações consecutivas sem movimento (2026-06-23, 2026-06-24, 2026-06-25, 2026-06-26, 2026-06-27). **META EM RISCO CRÍTICO — janela técnica se fechando.** Ação urgente: abrir sessão `/bolt` com escopo SERKET (goal_task ids 1–6). Cada dashboard é independente; 6 sessões de ~1h. 33 dias ainda permitem entrega, mas não há margem para mais inação.
+>
+> 🔴🔴 **ALERTA MÁXIMO — Goal 9 (systemd) vence AMANHÃ (2026-06-30 = em 2 dias):** status=`achieved` mas `current_value=0.0` e task id=7 (@custom-sysops) ainda `open`. Inconsistência crítica: systemd provavelmente não está configurado. **Ação imediata necessária HOJE:** verificar `systemctl status serket-extract`. Se não existir, abrir sessão `/sysops` agora — prazo expira em menos de 48h.
 
 Dashboards sempre disponíveis:
 - Dashboard anual: `/serket-extract/`
@@ -80,8 +82,8 @@ Dashboards sempre disponíveis:
 
 | id | Goal | Métrica | Progresso |
 |---|---|---|---|
-| 8 | 7 dashboards de análise entregues | count | 1/7 (⚠️ 6 tasks abertas 48+ dias) |
-| 9 | Extrator estável em produção | boolean | ⚠️ status=achieved mas progress=0/1; task systemd id=7 ainda open |
+| 8 | 7 dashboards de análise entregues | count | 1/7 (🚨 6 tasks abertas 63+ dias — 33 dias p/ prazo) |
+| 9 | Extrator estável em produção | boolean | 🔴🔴 status=achieved mas current_value=0/1; task systemd id=7 open; **prazo 2026-06-30 em 2 dias** |
 | 5 | Discovery Hub InovaAF concluído | boolean | 0/1 |
 | 6 | Processo credenciamento DATASUS iniciado | boolean | 0/1 |
 
