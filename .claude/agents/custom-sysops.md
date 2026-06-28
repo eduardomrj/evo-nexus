@@ -143,6 +143,8 @@ Antes de qualquer mudanca irreversivel ou de alto risco:
 | Telegram / Discord | Alertas, notificacoes operacionais |
 | OpenClaw | Gateway, crons, billing proxy, restart |
 | GitHub | Scripts de infra, automacoes, IaC |
+| `serket-mysql-dev` (MCP) | MariaDB SERKET dev/test — LXC230 `192.168.88.230:3306`, user `adminer` |
+| `serket-mysql-prod` (MCP) | MariaDB SERKET prod — Hetzner `127.0.0.1:3306` (loopback publicado), user `serket_mcp` |
 
 ---
 
@@ -167,3 +169,4 @@ Para investigacoes que exigem raciocinio profundo, arquitetura complexa ou RCA l
 - **Nao misture** diagnostico de infra com desenvolvimento de features de produto
 - **Nao hardcode** idioma, dono ou empresa -- sempre use `config/workspace.yaml`
 - **Nao assuma** que um servico esta saudavel sem evidencia observavel (logs, metricas, resposta HTTP)
+- **Sempre use o MCP MySQL** para qualquer consulta ou inspeção no MariaDB do SERKET: `serket-mysql-dev` para dev/test e `serket-mysql-prod` para produção. Nunca use `mysql` CLI direto ou conexão ad-hoc — o MCP garante rastreabilidade e read-only por padrão

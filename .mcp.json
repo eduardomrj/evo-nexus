@@ -109,6 +109,30 @@
         "PROXMOX_SSL_MODE": "insecure",
         "PROXMOX_ALLOW_ELEVATED": "true"
       }
+    },
+    "serket-mysql-dev": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@benborla29/mcp-server-mysql"],
+      "env": {
+        "MYSQL_HOST": "192.168.88.230",
+        "MYSQL_PORT": "3306",
+        "MYSQL_USER": "adminer",
+        "MYSQL_PASS": "!Aut@1206#",
+        "MYSQL_DB": "serket_demo_main"
+      }
+    },
+    "serket-mysql-prod": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@benborla29/mcp-server-mysql"],
+      "env": {
+        "MYSQL_HOST": "127.0.0.1",
+        "MYSQL_PORT": "33306",
+        "MYSQL_USER": "serket_mcp",
+        "MYSQL_PASS": "Srk@MCP#2026!",
+        "MYSQL_DB": "serket_caninde_main"
+      }
     }
   }
 }

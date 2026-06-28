@@ -1,8 +1,9 @@
 # [C] Discovery — SERKET AI Gateway
 
-**Status:** Em preparação — aguardando complemento de informações do SERKET  
-**Data de início:** 2026-04-18  
-**Owner:** Oracle → Compass (quando pronto para planejar)
+**Status:** ~~Em preparação~~ **DESCONTINUADO — 2026-06-28**
+**Motivo:** Ideia exploratória abandonada por decisão do Eduardo. Os 5 agentes por papel (`custom-serket-admin/gerente/secretaria/paciente/medico`) não serão criados.
+**Data de início:** 2026-04-18
+**Owner:** —
 
 ---
 
