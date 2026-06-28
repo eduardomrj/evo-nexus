@@ -1,13 +1,13 @@
 # Tasks — registry-integration
 
 **Feature:** go-pessoas-ui → GoControlRegistry
-**Status geral:** T-01→T-06 concluídas · T-07 pendente (verificação browser) · T-08 concluída
+**Status geral:** T-01→T-08 concluídas — exceto T-07 (verificação browser — Eduardo)
 
 ---
 
 ## T-01 — Criar `src/client.ts` no go-pessoas-ui
 
-**Status:** [ ] pendente
+**Status:** [x] concluída — commit `fad214d`
 **Arquivo:** `go-pessoas/frontend/packages/pessoas/src/client.ts`
 **Tipo:** NOVO
 
@@ -46,7 +46,7 @@ export function resetPessoasClient(): void {
 
 ## T-02 — Atualizar `src/api.ts`
 
-**Status:** [ ] pendente
+**Status:** [x] concluída — commit `fad214d`
 **Arquivo:** `go-pessoas/frontend/packages/pessoas/src/api.ts`
 **Tipo:** EDITAR
 
@@ -75,7 +75,7 @@ Mapeamento de paths (todas as funções):
 
 ## T-03 — Atualizar `src/config/api.ts`
 
-**Status:** [ ] pendente
+**Status:** [x] concluída — commit `fad214d`
 **Arquivo:** `go-pessoas/frontend/packages/pessoas/src/config/api.ts`
 **Tipo:** EDITAR
 
@@ -94,7 +94,7 @@ Funções afetadas: `getConfig`, `updateConfig`, `listTiposContato`, `createTipo
 
 ## T-04 — Adicionar `VITE_GO_PESSOAS_API_URL` nos env files do go-cobrança
 
-**Status:** [ ] pendente
+**Status:** [x] concluída — commit `c76b775`
 **Arquivos:**
 - `go-cobranca/frontend/apps/go-cobranca/.env.production`
 - `go-cobranca/frontend/apps/go-cobranca/.env.development`
@@ -115,7 +115,7 @@ as requests vão para `/api/v1/go-pessoas/` que o nginx do go-cobrança já rote
 
 ## T-05 — Rebuild do go-pessoas-ui
 
-**Status:** [ ] pendente
+**Status:** [x] concluída
 **Diretório:** `go-pessoas/frontend/packages/pessoas/`
 **Comando:** `tsc`
 
@@ -125,7 +125,7 @@ as requests vão para `/api/v1/go-pessoas/` que o nginx do go-cobrança já rote
 
 ## T-06 — Atualizar go-pessoas-ui no go-cobrança e rebuild
 
-**Status:** [ ] pendente
+**Status:** [x] concluída — commit `c76b775` (build do go-cobrança inclui nova versão do go-pessoas-ui)
 **Tipo:** EDITAR + BUILD
 
 O go-cobrança usa `go-pessoas-ui` via workspace pnpm. Verificar se o link está apontando para
@@ -150,7 +150,7 @@ cd go-cobranca/frontend/apps/go-cobranca && pnpm build
 
 ## T-07 — Verificação funcional
 
-**Status:** [ ] pendente
+**Status:** [ ] pendente — Eduardo verifica no browser
 
 1. Acessar `https://go-cobranca.myworkhome.com.br` e fazer login
 2. No Network tab, confirmar que após o login o bootstrap chama:
@@ -166,7 +166,7 @@ cd go-cobranca/frontend/apps/go-cobranca && pnpm build
 
 ## T-08 — Commits
 
-**Status:** [ ] pendente
+**Status:** [x] concluída — `fad214d` (go-pessoas) · `c76b775` (go-cobrança)
 
 Dois commits atômicos:
 
