@@ -10,5 +10,16 @@
       "documenso_api_key_env": "DOCUMENSO_API_KEY_INFORCELL",
       "ativo": true
     }
+  ,
+    {
+      "id": "solutiontec",
+      "empresa": "Solutiontec Soluções Tecnológicas Ltda",
+      "cnpj": "11029769000159",
+      "representante": "Paulo Kleber Tavares Rodrigues",
+      "cpf": "228.920.103-06",
+      "email": "kleberpaulotrn14@gmail.com",
+      "documenso_api_key_env": "DOCUMENSO_API_KEY_SOLUTIONTEC",
+      "ativo": true
+    }
   ]
 }

@@ -289,6 +289,17 @@ def gerar_contrato(caminho_json: str) -> Path:
     cnpj_limpo  = limpar_cnpj(cnpj_raw)
     vencimento  = dados["vencimento"]
     signatario  = dados["signatario"]
+
+    # Enriquecer signatario com doc_tipo/doc_numero de representantes.json (se ausente no JSON)
+    if not signatario.get("doc_tipo") or not signatario.get("doc_numero"):
+        rep_path = Path(__file__).resolve().parent / "representantes.json"
+        if rep_path.exists():
+            rep_data = json.loads(rep_path.read_text())
+            rep = next((r for r in rep_data.get("representantes", [])
+                        if limpar_cnpj(r.get("cnpj", "")) == cnpj_limpo), None)
+            if rep:
+                signatario.setdefault("doc_tipo",   rep.get("doc_tipo", ""))
+                signatario.setdefault("doc_numero", rep.get("doc_numero", ""))
     softwares   = dados["softwares"]
     servicos    = dados["servicos"]
     desc_lic    = float(dados.get("desconto_licenca", 0.0))

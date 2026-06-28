@@ -357,6 +357,7 @@ O CONTRATANTE declara, ainda, que assina este instrumento dentro do prazo de val
       <p class="assinatura-cargo">{{ signatario.cargo }}</p>
       <p class="assinatura-cpf">Nome: {{ signatario.nome }}</p>
       <p class="assinatura-cpf">CPF: {{ signatario.cpf }}</p>
+      {% if signatario.doc_tipo and signatario.doc_numero %}<p class="assinatura-cpf">{{ signatario.doc_tipo }}: {{ signatario.doc_numero }}</p>{% endif %}
       <p class="assinatura-cpf">E-mail: {{ signatario.email }}</p>
       <p class="assinatura-cpf">Telefone: {{ signatario.telefone }}</p>
     </div>

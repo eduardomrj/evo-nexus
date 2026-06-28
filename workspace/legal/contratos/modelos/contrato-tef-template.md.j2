@@ -249,6 +249,7 @@ Canindé/CE, {{ data_assinatura }}.
       <p class="assinatura-cargo">Representante Legal</p>
       <p class="assinatura-cpf">Nome: {{ signatario.nome }}</p>
       <p class="assinatura-cpf">CPF: {{ signatario.cpf }}</p>
+      {% if signatario.doc_tipo and signatario.doc_numero %}<p class="assinatura-cpf">{{ signatario.doc_tipo }}: {{ signatario.doc_numero }}</p>{% endif %}
     </div>
   </div>
 

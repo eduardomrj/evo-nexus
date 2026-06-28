@@ -5,15 +5,15 @@
       "nome": "CLÉBIO PAIVA SAMPAIO",
       "cpf": "289.834.833-34",
       "cargo": "Administrador da Empresa",
-      "email": null,
-      "telefone": null,
+      "email": "elitanioveiculos@hotmail.com",
+      "telefone": "(88) 99956-3702",
       "doc_tipo": "CNH",
       "doc_numero": "5013349799",
       "doc_validade": "2030-05-07",
       "data_nascimento": "1971-04-27",
       "filiacao_mae": null,
       "filiacao_pai": null,
-      "atualizado_em": "2026-06-19"
+      "atualizado_em": "2026-06-23"
     },
     {
       "cnpj": "07894234000179",
@@ -29,6 +29,114 @@
       "filiacao_mae": "ANTONIA DE SOUZA SILVA",
       "filiacao_pai": "ANTONIO CHAVES DA SILVA",
       "atualizado_em": "2026-06-19"
+    },
+    {
+      "cnpj": "15234197000109",
+      "nome": "MARIA ROSIMEIRY PEREIRA DE SOUSA",
+      "cpf": "614.623.223-87",
+      "cargo": "Administradora da Empresa",
+      "email": null,
+      "telefone": null,
+      "doc_tipo": "CNH",
+      "doc_numero": "01488086504",
+      "doc_validade": "2033-11-17",
+      "data_nascimento": "1978-03-25",
+      "filiacao_mae": "MARIA OZELINA LEITE PEREIRA",
+      "filiacao_pai": "FRANCISCO PEREIRA SOBRINHO",
+      "atualizado_em": "2026-06-19"
+    },
+    {
+      "cnpj": "29628459000116",
+      "nome": "MARIA ROSIMEIRY PEREIRA DE SOUSA",
+      "cpf": "614.623.223-87",
+      "cargo": "Administradora da Empresa",
+      "email": null,
+      "telefone": null,
+      "doc_tipo": "CNH",
+      "doc_numero": "01488086504",
+      "doc_validade": "2033-11-17",
+      "data_nascimento": "1978-03-25",
+      "filiacao_mae": "MARIA OZELINA LEITE PEREIRA",
+      "filiacao_pai": "FRANCISCO PEREIRA SOBRINHO",
+      "atualizado_em": "2026-06-19"
+    },
+    {
+      "cnpj": "07233020000151",
+      "nome": "NATALIO FERNANDES AMARO",
+      "cpf": "016.590.773-89",
+      "cargo": "Administrador",
+      "email": "nataliofernandes.a@gmail.com",
+      "telefone": "(88) 99617-2444",
+      "doc_tipo": "CNH",
+      "doc_numero": "04188269610",
+      "doc_validade": "2032-09-08",
+      "data_nascimento": "1985-09-21",
+      "filiacao_mae": "MARIA AMELIA FERNANDES AMARO",
+      "filiacao_pai": "ANTONIO MILTON ANGELIM AMARO",
+      "atualizado_em": "2026-06-23"
+    }
+  ,
+    {
+      "cnpj": "09943401000150",
+      "nome": "MARIA HELENA DE QUEIROZ CAVALCANTE",
+      "cpf": "195.384.483-91",
+      "cargo": "Administradora da Empresa",
+      "email": "papelariapresentes@hotmail.com",
+      "telefone": "(88) 99966-3358",
+      "doc_tipo": "RG",
+      "doc_numero": "2014009597-G",
+      "doc_validade": null,
+      "data_nascimento": "1961-02-14",
+      "filiacao_mae": "ILZA MARTINS DE LACERDA",
+      "filiacao_pai": "FRANCISCO FERREIRA COLAÇA",
+      "atualizado_em": "2026-06-23"
+    }
+  ,
+    {
+      "cnpj": "13249364000232",
+      "nome": "MATHEUS FERREIRA DINIZ",
+      "cpf": "993.008.503-34",
+      "cargo": "Administrador da Empresa",
+      "email": "matheusfdiniz@hotmail.com",
+      "telefone": "(85) 99707-1632",
+      "doc_tipo": "CNH",
+      "doc_numero": "02234295917",
+      "doc_validade": "2032-03-08",
+      "data_nascimento": "1983-05-09",
+      "filiacao_mae": "MARIA FERREIRA DAS NEVES DINIZ",
+      "filiacao_pai": "ARNAUD DANTAS DINIZ FILHO",
+      "atualizado_em": "2026-06-23"
+    },
+    {
+      "cnpj": "13249364000151",
+      "nome": "MATHEUS FERREIRA DINIZ",
+      "cpf": "993.008.503-34",
+      "cargo": "Administrador da Empresa",
+      "email": "matheusfdiniz@hotmail.com",
+      "telefone": "(85) 99707-1632",
+      "doc_tipo": "CNH",
+      "doc_numero": "02234295917",
+      "doc_validade": "2032-03-08",
+      "data_nascimento": "1983-05-09",
+      "filiacao_mae": "MARIA FERREIRA DAS NEVES DINIZ",
+      "filiacao_pai": "ARNAUD DANTAS DINIZ FILHO",
+      "atualizado_em": "2026-06-23"
+    }
+  ,
+    {
+      "cnpj": "12286379000127",
+      "nome": "VANUZIA CRISTINA SANTOS DA SILVA",
+      "cpf": "009.649.444-13",
+      "cargo": "Administradora da Empresa",
+      "email": "lojacanaapereiro.ce@gmail.com",
+      "telefone": "(88) 99709-0006",
+      "doc_tipo": "CNH",
+      "doc_numero": "2940821007",
+      "doc_validade": "24/01/2035",
+      "data_nascimento": "08/07/1978",
+      "filiacao_mae": "FRANCISCA COSTA DOS SANTOS SILVA",
+      "filiacao_pai": "AVANECI SABINO DA SILVA",
+      "atualizado_em": "2026-06-25"
     }
   ]
 }

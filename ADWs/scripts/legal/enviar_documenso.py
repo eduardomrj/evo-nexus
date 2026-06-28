@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Envio de contrato para assinatura via Documenso self-hosted.
+Envio de contrato para assinatura via Documenso self-hosted — API v2.
 
 Uso:
   python3 enviar_documenso.py \
@@ -9,10 +9,18 @@ Uso:
     --email "joao@empresa.com.br" \
     [--titulo "Contrato TEF SmartPOS — Empresa XYZ"]
     [--cc "copia@automacaosoftware.com.br"]
+    [--tipo licenca|tef]
+    [--parceiro-nome "Paulo Kleber"] [--parceiro-email "pk@email.com"]
+    [--api-key-parceiro-env DOCUMENSO_API_KEY_SOLUTIONTEC]
+    [--enviar]
 
 Requer no .env:
   DOCUMENSO_API_URL=https://signature.automacaosoftware.com.br
   DOCUMENSO_API_KEY=<token gerado em /settings/tokens>
+
+Validade e lembretes (configurados via API v2):
+  - Validade: 7 dias
+  - Lembretes: primeiro após 2 dias, repetir a cada 2 dias
 """
 
 import sys
@@ -33,12 +41,28 @@ load_dotenv(BASE_DIR / ".env")
 API_URL = os.getenv("DOCUMENSO_API_URL", "https://signature.automacaosoftware.com.br")
 API_KEY = os.getenv("DOCUMENSO_API_KEY", "")
 
+# Validade e lembretes — configurados via API v2
+ENVELOPE_EXPIRATION = {"unit": "day", "amount": 7}
+REMINDER_SETTINGS   = {
+    "sendAfter":   {"unit": "day", "amount": 1},  # 1º lembrete após 1 dia
+    "repeatEvery": {"unit": "day", "amount": 2},  # repetir a cada 2 dias
+}
+
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 def headers() -> dict:
     return {"Authorization": f"Bearer {API_KEY}"}
 
 
+def checar_config() -> None:
+    if not API_KEY:
+        print("✗ DOCUMENSO_API_KEY não encontrada no .env")
+        print("  Gere o token em: https://signature.automacaosoftware.com.br/settings/tokens")
+        print("  Adicione ao .env: DOCUMENSO_API_KEY=<token>")
+        sys.exit(1)
+
+
+# ── Detecção de páginas via PyMuPDF ──────────────────────────────────────────
 def pagina_anexo_iii_pdf(pdf_path: Path) -> int | None:
     """Detecta a página do Anexo III buscando 'Contatos Administrativos'.
     Usa âncora específica porque 'Anexo III' aparece múltiplas vezes no corpo
@@ -89,194 +113,57 @@ def pagina_assinaturas_pdf(pdf_path: Path) -> int:
     return fallback
 
 
-def checar_config() -> None:
-    if not API_KEY:
-        print("✗ DOCUMENSO_API_KEY não encontrada no .env")
-        print("  Gere o token em: https://signature.automacaosoftware.com.br/settings/tokens")
-        print("  Adicione ao .env: DOCUMENSO_API_KEY=<token>")
-        sys.exit(1)
-
-
-# ── Etapas do fluxo (API Documenso v2) ───────────────────────────────────────
-# Fluxo correto:
-#   1. POST /api/v1/documents  →  cria documento + signatários, retorna uploadUrl + documentId
-#   2. PUT <uploadUrl>          →  envia o PDF para o MinIO via URL pré-assinada
-#   3. POST /api/v1/documents/{id}/send  →  Documenso envia e-mail ao signatário
-
-ASSINANTE_CONTRATADA = {
-    "name":  "Automação Comercial LTDA.",
-    "email": "eduardo@automacaosoftware.com.br",
-    "role":  "SIGNER",
-}
-
-
-def criar_documento(titulo: str, nome: str, email: str, email_cc: str | None,
-                    parceiro_nome: str | None = None,
-                    parceiro_email: str | None = None) -> dict:
-    """Etapa 1 — cria o documento com signatários em uma única chamada.
-
-    Assinatura SEQUENCIAL:
-      Com parceiro   : PARCEIRO (1) → CONTRATANTE (2) → CONTRATADA (3)
-      Sem parceiro   : CONTRATANTE (1) → CONTRATADA (2)
-
-    Índices em doc['recipients']:
-      [0] PARCEIRO (se houver) ou CONTRATANTE
-      [1] CONTRATANTE (se houver parceiro) ou CONTRATADA
-      [-1] CONTRATADA (sempre o último SIGNER)
-    """
-    print(f"  Criando documento no Documenso...", end=" ", flush=True)
-
-    tem_parceiro = bool(parceiro_nome and parceiro_email)
-
-    if tem_parceiro:
-        recipients = [
-            {"name": parceiro_nome,                    "email": parceiro_email,                    "role": "SIGNER", "signingOrder": 1},
-            {"name": nome,                             "email": email,                             "role": "SIGNER", "signingOrder": 2},
-            {**ASSINANTE_CONTRATADA,                                                                                  "signingOrder": 3},
-        ]
-    else:
-        recipients = [
-            {"name": nome,                             "email": email,                             "role": "SIGNER", "signingOrder": 1},
-            {**ASSINANTE_CONTRATADA,                                                                                  "signingOrder": 2},
-        ]
-
-    if email_cc:
-        recipients.append({"name": "Automação Software", "email": email_cc, "role": "CC"})
-
-    resp = requests.post(
-        f"{API_URL}/api/v1/documents",
-        headers={**headers(), "Content-Type": "application/json"},
-        json={
-            "title": titulo,
-            "meta": {"signingOrder": "SEQUENTIAL"},
-            "recipients": recipients,
-        },
-        timeout=60,
-    )
-
-    if resp.status_code not in (200, 201):
-        print(f"✗ ({resp.status_code})")
-        print(f"  Resposta: {resp.text[:300]}")
-        sys.exit(1)
-
-    doc = resp.json()
-    print(f"ok (documentId={doc['documentId']})")
-    return doc
-
-
-def upload_pdf(upload_url: str, pdf_path: Path) -> None:
-    """Etapa 2 — envia o PDF para a URL pré-assinada do MinIO."""
-    print(f"  Enviando PDF ({pdf_path.name})...", end=" ", flush=True)
-
-    with open(pdf_path, "rb") as f:
-        resp = requests.put(
-            upload_url,
-            data=f,
-            headers={"Content-Type": "application/pdf"},
-            timeout=60,
-        )
-
-    if resp.status_code not in (200, 201, 204):
-        print(f"✗ ({resp.status_code})")
-        print(f"  Resposta: {resp.text[:300]}")
-        sys.exit(1)
-
-    print("ok")
-
-
-def adicionar_campo_assinatura(doc_id: int, recipient_cliente_id: int,
-                               recipient_contratada_id: int,
-                               pagina: int = 1,
-                               recipient_parceiro_id: int | None = None,
-                               y_partes: float = 36.0,
-                               y_parceiro: float = 65.5) -> None:
-    """Etapa 2b — adiciona campos de assinatura na página dedicada.
-
-    Coordenadas padrão calibradas para contrato LIC (pág. ~11):
-    - CONTRATADA/CONTRATANTE → y=36%
-    - PARCEIRO (testemunha)  → y=65.5%
-
-    Para contrato TEF (pág. ~8), usar y_partes=31.8, y_parceiro=61.3
-    (página mais curta → bloco de assinaturas proporcionalmente mais acima).
+# ── Montagem de campos (sem chamada de API) ───────────────────────────────────
+def montar_campos_assinatura(pagina: int,
+                             y_partes: float = 36.0,
+                             y_parceiro: float = 65.5,
+                             tem_parceiro: bool = False) -> dict:
+    """Retorna dicionário com listas de campos por papel:
+      'contratada', 'cliente', 'parceiro' (vazia se sem parceiro).
 
     Coordenadas em % da página (0–100).
     """
-    tem_parceiro = recipient_parceiro_id is not None
-    info = f"pág. {pagina} (dedicada)" + (", +parceiro" if tem_parceiro else "")
-    print(f"  Adicionando campos de assinatura ({info})...", end=" ", flush=True)
+    # pageY já vem calibrado por tipo (calculado em criar_documento_v2)
+    campo_contratada = {
+        "type": "SIGNATURE",
+        "pageNumber": pagina,
+        "pageX": 5,
+        "pageY": y_partes,
+        "width": 38,
+        "height": 7,
+    }
+    campo_cliente = {
+        "type": "SIGNATURE",
+        "pageNumber": pagina,
+        "pageX": 55,
+        "pageY": y_partes,
+        "width": 38,
+        "height": 7,
+    }
+    campo_parceiro = {
+        "type": "SIGNATURE",
+        "pageNumber": pagina,
+        "pageX": 5,
+        "pageY": y_parceiro,
+        "width": 60,
+        "height": 7,
+    } if tem_parceiro else None
 
-    campos = [
-        # CONTRATADA — lado esquerdo
-        {
-            "recipientId": recipient_contratada_id,
-            "type":        "SIGNATURE",
-            "pageNumber":  pagina,
-            "pageX":       5,
-            "pageY":       y_partes,
-            "pageWidth":   38,
-            "pageHeight":  7,
-        },
-        # CONTRATANTE — lado direito
-        {
-            "recipientId": recipient_cliente_id,
-            "type":        "SIGNATURE",
-            "pageNumber":  pagina,
-            "pageX":       55,
-            "pageY":       y_partes,
-            "pageWidth":   38,
-            "pageHeight":  7,
-        },
-    ]
-
-    # PARCEIRO — testemunha 1, linha abaixo das partes
-    if tem_parceiro:
-        campos.append({
-            "recipientId": recipient_parceiro_id,
-            "type":        "SIGNATURE",
-            "pageNumber":  pagina,
-            "pageX":       5,
-            "pageY":       y_parceiro,
-            "pageWidth":   60,
-            "pageHeight":  7,
-        })
-
-    for campo in campos:
-        resp = requests.post(
-            f"{API_URL}/api/v1/documents/{doc_id}/fields",
-            headers={**headers(), "Content-Type": "application/json"},
-            json=campo,
-            timeout=30,
-        )
-        if resp.status_code not in (200, 201):
-            print(f"✗ ({resp.status_code}) — {resp.text[:200]}")
-            sys.exit(1)
-
-    partes_info = f"contratada=esquerda y={y_partes}%, cliente=direita y={y_partes}%"
-    if tem_parceiro:
-        partes_info += f", parceiro=testemunha y={y_parceiro}%"
-    print(f"ok ({partes_info})")
+    return {
+        "contratada": [campo_contratada],
+        "cliente":    [campo_cliente],
+        "parceiro":   [campo_parceiro] if campo_parceiro else [],
+    }
 
 
-def adicionar_campos_texto_contato(doc_id: int, recipient_cliente_id: int,
-                                   pdf_path: Path, pagina: int) -> None:
-    """Adiciona campos TEXT/EMAIL na página do Anexo III para o CONTRATANTE.
-
-    Usa PyMuPDF para detectar a posição Y de cada label na coluna esquerda e
-    posiciona o campo na coluna direita (~50–93% de largura).
-
-    Seções e obrigatoriedade:
-      Seção 0 — Adm/Financeiro  → required=True
-      Seção 1 — Contador        → required=True
-      Seção 2 — TI              → required=False (opcional)
-
-    Tipos de campo:
-      "Nome", "Telefone" → TEXT com fieldMeta (label + required)
-      "E-mail"           → EMAIL com fieldMeta (label + required)
+def montar_campos_texto_contato(pdf_path: Path, pagina: int) -> list[dict]:
+    """Monta lista de campos TEXT/EMAIL para o Anexo III (Contatos Administrativos).
+    Usa PyMuPDF para detectar posições dos labels na página.
+    Retorna lista pronta para inserir em recipient.fields[].
     """
     labels_pos = posicoes_labels_pdf(pdf_path, pagina)
 
     if not labels_pos:
-        # Fallback: posições estimadas para A4 com margens padrão do template
         labels_pos = [
             (20.0, "Nome"), (24.0, "Telefone"), (28.0, "E-mail"),
             (46.0, "Nome"), (50.0, "Telefone"), (54.0, "E-mail"),
@@ -284,18 +171,13 @@ def adicionar_campos_texto_contato(doc_id: int, recipient_cliente_id: int,
         ]
         print("  (labels não detectados no PDF — usando posições estimadas)")
 
-    # Determinar a seção de cada campo pela ordem de aparição de "Nome"
-    SECOES    = ["Adm/Financeiro", "Contador", "TI"]
-    REQUIRED  = [True,             True,        False]
-    contagem_nome = 0
-    secao_atual   = 0
+    SECOES   = ["Adm/Financeiro", "Contador", "TI"]
+    REQUIRED = [True,             True,        False]
     contadores_label: dict[str, int] = {"Nome": 0, "Telefone": 0, "E-mail": 0}
+    secao_atual = 0
 
-    info_txt = f"pág. {pagina}, {len(labels_pos)} campos"
-    print(f"  Adicionando campos de contato ({info_txt})...", end=" ", flush=True)
-
+    campos = []
     for y_pct, label in labels_pos:
-        # Avança a seção a cada novo "Nome" (marca início de bloco)
         if label == "Nome":
             secao_atual = contadores_label["Nome"]
         contadores_label[label] += 1
@@ -304,59 +186,221 @@ def adicionar_campos_texto_contato(doc_id: int, recipient_cliente_id: int,
         required = REQUIRED[secao_atual]
 
         if label == "E-mail" and secao_atual == 0:
-            # Apenas Adm/Financeiro usa tipo EMAIL (auto-preenchido pelo Documenso
-            # com o e-mail do signatário). Contador e TI ficam como TEXT para
-            # evitar que o Documenso replique o mesmo e-mail nos três campos.
             campo_type = "EMAIL"
             meta_type  = "email"
         else:
             campo_type = "TEXT"
             meta_type  = "text"
 
-        # Slug único por campo: "email_adm", "nome_contador", "telefone_ti", etc.
         SECAO_SLUG = {"Adm/Financeiro": "adm", "Contador": "contador", "TI": "ti"}
         LABEL_SLUG = {"Nome": "nome", "Telefone": "telefone", "E-mail": "email"}
         field_slug = f"{LABEL_SLUG[label]}_{SECAO_SLUG[secao]}"
 
-        # y_offset: -3.5% ≈ 40px na escala de renderização A4 do Documenso (~1155px)
-        campo = {
-            "recipientId": recipient_cliente_id,
-            "type":        campo_type,
-            "pageNumber":  pagina,
-            "pageX":       50,
-            "pageY":       round(y_pct + 0.5, 1),
-            "pageWidth":   43,
-            "pageHeight":  1.5,
+        campos.append({
+            "type":       campo_type,
+            "pageNumber": pagina,
+            "pageX":      50,
+            "pageY":      round(y_pct + 0.5, 1),
+            "width":      43,
+            "height":     1.5,
             "fieldMeta": {
                 "type":        meta_type,
                 "label":       f"{label} — {secao}",
                 "placeholder": field_slug,
                 "required":    required,
             },
-        }
+        })
+
+    return campos
+
+
+# ── API v2 — Fluxo principal ──────────────────────────────────────────────────
+# Fluxo v2:
+#   1. POST /api/v2/document/create  (multipart: payload JSON + file PDF)
+#      → retorna { id: int, envelopeId: str }
+#   2. POST /api/v2/document/distribute  (JSON: documentId + meta)
+#      → Documenso envia e-mail ao signatário
+
+ASSINANTE_CONTRATADA = {
+    "name":  "Automação Comercial LTDA.",
+    "email": "eduardo@automacaosoftware.com.br",
+    "role":  "SIGNER",
+}
+
+
+def criar_documento_v2(titulo: str,
+                       nome: str, email: str, email_cc: str | None,
+                       pdf_path: Path,
+                       tipo: str | None,
+                       parceiro_nome: str | None = None,
+                       parceiro_email: str | None = None) -> dict:
+    """Etapa 1 — cria documento via API v2 (multipart/form-data).
+
+    PDF + payload JSON em uma única chamada.
+    Campos de assinatura e texto já embutidos nos recipients.
+
+    Ordem de assinatura SEQUENCIAL:
+      Com parceiro   : PARCEIRO (1) → CONTRATANTE (2) → CONTRATADA (3)
+      Sem parceiro   : CONTRATANTE (1) → CONTRATADA (2)
+    """
+    print(f"  Detectando páginas no PDF...", end=" ", flush=True)
+    pagina_assin = pagina_assinaturas_pdf(pdf_path)
+    pagina_iii   = pagina_anexo_iii_pdf(pdf_path)
+    print(f"assinaturas=pág.{pagina_assin}"
+          + (f", Anexo III=pág.{pagina_iii}" if pagina_iii else ", sem Anexo III"))
+
+    # Posições calibradas por tipo de contrato.
+    # y_partes  = posição Y dos campos CONTRATANTE e CONTRATADA
+    # y_parceiro = posição Y do campo PARCEIRO
+    # Offset aplicado para alinhar o campo com a linha de assinatura no PDF:
+    #   licença : subir 100% da altura (field_height=7) → y - 7.0
+    #   tef     : subir 20% da altura                  → y - 1.4  (parceiro: subir 100%)
+    if tipo == "tef":
+        y_partes,    y_parceiro_pos = 24.8 - 1.4, 54.3 - 7.0   # → 23.4,  47.3
+    else:
+        y_partes,    y_parceiro_pos = 36.0 - 7.0, 65.5 - 7.0   # → 29.0,  58.5
+
+    tem_parceiro = bool(parceiro_nome and parceiro_email)
+    campos = montar_campos_assinatura(
+        pagina=pagina_assin,
+        y_partes=y_partes,
+        y_parceiro=y_parceiro_pos,
+        tem_parceiro=tem_parceiro,
+    )
+
+    # Campos texto do Anexo III (apenas para o cliente)
+    campos_contato = []
+    if pagina_iii:
+        print(f"  Montando campos de contato (pág. {pagina_iii})...", end=" ", flush=True)
+        campos_contato = montar_campos_texto_contato(pdf_path, pagina_iii)
+        print(f"ok ({len(campos_contato)} campos)")
+
+    # Montar recipients com campos embutidos
+    if tem_parceiro:
+        recipients = [
+            {
+                "name":  parceiro_nome,
+                "email": parceiro_email,
+                "role":  "SIGNER",
+                "signingOrder": 1,
+                "fields": campos["parceiro"],
+            },
+            {
+                "name":  nome,
+                "email": email,
+                "role":  "SIGNER",
+                "signingOrder": 2,
+                "fields": campos["cliente"] + campos_contato,
+            },
+            {
+                **ASSINANTE_CONTRATADA,
+                "signingOrder": 3,
+                "fields": campos["contratada"],
+            },
+        ]
+    else:
+        recipients = [
+            {
+                "name":  nome,
+                "email": email,
+                "role":  "SIGNER",
+                "signingOrder": 1,
+                "fields": campos["cliente"] + campos_contato,
+            },
+            {
+                **ASSINANTE_CONTRATADA,
+                "signingOrder": 2,
+                "fields": campos["contratada"],
+            },
+        ]
+
+    if email_cc:
+        recipients.append({
+            "name":  "Automação Software",
+            "email": email_cc,
+            "role":  "CC",
+            "fields": [],
+        })
+
+    payload = {
+        "title": titulo,
+        "envelopeExpirationPeriod": ENVELOPE_EXPIRATION,
+        "reminderSettings":         REMINDER_SETTINGS,
+        "recipients": recipients,
+    }
+
+    print(f"  Criando documento no Documenso (v2)...", end=" ", flush=True)
+
+    with open(pdf_path, "rb") as pdf_file:
         resp = requests.post(
-            f"{API_URL}/api/v1/documents/{doc_id}/fields",
-            headers={**headers(), "Content-Type": "application/json"},
-            json=campo,
-            timeout=30,
+            f"{API_URL}/api/v2/document/create",
+            headers=headers(),
+            files={
+                "file":    (pdf_path.name, pdf_file, "application/pdf"),
+                "payload": (None, json.dumps(payload), "application/json"),
+            },
+            timeout=120,
         )
-        if resp.status_code not in (200, 201):
-            print(f"✗ ({resp.status_code}) — {resp.text[:200]}")
-            sys.exit(1)
+
+    if resp.status_code not in (200, 201):
+        print(f"✗ ({resp.status_code})")
+        print(f"  Resposta: {resp.text[:400]}")
+        sys.exit(1)
+
+    doc = resp.json()
+    print(f"ok (documentId={doc['id']})")
+    return doc
+
+
+def atualizar_documento(doc_id: int) -> None:
+    """Etapa 1b — aplica validade, lembretes e ordem de assinatura via /document/update.
+
+    Esses campos não são aceitos pelo /document/create (multipart),
+    mas são suportados pelo /document/update (JSON).
+    """
+    print(f"  Aplicando validade e lembretes...", end=" ", flush=True)
+
+    resp = requests.post(
+        f"{API_URL}/api/v2/document/update",
+        headers={**headers(), "Content-Type": "application/json"},
+        json={
+            "documentId": doc_id,
+            "meta": {
+                "signingOrder": "SEQUENTIAL",
+                "timezone":     "America/Fortaleza",
+                "dateFormat":   "dd/MM/yyyy",
+                "language":     "pt-BR",
+            },
+            "envelopeExpirationPeriod": ENVELOPE_EXPIRATION,
+            "reminderSettings":         REMINDER_SETTINGS,
+        },
+        timeout=30,
+    )
+
+    if resp.status_code not in (200, 201):
+        print(f"✗ ({resp.status_code})")
+        print(f"  Resposta: {resp.text[:300]}")
+        sys.exit(1)
 
     print("ok")
 
 
-def disparar_envio(doc_id: int) -> dict:
-    """Etapa 3 — instrui o Documenso a iniciar o fluxo de assinatura.
-    É o Documenso quem envia o e-mail ao signatário via SMTP configurado."""
+def distribuir_documento(doc_id: int) -> dict:
+    """Etapa 2 — instrui o Documenso a iniciar o fluxo de assinatura via e-mail."""
     print(f"  Iniciando fluxo de assinatura no Documenso...", end=" ", flush=True)
 
     resp = requests.post(
-        f"{API_URL}/api/v1/documents/{doc_id}/send",
+        f"{API_URL}/api/v2/document/distribute",
         headers={**headers(), "Content-Type": "application/json"},
-        json={"sendEmail": True},
-        timeout=15,
+        json={
+            "documentId": doc_id,
+            "meta": {
+                "distributionMethod": "EMAIL",
+                "timezone":   "America/Fortaleza",
+                "dateFormat": "dd/MM/yyyy",
+            },
+        },
+        timeout=30,
     )
 
     if resp.status_code not in (200, 201):
@@ -370,7 +414,7 @@ def disparar_envio(doc_id: int) -> dict:
 
 
 def status_documento(doc_id: int) -> str:
-    """Consulta o status atual do documento."""
+    """Consulta o status atual do documento via API v1 (compatível)."""
     resp = requests.get(
         f"{API_URL}/api/v1/documents/{doc_id}",
         headers=headers(),
@@ -383,24 +427,22 @@ def status_documento(doc_id: int) -> str:
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Envia contrato PDF para assinatura via Documenso")
+    parser = argparse.ArgumentParser(description="Envia contrato PDF para assinatura via Documenso v2")
     parser.add_argument("--pdf",    required=True, help="Caminho absoluto do PDF a enviar")
     parser.add_argument("--nome",   required=True, help="Nome completo do signatário (cliente)")
     parser.add_argument("--email",  required=True, help="E-mail do signatário (cliente)")
-    parser.add_argument("--titulo", help="Título do documento no Documenso (padrão: nome do arquivo)")
-    parser.add_argument("--cc",                  help="E-mail para cópia (ex: copia@automacaosoftware.com.br)")
-    parser.add_argument("--tipo",                choices=["licenca", "tef"], default=None,
-                        help="Tipo do contrato (informativo — página de assinatura detectada automaticamente)")
-    parser.add_argument("--enviar",              action="store_true", default=False,
+    parser.add_argument("--titulo", help="Título do documento no Documenso (padrão: gerado do nome do arquivo)")
+    parser.add_argument("--cc",     help="E-mail para cópia (ex: copia@automacaosoftware.com.br)")
+    parser.add_argument("--tipo",   choices=["licenca", "tef"], default=None,
+                        help="Tipo do contrato — afeta posição Y dos campos de assinatura")
+    parser.add_argument("--enviar", action="store_true", default=False,
                         help="Dispara o e-mail de assinatura imediatamente via Documenso. "
-                             "Sem esta flag, o documento é criado como DRAFT e o envio "
-                             "deve ser feito manualmente pela plataforma.")
-    # Parceiro/revendedor (opcionais — ambos obrigatórios se um for fornecido)
-    parser.add_argument("--parceiro-nome",       help="Nome do representante do parceiro/revendedor")
-    parser.add_argument("--parceiro-email",      help="E-mail do parceiro para assinatura eletrônica")
+                             "Sem esta flag, o documento é criado como DRAFT.")
+    parser.add_argument("--parceiro-nome",        help="Nome do representante do parceiro/revendedor")
+    parser.add_argument("--parceiro-email",       help="E-mail do parceiro para assinatura eletrônica")
     parser.add_argument("--api-key-parceiro-env", default=None,
                         help="Nome da variável de ambiente com o token da equipe do parceiro no Documenso "
-                             "(ex: DOCUMENSO_API_KEY_INFORCELL). Quando fornecido, o documento é criado "
+                             "(ex: DOCUMENSO_API_KEY_SOLUTIONTEC). Quando fornecido, o documento é criado "
                              "na equipe do parceiro.")
     args = parser.parse_args()
 
@@ -440,7 +482,7 @@ def main() -> None:
             titulo = pdf_path.stem.replace("_", " ")
 
     modo = "ENVIO AUTOMÁTICO (e-mail disparado)" if args.enviar else "DRAFT (envio manual pela plataforma)"
-    print(f"\n── Documenso — {modo} ─────────────────")
+    print(f"\n── Documenso v2 — {modo} ─────────────────")
     print(f"  Arquivo   : {pdf_path.name}")
     print(f"  Signatário: {args.nome} <{args.email}>")
     if tem_parceiro:
@@ -448,62 +490,31 @@ def main() -> None:
         print(f"  Parceiro  : {args.parceiro_nome} <{args.parceiro_email}>{equipe_info}")
     print(f"  Contratada: Automação Comercial LTDA. <eduardo@automacaosoftware.com.br>")
     print(f"  Título    : {titulo}")
+    print(f"  Validade  : {ENVELOPE_EXPIRATION['amount']} {ENVELOPE_EXPIRATION['unit']}(s)")
+    print(f"  Lembrete  : após {REMINDER_SETTINGS['sendAfter']['amount']} dia(s), "
+          f"repetir a cada {REMINDER_SETTINGS['repeatEvery']['amount']} dia(s)")
     print(f"  Documenso : {API_URL}")
     print(f"────────────────────────────────────────────────────────\n")
 
-    # Etapa 1 — criar documento + signatários
-    doc = criar_documento(titulo, args.nome, args.email, args.cc,
-                          parceiro_nome=args.parceiro_nome if tem_parceiro else None,
-                          parceiro_email=args.parceiro_email if tem_parceiro else None)
-    doc_id     = doc["documentId"]
-    upload_url = doc["uploadUrl"]
+    # Etapa 1 — criar documento + PDF + campos em uma única chamada
+    doc = criar_documento_v2(
+        titulo=titulo,
+        nome=args.nome,
+        email=args.email,
+        email_cc=args.cc,
+        pdf_path=pdf_path,
+        tipo=args.tipo,
+        parceiro_nome=args.parceiro_nome if tem_parceiro else None,
+        parceiro_email=args.parceiro_email if tem_parceiro else None,
+    )
+    doc_id = doc["id"]
 
-    # Etapa 2 — upload do PDF na URL pré-assinada do MinIO
-    upload_pdf(upload_url, pdf_path)
+    # Etapa 1b — aplicar validade, lembretes e signingOrder SEQUENTIAL
+    atualizar_documento(doc_id)
 
-    # Etapa 2b — campos de assinatura
-    # Detecta a página de assinaturas pelo texto âncora no PDF
-    pagina = pagina_assinaturas_pdf(pdf_path)
-    print(f"  Página de assinaturas detectada: {pagina}")
-
-    # Índices dependem da presença do parceiro — assinatura sequencial:
-    # Com parceiro   : [0]=PARCEIRO (ordem 1), [1]=CONTRATANTE (ordem 2), [-1]=CONTRATADA (ordem 3)
-    # Sem parceiro   : [0]=CONTRATANTE (ordem 1), [-1]=CONTRATADA (ordem 2)
-    recipients = doc["recipients"]
-    signers = [r for r in recipients if r.get("role") == "SIGNER"]
-
-    if tem_parceiro:
-        recipient_parceiro_id   = signers[0]["recipientId"]   # PARCEIRO    (ordem 1)
-        recipient_cliente_id    = signers[1]["recipientId"]   # CONTRATANTE (ordem 2)
-        recipient_contratada_id = signers[2]["recipientId"]   # CONTRATADA  (ordem 3)
-    else:
-        recipient_parceiro_id   = None
-        recipient_cliente_id    = signers[0]["recipientId"]   # CONTRATANTE (ordem 1)
-        recipient_contratada_id = signers[1]["recipientId"]   # CONTRATADA  (ordem 2)
-
-    # Posições de assinatura variam por tipo de contrato:
-    #   licenca → y_partes=36.0, y_parceiro=65.5  (pág. ~11, calibrada)
-    #   tef     → y_partes=31.8, y_parceiro=61.3  (pág. ~8, bloco mais acima)
-    if args.tipo == "tef":
-        y_partes, y_parceiro_pos = 24.8, 54.3
-    else:
-        y_partes, y_parceiro_pos = 36.0, 65.5
-
-    adicionar_campo_assinatura(doc_id, recipient_cliente_id,
-                               recipient_contratada_id, pagina=pagina,
-                               recipient_parceiro_id=recipient_parceiro_id,
-                               y_partes=y_partes, y_parceiro=y_parceiro_pos)
-
-    # Etapa 2c — campos TEXT para Contatos Administrativos (Anexo III, se existir)
-    pagina_iii = pagina_anexo_iii_pdf(pdf_path)
-    if pagina_iii:
-        adicionar_campos_texto_contato(doc_id, recipient_cliente_id, pdf_path, pagina_iii)
-    else:
-        print("  Anexo III não encontrado — campos de contato não adicionados")
-
-    # Etapa 3 — disparar e-mail (opcional)
+    # Etapa 2 — disparar e-mail (opcional)
     if args.enviar:
-        disparar_envio(doc_id)
+        distribuir_documento(doc_id)
 
     # Resultado
     link = f"{API_URL}/documents/{doc_id}"
@@ -517,7 +528,7 @@ def main() -> None:
         print(f"  {link}")
     print()
 
-    # Salvar referência local (JSON na mesma pasta dos contratos gerados)
+    # Salvar referência local
     registro_path = pdf_path.parent / "envios_assinatura.json"
     registro = {"envios": []}
     if registro_path.exists():

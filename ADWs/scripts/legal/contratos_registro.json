@@ -415,7 +415,9 @@
         "cpf": "195.384.483-91",
         "cargo": "Administradora da Empresa",
         "email": "papelariapresentes@hotmail.com",
-        "telefone": "(88) 99966-3358"
+        "telefone": "(88) 99966-3358",
+        "rg": "2014009597-G",
+        "data_nascimento": "1961-02-14"
       },
       "parceiro": {
         "empresa": "Solutiontec Soluções Tecnológicas Ltda",
@@ -424,6 +426,63 @@
       },
       "asaas_customer_id": "cus_000103988800",
       "asaas_subscription_id": "sub_hmdrl573t5rh5u2g"
+    },
+    {
+      "numero": "LIC-2026-0028",
+      "cnpj": "12244299000109",
+      "empresa": "Veronica Lima De Araujo",
+      "tipo": "licenca",
+      "data": "2026-06-26",
+      "arquivo": "CONTRATO_LIC_LIC-2026-0028_12244299000109.pdf",
+      "status": "ativo",
+      "vencimento_dia": 20,
+      "softwares": [
+        "PACOTE EMPORION (Emporion Manager, Emporion PDV)"
+      ],
+      "total_mensal": 159.02,
+      "signatario": {
+        "nome": "Veronica Lima de Araujo",
+        "cpf": "234.447.973-20",
+        "cargo": "Empresária Individual",
+        "email": "kxcarro@gmail.com",
+        "telefone": "(85) 98775-7538"
+      },
+      "asaas_customer_id": "cus_000103962558",
+      "asaas_subscription_id": "sub_ye1c15df2yp06y71"
+    },
+    {
+      "numero": "TEF-2026-0027",
+      "cnpj": "12244299000109",
+      "empresa": "Veronica Lima De Araujo",
+      "tipo": "tef",
+      "modalidade": "smartpos",
+      "data": "2026-06-26",
+      "arquivo": "CONTRATO_TEF_TEF-2026-0027_12244299000109.pdf",
+      "status": "ativo",
+      "vencimento_dia": 5,
+      "smartpos": {
+        "qtd": 1,
+        "adesao": 75.0,
+        "mensalidade": 49.7,
+        "transacao": 0.25
+      }
+    },
+    {
+      "numero": "TEF-2026-0028",
+      "cnpj": "12244299000109",
+      "empresa": "Veronica Lima De Araujo",
+      "tipo": "tef",
+      "modalidade": "smartpos",
+      "data": "2026-06-26",
+      "arquivo": "CONTRATO_TEF_TEF-2026-0028_12244299000109.pdf",
+      "status": "ativo",
+      "vencimento_dia": 5,
+      "smartpos": {
+        "qtd": 1,
+        "adesao": 75.0,
+        "mensalidade": 49.7,
+        "transacao": 0.25
+      }
     }
   ]
 }

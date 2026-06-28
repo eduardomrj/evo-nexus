@@ -287,6 +287,8 @@ def gerar_contrato(
     # Responsável legal do CONTRATANTE
     signatario_nome: str | None = None,
     signatario_cpf: str | None = None,
+    signatario_doc_tipo: str | None = None,
+    signatario_doc_numero: str | None = None,
     # Parceiro/revendedor (opcional)
     parceiro: dict | None = None,
 ) -> Path:
@@ -418,7 +420,12 @@ def gerar_contrato(
         val_mensal_recorrente     = formatar_brl(val_mensal_recorrente),
         numero_contrato           = numero_contrato,
         parceiro                  = parceiro,
-        signatario                = {"nome": signatario_nome or "", "cpf": signatario_cpf or ""},
+        signatario                = {
+            "nome":       signatario_nome or "",
+            "cpf":        signatario_cpf or "",
+            "doc_tipo":   signatario_doc_tipo or "",
+            "doc_numero": signatario_doc_numero or "",
+        },
     )
 
     # 4. Markdown → HTML → PDF
@@ -487,6 +494,8 @@ if __name__ == "__main__":
     # Responsável legal do CONTRATANTE
     parser.add_argument("--signatario-nome",       help="Nome do responsável legal do cliente")
     parser.add_argument("--signatario-cpf",        help="CPF do responsável legal do cliente")
+    parser.add_argument("--signatario-doc-tipo",   help="Tipo do doc. de identidade (ex.: CNH, RG)")
+    parser.add_argument("--signatario-doc-numero", help="Número do doc. de identidade")
     # Parceiro/revendedor (todos opcionais — omitir = sem parceiro)
     parser.add_argument("--parceiro-empresa",      help="Nome da empresa parceira/revendedora")
     parser.add_argument("--parceiro-representante",help="Nome do representante do parceiro")
@@ -494,6 +503,17 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     data_assinatura = date.fromisoformat(args.data) if args.data else None
+
+    # Lookup automático em representantes.json pelo CNPJ
+    cnpj_limpo_cli = limpar_cnpj(args.cnpj)
+    rep_path = Path(__file__).resolve().parent / "representantes.json"
+    rep_data = json.loads(rep_path.read_text()) if rep_path.exists() else {"representantes": []}
+    rep = next((r for r in rep_data.get("representantes", []) if limpar_cnpj(r.get("cnpj", "")) == cnpj_limpo_cli), None)
+
+    signatario_nome       = args.signatario_nome       or (rep["nome"]       if rep else None)
+    signatario_cpf        = args.signatario_cpf        or (rep["cpf"]        if rep else None)
+    signatario_doc_tipo   = args.signatario_doc_tipo   or (rep.get("doc_tipo")   if rep else None)
+    signatario_doc_numero = args.signatario_doc_numero or (rep.get("doc_numero") if rep else None)
 
     parceiro = None
     if args.parceiro_empresa or args.parceiro_representante or args.parceiro_cpf:
@@ -524,7 +544,9 @@ if __name__ == "__main__":
         transacao_pinpad          = args.trans_pinpad,
         empresa_nome_override     = args.empresa_nome,
         empresa_endereco_override = args.empresa_endereco,
-        signatario_nome           = args.signatario_nome,
-        signatario_cpf            = args.signatario_cpf,
+        signatario_nome           = signatario_nome,
+        signatario_cpf            = signatario_cpf,
+        signatario_doc_tipo       = signatario_doc_tipo,
+        signatario_doc_numero     = signatario_doc_numero,
         parceiro                  = parceiro,
     )
